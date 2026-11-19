@@ -69,7 +69,7 @@ def parse_codex(stdout):
             usage = event.get("usage")
     if not isinstance(answer, str) or usage is None:
         raise ReviewError("Codex returned no completed critique or usage")
-    return answer, usage
+    return answer, usage, {}
 
 
 def parse_claude(stdout):
@@ -78,7 +78,9 @@ def parse_claude(stdout):
         raise ReviewError("Claude reported a failed run")
     if response["num_turns"] != 1 or not isinstance(response.get("result"), str):
         raise ReviewError("Claude returned no single-turn critique")
-    return response["result"], response.get("usage")
+    # Claude reports the model it resolved and a dollar cost; Codex reports neither.
+    extra = {"resolved_models": sorted(response.get("modelUsage") or {}), "reported_cost_usd": response.get("total_cost_usd")}
+    return response["result"], response.get("usage"), extra
 
 
 def review(provider, plan, rubric, model=None, effort=None):
@@ -119,10 +121,10 @@ def review(provider, plan, rubric, model=None, effort=None):
             raise ReviewError(f"{provider} requires sign-in")
         raise ReviewError(f"{provider} exited with code {result.returncode}; check CLI setup and connectivity")
     try:
-        answer, usage = parser(result.stdout)
+        answer, usage, extra = parser(result.stdout)
     except (ValueError, TypeError, KeyError) as error:
         raise ReviewError(f"{provider} returned unexpected JSON") from error
-    return validate(answer), usage
+    return validate(answer), usage, extra
 
 
 def save_review(provider, plan_path, output, *, model=None, effort=None):
@@ -138,13 +140,14 @@ def save_review(provider, plan_path, output, *, model=None, effort=None):
         raise ReviewError("plan must have 1–500 words")
     effort = effort or DEFAULT_EFFORT[provider]
     started = monotonic()
-    critique, usage = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip(), model, effort)
+    critique, usage, extra = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip(), model, effort)
     metadata = {
         "provider": provider,
         "requested_model": model,
         "requested_effort": effort,
         "wall_ms": round(1000 * (monotonic() - started)),
         "usage": usage,
+        **extra,
     }
     with usage_path.open("x", encoding="utf-8") as sidecar:
         json.dump(metadata, sidecar, indent=2)

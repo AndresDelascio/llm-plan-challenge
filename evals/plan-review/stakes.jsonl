@@ -1,0 +1,6 @@
+{"pair":"Attendance sync after offline practice","stakes":"routine","reason":"Team attendance records; a mistake is visible and fixable."}
+{"pair":"Camera swap for a soccer shot tracker","stakes":"routine","reason":"Personal measurement setup; a wrong result costs a re-recording."}
+{"pair":"Clip ranking evaluation","stakes":"routine","reason":"Offline comparison of two editors; nothing ships from it directly."}
+{"pair":"Historical demand forecasting","stakes":"consequential","reason":"The brief says the forecast is deployed to stores, so errors cost money."}
+{"pair":"Inventory reservation during order processing","stakes":"consequential","reason":"Overselling and unknown payment state involve customer money."}
+{"pair":"Photoelectric timing gate prototype","stakes":"routine","reason":"Bench prototype; an error shows up in the next test."}

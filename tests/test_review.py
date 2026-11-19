@@ -90,6 +90,11 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(self.report.read_text(encoding="utf-8"), CLEAR + "\n")
         self.assertEqual(json.loads(self.metrics.read_text(encoding="utf-8"))["usage"]["cache_read_input_tokens"], 80)
 
+    def test_claude_resolved_model_and_cost_are_recorded(self):
+        self.run_review("claude", claude_result(CLEAR, modelUsage={"claude-test-1": {}}, total_cost_usd=0.0123))
+        saved = json.loads(self.metrics.read_text(encoding="utf-8"))
+        self.assertEqual((saved["resolved_models"], saved["reported_cost_usd"]), (["claude-test-1"], 0.0123))
+
     def test_rejects_codex_tool_event(self):
         event = {"type": "item.completed", "item": {"type": "command_execution"}}
         with self.assertRaisesRegex(runner.ReviewError, "used a tool"):

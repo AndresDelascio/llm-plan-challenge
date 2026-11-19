@@ -1,6 +1,7 @@
 """Collect reproducible critic runs in a fresh output directory."""
 
 import argparse
+from datetime import datetime, timezone
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -11,16 +12,18 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 SKILL = HERE.parents[1] / ".claude/skills/challenge"
+sys.path.insert(0, str(SKILL))
+import review  # noqa: E402  the reviewer's timeout and default efforts go in the manifest
 
 
-def collect_jobs(suite, key):
+def collect_jobs(suite, key, providers=("codex", "claude")):
     selected = [row["id"] for row in key if suite == "full" or row["split"] == "smoke"]
     repeats = 2 if suite == "full" else 1
     return [
         (case, provider, repeat)
         for repeat in range(1, repeats + 1)
         for case in sorted(selected)
-        for provider in ("codex", "claude")
+        for provider in providers
     ]
 
 
@@ -40,12 +43,17 @@ def version(provider):
 
 def collect(args, jobs):
     models = {"codex": args.codex_model, "claude": args.claude_model}
+    models = {provider: models[provider] for provider in sorted({provider for _, provider, _ in jobs})}
     paths = {case: HERE / "plans" / f"{case}.md" for case, _, _ in jobs}
     manifest = {
         "suite": args.suite,
         "planned_calls": len(jobs),
         "models_requested": models,
-        "effort": args.effort or "runner defaults",
+        "effort": args.effort or {provider: review.DEFAULT_EFFORT[provider] for provider in models},
+        "timeout_s": review.TIMEOUT,
+        "started_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "python": sys.version.split()[0],
+        "platform": sys.platform,
         "cli_versions": {provider: version(provider) for provider in models},
         "runner_sha256": digest(SKILL / "review.py"),
         "rubric_sha256": digest(SKILL / "critic-prompt.md"),
@@ -67,6 +75,7 @@ def collect(args, jobs):
             error = result.stderr.strip() if result.returncode else None
             log.write(json.dumps({
                 "case": case, "provider": provider, "repeat": repeat, "ok": error is None,
+                "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "critique": output.name if error is None else None, "error": error,
             }) + "\n")
             log.flush()
@@ -87,10 +96,11 @@ def main():
     cli.add_argument("--codex-model")
     cli.add_argument("--claude-model")
     cli.add_argument("--effort", choices=("low", "medium", "high"), help="Override both reviewers for a matched-effort comparison")
+    cli.add_argument("--provider", choices=("codex", "claude"), help="Run one reviewer only, for example while the other CLI is signed out")
     cli.add_argument("--dry-run", action="store_true")
     args = cli.parse_args()
     key = [json.loads(line) for line in (HERE / "answer-key.jsonl").read_text(encoding="utf-8").splitlines()]
-    jobs = collect_jobs(args.suite, key)
+    jobs = collect_jobs(args.suite, key, (args.provider,) if args.provider else ("codex", "claude"))
     if args.dry_run:
         print(f"{len(jobs)} planned calls. No reviewer calls made.")
         return 0

@@ -55,6 +55,8 @@ class BenchmarkTests(unittest.TestCase):
         self.assertEqual(len(set(full)), 48)
         self.assertEqual({case for case, _, _ in smoke}, {row["id"] for row in self.key if row["split"] == "smoke"})
         self.assertEqual(sum(provider == "codex" for _, provider, _ in full), 24)
+        one = runner.collect_jobs("full", self.key, ("claude",))
+        self.assertEqual((len(one), {provider for _, provider, _ in one}), (24, {"claude"}))
 
     def test_historical_calculation_matches_archive(self):
         metrics = load_script("historical_summary").summarize()
@@ -78,5 +80,35 @@ class BenchmarkTests(unittest.TestCase):
             manifest = json.loads((args.out / "manifest.json").read_text(encoding="utf-8"))
             attempts = (args.out / "runs.jsonl").read_text(encoding="utf-8").splitlines()
             self.assertEqual(manifest["planned_calls"], 12)
+            self.assertEqual((manifest["timeout_s"], manifest["effort"]), (180, {"claude": "medium", "codex": "low"}))
             self.assertEqual(len(attempts), 1)
             self.assertFalse(json.loads(attempts[0])["ok"])
+
+    def test_scoring_counts_misses_failed_runs_and_routing(self):
+        score = load_script("score")
+        key = [
+            {"id": "a", "pair": "money", "seeds": [{"id": "s1", "severity": "blocker"}, {"id": "s2", "severity": "major"}]},
+            {"id": "b", "pair": "money", "seeds": []},
+        ]
+
+        def attempt(provider, case, blind_id, ok=True):
+            usage = {"provider": provider, "requested_model": None, "wall_ms": 1000, "usage": (
+                {"input_tokens": 100, "cached_input_tokens": 60, "output_tokens": 10} if provider == "codex"
+                else {"input_tokens": 40, "cache_read_input_tokens": 60, "output_tokens": 10})}
+            return {"provider": provider, "case": case, "repeat": 1, "ok": ok, "blind_id": blind_id, "usage": usage if ok else None}
+
+        attempts = [attempt("codex", "a", "c1"), attempt("codex", "b", "c2"), attempt("claude", "a", "c3"), attempt("claude", "b", None, ok=False)]
+        judgments = [
+            {"blind_id": "c1", "matched_seeds": ["s2"], "judgment": "seed"},
+            {"blind_id": "c2", "matched_seeds": [], "judgment": "repaired-claim"},
+            {"blind_id": "c3", "matched_seeds": ["s1", "s2"], "judgment": "seed"},
+            {"blind_id": "c3", "matched_seeds": [], "judgment": "valid"},
+        ]
+        reviewers, policies = score.summarize(attempts, judgments, key, {"money": "consequential"})
+        self.assertEqual((reviewers["codex"]["blockers"], reviewers["codex"]["seeds"], reviewers["codex"]["controls"]), ([0, 1, 1], [1, 2, 2], [1, 1]))
+        self.assertEqual((reviewers["claude"]["completed"], reviewers["claude"]["attempted"], reviewers["claude"]["novel"]["valid"]), (1, 2, 1))
+        self.assertEqual(reviewers["codex"]["tokens"][0], (40, 60, 0, 10))  # same four fields for both CLIs
+        self.assertEqual(reviewers["claude"]["tokens"][0], (40, 60, 0, 10))
+        self.assertEqual(policies["always codex"]["consequential_blocker_misses"], 1)
+        self.assertEqual((policies["routing rule"]["blockers"], policies["routing rule"]["failed"]), ([1, 1], 1))
+        self.assertEqual((policies["both"]["calls"], policies["both"]["tokens"]), (4, 330))
