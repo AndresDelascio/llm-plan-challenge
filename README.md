@@ -27,10 +27,11 @@ The whole tool is two text files: [SKILL.md](.claude/skills/challenge/SKILL.md) 
 
 You need [Claude Code](https://claude.com/claude-code).
 
-1. Copy the **challenge** folder from `.claude/skills/` in this repo into `.claude/skills/` in your user folder, so the command works in every project:
+1. From this repo's folder, link the **challenge** folder into `.claude/skills/` in your user folder, so the command works in every project:
    ```powershell
-   Copy-Item -Recurse .claude\skills\challenge $HOME\.claude\skills\
+   New-Item -ItemType Junction -Path $HOME\.claude\skills\challenge -Target "$PWD\.claude\skills\challenge"
    ```
+   This is a folder link (a junction), which needs no administrator rights. There is only one set of files, so the installed command is always this repo's working folder: a clean `git status` means it matches the last commit. Moving the repo breaks the link. To remove the link without touching the files, run `cmd /c rmdir $HOME\.claude\skills\challenge`.
 2. Open Claude Code in any project and type:
    ```
    /challenge an app that tracks my weekly training load
