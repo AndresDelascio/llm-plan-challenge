@@ -123,7 +123,25 @@ The two missing token counts are my logging mistake: the command kept only the l
 
 See each folder's **decisions.md** for every issue and who raised it.
 
-**What I decided from it:** the default critic is Codex. It costs about a tenth to a quarter of the tokens, and that matters for a check I run on every plan. The price is coverage: on these plans it raised 6 of the 20 accepted issues against Claude's 18. For a plan that matters I use `/challenge claude`, and `/challenge measure` repeats this comparison on any new plan.
+### Fifth run: plans with flaws planted on purpose (2026-11-19)
+
+The runs above could not say which critic misses obvious problems, because nobody knew the right answer in advance. So Claude wrote three short made-up plans and planted 4 flaws in each (2 serious, 2 small), 12 in total. The answer key was committed before any critic ran. Each critic then read each plan twice.
+
+| | Codex (ChatGPT) | Claude |
+|---|---|---|
+| Planted flaws found, per run | 4 of 4 in all 6 runs | 4 of 4 in all 6 runs |
+| Tokens per run (measured) | 4,162 to 13,038 | 62,316 to 63,235 |
+| Tokens per planted flaw found (computed) | 2,062 | 15,660 |
+| Issues raised that were not planted | 1 | 6 |
+
+- **Both critics found every planted flaw in every run.** For flaws that can be found by reading the plan carefully, the cheaper critic is enough.
+- **Claude used 7.6 times the tokens** for the same planted flaws (computed, 375,846 against 49,494 over six runs each).
+- **The test hit its ceiling**, so it does not show the two are equal. The only difference is in the extra issues nobody planted: Claude raised 6, Codex 1. Those were not judged.
+- **Limits:** Claude wrote the plans, planted the flaws and did the scoring, so the flaws may be the kind Claude finds easy to see.
+
+See **challenge/seeded-test/results.md** for the per-flaw table and every token count.
+
+**What I decided from it:** the default critic is Codex. It costs about an eighth to a quarter of the tokens, and that matters for a check I run on every plan. On planted flaws it caught everything Claude caught. The price is coverage of the less obvious problems: on the three real plans it raised 6 of the 20 accepted issues against Claude's 18. For a plan that matters I use `/challenge claude`, and `/challenge measure` repeats the comparison on any new plan.
 
 ## What this is not
 
