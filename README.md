@@ -46,5 +46,6 @@ The standard run sends a compact plan and rubric to one reviewer in a fresh CLI 
 ## Evidence and next steps
 
 - [Historical benchmarks](docs/benchmarks.md) include the original critiques and token measurements. Those measurements predate the lightweight runner.
+- [Paired evaluation dataset](evals/plan-review/) contains seeded plans, repaired controls, and a blind scoring protocol.
 - [Verification guide](docs/verification.md) covers offline tests, real-client smoke tests and how to compare the new usage logs.
 - Before inviting outside users, run the authenticated smoke tests, benchmark tokens versus review quality, choose a license, and review the archived examples for anything you want to keep private.
