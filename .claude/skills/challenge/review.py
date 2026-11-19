@@ -29,6 +29,19 @@ class ReviewError(Exception):
 
 
 def validate(text):
+    # Claude sometimes adds a closing remark after the required format (3 of 24 benchmark runs).
+    # Drop it and keep the review. Text followed by another issue heading is still rejected.
+    kept, count = [], 0
+    rest = iter(text.splitlines())
+    for line in rest:
+        if line.strip():
+            if count % 3 == 1 and not line.strip().startswith("### "):
+                if any(later.strip().startswith("### ") for later in rest):
+                    raise ReviewError("invalid issue count or format")
+                break
+            count += 1
+        kept.append(line)
+    text = "\n".join(kept)
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     verdict = lines[0].removeprefix("VERDICT: ") if lines and lines[0].startswith("VERDICT: ") else ""
     if verdict not in VERDICTS or len(text.split()) > MAX_WORDS or len(text.encode("utf-8")) > 4096:

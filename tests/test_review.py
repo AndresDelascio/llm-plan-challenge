@@ -133,6 +133,12 @@ class ReviewTests(unittest.TestCase):
         self.assertFalse(self.metrics.exists())
         self.assertEqual((self.project / "critique.rejected.txt").read_text(encoding="utf-8"), "VERDICT: BLOCKED")
 
+    def test_closing_remark_is_dropped_but_a_later_issue_is_not(self):
+        self.assertEqual(runner.validate(CLEAR + "\n\nThe plan is sound."), CLEAR + "\n")
+        self.assertEqual(runner.validate(BLOCKED + "\n\nSteps 3 and 4 are fine."), BLOCKED + "\n")
+        with self.assertRaises(runner.ReviewError):
+            runner.validate(BLOCKED + "\nA remark.\n### 2. [minor] Lost\n- Failure: x\n- Fix: y")
+
     def test_login_failure_preserves_plan_and_hides_raw_output(self):
         plan_before = self.plan.read_bytes()
         with self.assertRaisesRegex(runner.ReviewError, "^claude requires sign-in$"):
