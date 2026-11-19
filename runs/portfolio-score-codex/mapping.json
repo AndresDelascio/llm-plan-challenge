@@ -1,0 +1,578 @@
+[
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:22+00:00",
+    "critique": "p01-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5931,
+      "usage": {
+        "input_tokens": 14039,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 78,
+        "reasoning_output_tokens": 64
+      }
+    },
+    "blind_id": "c24"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:33+00:00",
+    "critique": "p02-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10262,
+      "usage": {
+        "input_tokens": 14056,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 263,
+        "reasoning_output_tokens": 79
+      }
+    },
+    "blind_id": "c02"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:38+00:00",
+    "critique": "p03-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5616,
+      "usage": {
+        "input_tokens": 13165,
+        "cached_input_tokens": 12672,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 135,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c11"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:44+00:00",
+    "critique": "p04-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5877,
+      "usage": {
+        "input_tokens": 14081,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 142,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c23"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:55+00:00",
+    "critique": "p05-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10008,
+      "usage": {
+        "input_tokens": 14061,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 310,
+        "reasoning_output_tokens": 34
+      }
+    },
+    "blind_id": "c20"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:01+00:00",
+    "critique": "p06-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6679,
+      "usage": {
+        "input_tokens": 14031,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 151,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c19"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:10+00:00",
+    "critique": "p07-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7959,
+      "usage": {
+        "input_tokens": 14051,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 226,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c01"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:16+00:00",
+    "critique": "p08-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6178,
+      "usage": {
+        "input_tokens": 14032,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c05"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:27+00:00",
+    "critique": "p09-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10649,
+      "usage": {
+        "input_tokens": 14083,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 302,
+        "reasoning_output_tokens": 66
+      }
+    },
+    "blind_id": "c16"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:34+00:00",
+    "critique": "p10-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7563,
+      "usage": {
+        "input_tokens": 13160,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 192,
+        "reasoning_output_tokens": 25
+      }
+    },
+    "blind_id": "c18"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:40+00:00",
+    "critique": "p11-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5930,
+      "usage": {
+        "input_tokens": 13160,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 143,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c12"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:48+00:00",
+    "critique": "p12-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7775,
+      "usage": {
+        "input_tokens": 13182,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 198,
+        "reasoning_output_tokens": 21
+      }
+    },
+    "blind_id": "c08"
+  },
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:57+00:00",
+    "critique": "p01-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8735,
+      "usage": {
+        "input_tokens": 14043,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 208,
+        "reasoning_output_tokens": 64
+      }
+    },
+    "blind_id": "c07"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:07+00:00",
+    "critique": "p02-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9128,
+      "usage": {
+        "input_tokens": 13174,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 295,
+        "reasoning_output_tokens": 99
+      }
+    },
+    "blind_id": "c04"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:13+00:00",
+    "critique": "p03-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6489,
+      "usage": {
+        "input_tokens": 13165,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 137,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c14"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:19+00:00",
+    "critique": "p04-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6144,
+      "usage": {
+        "input_tokens": 14079,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 141,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c13"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:28+00:00",
+    "critique": "p05-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8272,
+      "usage": {
+        "input_tokens": 14059,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 258,
+        "reasoning_output_tokens": 39
+      }
+    },
+    "blind_id": "c10"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:34+00:00",
+    "critique": "p06-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5914,
+      "usage": {
+        "input_tokens": 14031,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 153,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c15"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:41+00:00",
+    "critique": "p07-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6382,
+      "usage": {
+        "input_tokens": 14053,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 162,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c21"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:47+00:00",
+    "critique": "p08-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5888,
+      "usage": {
+        "input_tokens": 14032,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 150,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c03"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:56+00:00",
+    "critique": "p09-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9240,
+      "usage": {
+        "input_tokens": 14083,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 263,
+        "reasoning_output_tokens": 49
+      }
+    },
+    "blind_id": "c09"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:05+00:00",
+    "critique": "p10-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9238,
+      "usage": {
+        "input_tokens": 14046,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 293,
+        "reasoning_output_tokens": 54
+      }
+    },
+    "blind_id": "c22"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:11+00:00",
+    "critique": "p11-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5906,
+      "usage": {
+        "input_tokens": 14040,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 144,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c17"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:20+00:00",
+    "critique": "p12-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8873,
+      "usage": {
+        "input_tokens": 13182,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 247,
+        "reasoning_output_tokens": 60
+      }
+    },
+    "blind_id": "c06"
+  }
+]

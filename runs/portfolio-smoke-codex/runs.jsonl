@@ -1,0 +1,6 @@
+{"case": "p02", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:45:33+00:00", "critique": "p02-codex-1.md", "error": null}
+{"case": "p04", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:45:40+00:00", "critique": "p04-codex-1.md", "error": null}
+{"case": "p07", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:45:46+00:00", "critique": "p07-codex-1.md", "error": null}
+{"case": "p09", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:45:55+00:00", "critique": "p09-codex-1.md", "error": null}
+{"case": "p11", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:46:01+00:00", "critique": "p11-codex-1.md", "error": null}
+{"case": "p12", "provider": "codex", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T21:46:09+00:00", "critique": "p12-codex-1.md", "error": null}
