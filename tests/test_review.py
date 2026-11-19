@@ -121,6 +121,18 @@ class ReviewTests(unittest.TestCase):
             with self.subTest(answer=answer), self.assertRaises(runner.ReviewError):
                 runner.validate(answer)
 
+    def test_slightly_long_review_passes_and_rejected_reply_is_kept(self):
+        long = BLOCKED.replace("history.", "history. " + "word " * 250)  # about 270 words, as Claude returned live
+        self.assertGreater(len(long.split()), 250)
+        runner.validate(long)
+        with self.assertRaises(runner.ReviewError):
+            runner.validate(BLOCKED.replace("history.", "history. " + "word " * 400))
+        with self.assertRaises(runner.ReviewError):
+            self.run_review("claude", claude_result("VERDICT: BLOCKED"))
+        self.assertFalse(self.report.exists())
+        self.assertFalse(self.metrics.exists())
+        self.assertEqual((self.project / "critique.rejected.txt").read_text(encoding="utf-8"), "VERDICT: BLOCKED")
+
     def test_login_failure_preserves_plan_and_hides_raw_output(self):
         plan_before = self.plan.read_bytes()
         with self.assertRaisesRegex(runner.ReviewError, "^claude requires sign-in$"):

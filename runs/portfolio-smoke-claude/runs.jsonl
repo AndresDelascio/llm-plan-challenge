@@ -1,0 +1,6 @@
+{"case": "p02", "provider": "claude", "repeat": 1, "ok": false, "finished_utc": "2026-11-19T23:35:03+00:00", "critique": null, "error": "NOT CHALLENGED: invalid or oversized critique"}
+{"case": "p04", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:35:22+00:00", "critique": "p04-claude-1.md", "error": null}
+{"case": "p07", "provider": "claude", "repeat": 1, "ok": false, "finished_utc": "2026-11-19T23:35:44+00:00", "critique": null, "error": "NOT CHALLENGED: invalid or oversized critique"}
+{"case": "p09", "provider": "claude", "repeat": 1, "ok": false, "finished_utc": "2026-11-19T23:36:01+00:00", "critique": null, "error": "NOT CHALLENGED: invalid issue count or format"}
+{"case": "p11", "provider": "claude", "repeat": 1, "ok": false, "finished_utc": "2026-11-19T23:36:20+00:00", "critique": null, "error": "NOT CHALLENGED: invalid or oversized critique"}
+{"case": "p12", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:36:41+00:00", "critique": "p12-claude-1.md", "error": null}

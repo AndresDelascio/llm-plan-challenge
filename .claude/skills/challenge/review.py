@@ -12,6 +12,9 @@ from time import monotonic
 
 
 TIMEOUT = 180
+# The rubric asks for 250 words. Models do not count words exactly (Claude returned 270 on a
+# well-formed review), so the hard limit leaves slack. The 4096-byte cap still bounds the size.
+MAX_WORDS = 400
 RUBRIC = Path(__file__).with_name("critic-prompt.md")
 DEFAULT_EFFORT = {"codex": "low", "claude": "medium"}
 VERDICTS = {
@@ -28,7 +31,7 @@ class ReviewError(Exception):
 def validate(text):
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     verdict = lines[0].removeprefix("VERDICT: ") if lines and lines[0].startswith("VERDICT: ") else ""
-    if verdict not in VERDICTS or len(text.split()) > 250 or len(text.encode("utf-8")) > 4096:
+    if verdict not in VERDICTS or len(text.split()) > MAX_WORDS or len(text.encode("utf-8")) > 4096:
         raise ReviewError("invalid or oversized critique")
     body = lines[1:]
     if len(body) % 3 or len(body) > 15:
@@ -124,7 +127,7 @@ def review(provider, plan, rubric, model=None, effort=None):
         answer, usage, extra = parser(result.stdout)
     except (ValueError, TypeError, KeyError) as error:
         raise ReviewError(f"{provider} returned unexpected JSON") from error
-    return validate(answer), usage, extra
+    return answer, usage, extra
 
 
 def save_review(provider, plan_path, output, *, model=None, effort=None):
@@ -140,7 +143,13 @@ def save_review(provider, plan_path, output, *, model=None, effort=None):
         raise ReviewError("plan must have 1–500 words")
     effort = effort or DEFAULT_EFFORT[provider]
     started = monotonic()
-    critique, usage, extra = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip(), model, effort)
+    answer, usage, extra = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip(), model, effort)
+    try:
+        critique = validate(answer)
+    except ReviewError:
+        # Keep the rejected reply for diagnosis under a name the workflow never reads as a critique.
+        output.with_suffix(".rejected.txt").write_text(answer, encoding="utf-8")
+        raise
     metadata = {
         "provider": provider,
         "requested_model": model,
