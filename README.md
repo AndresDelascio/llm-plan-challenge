@@ -159,4 +159,4 @@ See **challenge/seeded-test/results.md** for the per-flaw table and every token 
 
 ## How this was built
 
-Human-led design with AI-assisted implementation. I set the goal, the constraints and the stop rules; Claude Code wrote the skill and prompt files; every result in this README comes from a run whose raw files are in the `challenge/` folder.
+Human-led design with AI-assisted implementation. I set the goal, the constraints and the stop rules; Claude Code wrote the skill and prompt files; ChatGPT (through Codex CLI) wrote every `critique-codex-*.md` file, and its criticisms changed the plans and the tool's own design; every result in this README comes from a run whose raw files are in the `challenge/` folder.
