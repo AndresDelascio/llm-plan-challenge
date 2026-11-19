@@ -4,19 +4,26 @@
 
 Most plans get one low-effort Codex review. For consequential work, the skill recommends a deeper Claude review and asks you to choose. When you want two independent opinions, run both reviewers against the same draft before revising it.
 
-## What the pilot found
+## What the tests found
 
-| Historical experiment | Codex CLI | Claude subagent |
+Both reviewers ran live on 12 synthetic plans, twice each (48 calls, 2026-11-19). Six plans have two planted flaws. Six are the same plans with the flaws repaired.
+
+| Measured on the paired benchmark | Codex (low effort) | Claude (medium effort) |
 | --- | ---: | ---: |
-| Seeded failures detected across repeated reviews | 24 / 24 | 24 / 24 |
-| Mean reported tokens per seeded review | 8,249 | 62,641 |
-| Accepted distinct findings on three real plans | 6 / 20 | 18 / 20 |
-| Accepted findings unique to each reviewer | 2 | 14 |
+| Reviews that passed the format check | 24 / 24 | 21 / 24 |
+| Planted blockers found | 18 / 18 | 18 / 18 |
+| Repaired plans where the old flaw was still claimed | 2 / 12 | 0 / 9 |
+| Extra findings judged valid | 17 | 37 |
+| Median wall time per review | 7.1 s | 17.9 s |
+| Median reported tokens per review | 14,184 | 2,417 |
 
-The seeded test saturated. The two workflows reported **7.59× different mean token totals**, including different amounts of startup context. The three real plans gave a reason to pay for deeper review. Claude found 14 accepted issues Codex missed, and using both raised the observed union from 18 to 20. One plan's judgments were corrected after reviewer identities were revealed. These are historical workflow measurements. The current standalone runner and routing policy still need live evaluation.
+Both found every planted flaw, so this test does not show which one catches more blockers. Codex was faster and always returned a usable review. Claude wrote about twice as many extra findings that held up. That is the reason the skill recommends Claude for consequential plans. Dollar cost is unknown for Codex because its CLI does not report it. Grading was done blind by an AI grader, not a person.
 
-- [Raw pilot results and limitations](docs/benchmarks.md)
-- [Reproduce the arithmetic and inspect routing scenarios](evals/plan-review/)
+On the camera-swap pair, both reviewers caught the missing crop offset in every run and neither repeated it on the repaired plan.
+
+- [Full results, failures and limits](docs/portfolio-results.md)
+- [Raw reviews, usage files and grading rows](runs/)
+- [Earlier pilot on three real plans](docs/benchmarks.md)
 
 ## Try it
 
@@ -62,7 +69,7 @@ flowchart TD
 
 ## Evaluation and engineering
 
-The next benchmark contains **12 plans in six matched pairs**, with **9 seeded blockers and 3 major issues**. The paired controls test whether a reviewer withdraws the same claim after the flaw is repaired. The runner has a **12-call smoke budget** and a **48-call full budget**, with plan and rubric hashes, CLI versions, usage and failure logs. Model results for this suite are pending.
+The benchmark contains **12 plans in six matched pairs**, with **9 planted blockers and 3 major issues**. The paired controls test whether a reviewer drops a claim once the flaw is repaired. Plans, answer key and scoring rules were frozen before the first call. Each run keeps plan and rubric hashes, CLI versions, usage and failures. 22 offline tests cover both CLI adapters with no model calls.
 
 ```sh
 python -B -m unittest discover -s tests -v

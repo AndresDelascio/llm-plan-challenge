@@ -1,0 +1,24 @@
+{"case": "p01", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:38:14+00:00", "critique": "p01-claude-1.md", "error": null}
+{"case": "p02", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:38:41+00:00", "critique": "p02-claude-1.md", "error": null}
+{"case": "p03", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:38:57+00:00", "critique": "p03-claude-1.md", "error": null}
+{"case": "p04", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:39:14+00:00", "critique": "p04-claude-1.md", "error": null}
+{"case": "p05", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:39:40+00:00", "critique": "p05-claude-1.md", "error": null}
+{"case": "p06", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:40:00+00:00", "critique": "p06-claude-1.md", "error": null}
+{"case": "p07", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:40:25+00:00", "critique": "p07-claude-1.md", "error": null}
+{"case": "p08", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:40:39+00:00", "critique": "p08-claude-1.md", "error": null}
+{"case": "p09", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:40:52+00:00", "critique": "p09-claude-1.md", "error": null}
+{"case": "p10", "provider": "claude", "repeat": 1, "ok": false, "finished_utc": "2026-11-19T23:41:12+00:00", "critique": null, "error": "NOT CHALLENGED: invalid issue count or format"}
+{"case": "p11", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:41:30+00:00", "critique": "p11-claude-1.md", "error": null}
+{"case": "p12", "provider": "claude", "repeat": 1, "ok": true, "finished_utc": "2026-11-19T23:41:48+00:00", "critique": "p12-claude-1.md", "error": null}
+{"case": "p01", "provider": "claude", "repeat": 2, "ok": false, "finished_utc": "2026-11-19T23:42:07+00:00", "critique": null, "error": "NOT CHALLENGED: invalid issue count or format"}
+{"case": "p02", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:42:33+00:00", "critique": "p02-claude-2.md", "error": null}
+{"case": "p03", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:42:48+00:00", "critique": "p03-claude-2.md", "error": null}
+{"case": "p04", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:43:05+00:00", "critique": "p04-claude-2.md", "error": null}
+{"case": "p05", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:43:34+00:00", "critique": "p05-claude-2.md", "error": null}
+{"case": "p06", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:43:53+00:00", "critique": "p06-claude-2.md", "error": null}
+{"case": "p07", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:44:18+00:00", "critique": "p07-claude-2.md", "error": null}
+{"case": "p08", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:44:31+00:00", "critique": "p08-claude-2.md", "error": null}
+{"case": "p09", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:44:45+00:00", "critique": "p09-claude-2.md", "error": null}
+{"case": "p10", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:45:05+00:00", "critique": "p10-claude-2.md", "error": null}
+{"case": "p11", "provider": "claude", "repeat": 2, "ok": true, "finished_utc": "2026-11-19T23:45:23+00:00", "critique": "p11-claude-2.md", "error": null}
+{"case": "p12", "provider": "claude", "repeat": 2, "ok": false, "finished_utc": "2026-11-19T23:45:42+00:00", "critique": null, "error": "NOT CHALLENGED: invalid issue count or format"}

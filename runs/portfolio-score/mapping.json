@@ -1,0 +1,1766 @@
+[
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:22+00:00",
+    "critique": "p01-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5931,
+      "usage": {
+        "input_tokens": 14039,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 78,
+        "reasoning_output_tokens": 64
+      }
+    },
+    "blind_id": "c04"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:33+00:00",
+    "critique": "p02-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10262,
+      "usage": {
+        "input_tokens": 14056,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 263,
+        "reasoning_output_tokens": 79
+      }
+    },
+    "blind_id": "c26"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:38+00:00",
+    "critique": "p03-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5616,
+      "usage": {
+        "input_tokens": 13165,
+        "cached_input_tokens": 12672,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 135,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c14"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:44+00:00",
+    "critique": "p04-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5877,
+      "usage": {
+        "input_tokens": 14081,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 142,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c35"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:46:55+00:00",
+    "critique": "p05-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10008,
+      "usage": {
+        "input_tokens": 14061,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 310,
+        "reasoning_output_tokens": 34
+      }
+    },
+    "blind_id": "c33"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:01+00:00",
+    "critique": "p06-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6679,
+      "usage": {
+        "input_tokens": 14031,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 151,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c27"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:10+00:00",
+    "critique": "p07-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7959,
+      "usage": {
+        "input_tokens": 14051,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 226,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c39"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:16+00:00",
+    "critique": "p08-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6178,
+      "usage": {
+        "input_tokens": 14032,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c36"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:27+00:00",
+    "critique": "p09-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 10649,
+      "usage": {
+        "input_tokens": 14083,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 302,
+        "reasoning_output_tokens": 66
+      }
+    },
+    "blind_id": "c18"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:34+00:00",
+    "critique": "p10-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7563,
+      "usage": {
+        "input_tokens": 13160,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 192,
+        "reasoning_output_tokens": 25
+      }
+    },
+    "blind_id": "c16"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:40+00:00",
+    "critique": "p11-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5930,
+      "usage": {
+        "input_tokens": 13160,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 143,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c23"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:48+00:00",
+    "critique": "p12-codex-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 7775,
+      "usage": {
+        "input_tokens": 13182,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 198,
+        "reasoning_output_tokens": 21
+      }
+    },
+    "blind_id": "c20"
+  },
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:47:57+00:00",
+    "critique": "p01-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8735,
+      "usage": {
+        "input_tokens": 14043,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 208,
+        "reasoning_output_tokens": 64
+      }
+    },
+    "blind_id": "c29"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:07+00:00",
+    "critique": "p02-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9128,
+      "usage": {
+        "input_tokens": 13174,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 295,
+        "reasoning_output_tokens": 99
+      }
+    },
+    "blind_id": "c02"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:13+00:00",
+    "critique": "p03-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6489,
+      "usage": {
+        "input_tokens": 13165,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 137,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c43"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:19+00:00",
+    "critique": "p04-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6144,
+      "usage": {
+        "input_tokens": 14079,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 141,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c32"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:28+00:00",
+    "critique": "p05-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8272,
+      "usage": {
+        "input_tokens": 14059,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 258,
+        "reasoning_output_tokens": 39
+      }
+    },
+    "blind_id": "c17"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:34+00:00",
+    "critique": "p06-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5914,
+      "usage": {
+        "input_tokens": 14031,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 153,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c08"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:41+00:00",
+    "critique": "p07-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 6382,
+      "usage": {
+        "input_tokens": 14053,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 162,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c41"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:47+00:00",
+    "critique": "p08-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5888,
+      "usage": {
+        "input_tokens": 14032,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 150,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c37"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:48:56+00:00",
+    "critique": "p09-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9240,
+      "usage": {
+        "input_tokens": 14083,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 263,
+        "reasoning_output_tokens": 49
+      }
+    },
+    "blind_id": "c45"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:05+00:00",
+    "critique": "p10-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 9238,
+      "usage": {
+        "input_tokens": 14046,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 293,
+        "reasoning_output_tokens": 54
+      }
+    },
+    "blind_id": "c44"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:11+00:00",
+    "critique": "p11-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 5906,
+      "usage": {
+        "input_tokens": 14040,
+        "cached_input_tokens": 12928,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 144,
+        "reasoning_output_tokens": 0
+      }
+    },
+    "blind_id": "c05"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T21:49:20+00:00",
+    "critique": "p12-codex-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "low",
+      "wall_ms": 8873,
+      "usage": {
+        "input_tokens": 13182,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 247,
+        "reasoning_output_tokens": 60
+      }
+    },
+    "blind_id": "c07"
+  },
+  {
+    "case": "p01",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:38:14+00:00",
+    "critique": "p01-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 17092,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1319,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1148,
+        "output_tokens_details": {
+          "thinking_tokens": 1127
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1319,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1148,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1319,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1319
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.06704
+    },
+    "blind_id": "c11"
+  },
+  {
+    "case": "p02",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:38:41+00:00",
+    "critique": "p02-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 27147,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 582,
+        "cache_read_input_tokens": 788,
+        "output_tokens": 1699,
+        "output_tokens_details": {
+          "thinking_tokens": 1226
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 582,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1699,
+            "cache_read_input_tokens": 788,
+            "cache_creation_input_tokens": 582,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 582
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.07744559999999999
+    },
+    "blind_id": "c06"
+  },
+  {
+    "case": "p03",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:38:57+00:00",
+    "critique": "p03-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16162,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1331,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 918,
+        "output_tokens_details": {
+          "thinking_tokens": 337
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1331,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 918,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1331,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1331
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.058032
+    },
+    "blind_id": "c24"
+  },
+  {
+    "case": "p04",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:39:14+00:00",
+    "critique": "p04-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16129,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 583,
+        "cache_read_input_tokens": 800,
+        "output_tokens": 818,
+        "output_tokens_details": {
+          "thinking_tokens": 493
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 583,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 818,
+            "cache_read_input_tokens": 800,
+            "cache_creation_input_tokens": 583,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 583
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.042224
+    },
+    "blind_id": "c42"
+  },
+  {
+    "case": "p05",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:39:40+00:00",
+    "critique": "p05-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 26245,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1369,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1669,
+        "output_tokens_details": {
+          "thinking_tokens": 1103
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1369,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1669,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1369,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1369
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.08868000000000001
+    },
+    "blind_id": "c40"
+  },
+  {
+    "case": "p06",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:40:00+00:00",
+    "critique": "p06-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 19696,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1318,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1032,
+        "output_tokens_details": {
+          "thinking_tokens": 469
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1318,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1032,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1318,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1318
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.062383999999999995
+    },
+    "blind_id": "c15"
+  },
+  {
+    "case": "p07",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:40:25+00:00",
+    "critique": "p07-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 24572,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 581,
+        "cache_read_input_tokens": 764,
+        "output_tokens": 1327,
+        "output_tokens_details": {
+          "thinking_tokens": 689
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 581,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1327,
+            "cache_read_input_tokens": 764,
+            "cache_creation_input_tokens": 581,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 581
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.06254480000000001
+    },
+    "blind_id": "c03"
+  },
+  {
+    "case": "p08",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:40:39+00:00",
+    "critique": "p08-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 13505,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1304,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 559,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1304,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 559,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1304,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1304
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.04324
+    },
+    "blind_id": "c21"
+  },
+  {
+    "case": "p09",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:40:52+00:00",
+    "critique": "p09-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12865,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 579,
+        "cache_read_input_tokens": 801,
+        "output_tokens": 773,
+        "output_tokens_details": {
+          "thinking_tokens": 752
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 579,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 773,
+            "cache_read_input_tokens": 801,
+            "cache_creation_input_tokens": 579,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 579
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0403602
+    },
+    "blind_id": "c31"
+  },
+  {
+    "case": "p10",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": false,
+    "finished_utc": "2026-11-19T23:41:12+00:00",
+    "critique": null,
+    "error": "NOT CHALLENGED: invalid issue count or format",
+    "run_dir": "portfolio-full-claude",
+    "usage": null
+  },
+  {
+    "case": "p11",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:41:30+00:00",
+    "critique": "p11-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 18443,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 579,
+        "cache_read_input_tokens": 749,
+        "output_tokens": 1171,
+        "output_tokens_details": {
+          "thinking_tokens": 582
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 579,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1171,
+            "cache_read_input_tokens": 749,
+            "cache_creation_input_tokens": 579,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 579
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0562698
+    },
+    "blind_id": "c38"
+  },
+  {
+    "case": "p12",
+    "provider": "claude",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:41:48+00:00",
+    "critique": "p12-claude-1.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 17939,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 578,
+        "cache_read_input_tokens": 788,
+        "output_tokens": 1235,
+        "output_tokens_details": {
+          "thinking_tokens": 677
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 578,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1235,
+            "cache_read_input_tokens": 788,
+            "cache_creation_input_tokens": 578,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 578
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0588216
+    },
+    "blind_id": "c34"
+  },
+  {
+    "case": "p01",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": false,
+    "finished_utc": "2026-11-19T23:42:07+00:00",
+    "critique": null,
+    "error": "NOT CHALLENGED: invalid issue count or format",
+    "run_dir": "portfolio-full-claude",
+    "usage": null
+  },
+  {
+    "case": "p02",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:42:33+00:00",
+    "critique": "p02-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 25766,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 586,
+        "cache_read_input_tokens": 788,
+        "output_tokens": 1528,
+        "output_tokens_details": {
+          "thinking_tokens": 909
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 586,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1528,
+            "cache_read_input_tokens": 788,
+            "cache_creation_input_tokens": 586,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 586
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0706696
+    },
+    "blind_id": "c10"
+  },
+  {
+    "case": "p03",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:42:48+00:00",
+    "critique": "p03-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 14849,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 581,
+        "cache_read_input_tokens": 750,
+        "output_tokens": 833,
+        "output_tokens_details": {
+          "thinking_tokens": 283
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 581,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 833,
+            "cache_read_input_tokens": 750,
+            "cache_creation_input_tokens": 581,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 581
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.042782
+    },
+    "blind_id": "c22"
+  },
+  {
+    "case": "p04",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:43:05+00:00",
+    "critique": "p04-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16566,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 576,
+        "cache_read_input_tokens": 800,
+        "output_tokens": 743,
+        "output_tokens_details": {
+          "thinking_tokens": 407
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 576,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 743,
+            "cache_read_input_tokens": 800,
+            "cache_creation_input_tokens": 576,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 576
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.039111999999999994
+    },
+    "blind_id": "c19"
+  },
+  {
+    "case": "p05",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:43:34+00:00",
+    "critique": "p05-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 29065,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 581,
+        "cache_read_input_tokens": 792,
+        "output_tokens": 2182,
+        "output_tokens_details": {
+          "thinking_tokens": 1607
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 581,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2182,
+            "cache_read_input_tokens": 792,
+            "cache_creation_input_tokens": 581,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 581
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0967504
+    },
+    "blind_id": "c12"
+  },
+  {
+    "case": "p06",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:43:53+00:00",
+    "critique": "p06-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 19408,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 576,
+        "cache_read_input_tokens": 735,
+        "output_tokens": 1083,
+        "output_tokens_details": {
+          "thinking_tokens": 536
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 576,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1083,
+            "cache_read_input_tokens": 735,
+            "cache_creation_input_tokens": 576,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 576
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.052699
+    },
+    "blind_id": "c09"
+  },
+  {
+    "case": "p07",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:44:18+00:00",
+    "critique": "p07-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 24967,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 582,
+        "cache_read_input_tokens": 764,
+        "output_tokens": 1567,
+        "output_tokens_details": {
+          "thinking_tokens": 916
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 582,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1567,
+            "cache_read_input_tokens": 764,
+            "cache_creation_input_tokens": 582,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 582
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0721608
+    },
+    "blind_id": "c01"
+  },
+  {
+    "case": "p08",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:44:31+00:00",
+    "critique": "p08-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12244,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 573,
+        "cache_read_input_tokens": 727,
+        "output_tokens": 500,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 573,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 500,
+            "cache_read_input_tokens": 727,
+            "cache_creation_input_tokens": 573,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 573
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0293294
+    },
+    "blind_id": "c25"
+  },
+  {
+    "case": "p09",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:44:45+00:00",
+    "critique": "p09-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 14341,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 574,
+        "cache_read_input_tokens": 801,
+        "output_tokens": 669,
+        "output_tokens_details": {
+          "thinking_tokens": 648
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 574,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 669,
+            "cache_read_input_tokens": 801,
+            "cache_creation_input_tokens": 574,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 574
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0361202
+    },
+    "blind_id": "c30"
+  },
+  {
+    "case": "p10",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:45:05+00:00",
+    "critique": "p10-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 19856,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 584,
+        "cache_read_input_tokens": 755,
+        "output_tokens": 1273,
+        "output_tokens_details": {
+          "thinking_tokens": 655
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 584,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1273,
+            "cache_read_input_tokens": 755,
+            "cache_creation_input_tokens": 584,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 584
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.060431
+    },
+    "blind_id": "c28"
+  },
+  {
+    "case": "p11",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-19T23:45:23+00:00",
+    "critique": "p11-claude-2.md",
+    "error": null,
+    "run_dir": "portfolio-full-claude",
+    "usage": {
+      "provider": "claude",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 17168,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 576,
+        "cache_read_input_tokens": 749,
+        "output_tokens": 1090,
+        "output_tokens_details": {
+          "thinking_tokens": 471
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 576,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1090,
+            "cache_read_input_tokens": 749,
+            "cache_creation_input_tokens": 576,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 576
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.0529818
+    },
+    "blind_id": "c13"
+  },
+  {
+    "case": "p12",
+    "provider": "claude",
+    "repeat": 2,
+    "ok": false,
+    "finished_utc": "2026-11-19T23:45:42+00:00",
+    "critique": null,
+    "error": "NOT CHALLENGED: invalid issue count or format",
+    "run_dir": "portfolio-full-claude",
+    "usage": null
+  }
+]

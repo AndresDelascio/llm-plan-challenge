@@ -1,0 +1,34 @@
+{
+  "suite": "full",
+  "planned_calls": 24,
+  "models_requested": {
+    "claude": null
+  },
+  "effort": {
+    "claude": "medium"
+  },
+  "timeout_s": 180,
+  "started_utc": "2026-11-19T23:37:56+00:00",
+  "python": "3.13.17",
+  "platform": "win32",
+  "cli_versions": {
+    "claude": "2.1.319 (Claude Code)"
+  },
+  "runner_sha256": "fd368f17aee476851d52debb1709b21a612c4929b615cab2cf9d3ebd3d86f59f",
+  "rubric_sha256": "36f961b264024ede508f1fb58d4e81167737b58a0973b1778ad47e8f5f8d02dd",
+  "answer_key_sha256": "288b02f307a1120248970bf3489a3730038187efeb826a278ea59d8ede399fa9",
+  "plan_sha256": {
+    "p01": "3f4d37153e625736d894d8fbc7d9ebf47dbde8f1686dd4cfc8376ce4f61a4754",
+    "p02": "f263426c84a52a15b54ff5c294349337d96337198094dd554ce943149ce7cf90",
+    "p03": "e22cc5594fd30afbc64d5ad5bf9d63dc6d382da7b1596f52c88584c449fb02da",
+    "p04": "ff82d59d7f586239004e56009814615b78f134e9561d23782902ed4b4e1423b2",
+    "p05": "064ab3b9884f01c1d911bc4b9d7cecbd387ed492a5a2fa26d911a039a1d9759b",
+    "p06": "ced46ec1d58314a128a0fc424884084f9946494a42640507f8e18461d0940083",
+    "p07": "2048c22cb13d23ba0b407d5280643e264b430ef472c63866e476a807700611e7",
+    "p08": "a57f4467dedf22cc91781f1ff667006f42a0940c33efa630513ba4d6f2b46675",
+    "p09": "cd34dbb11889ce218c01e8dbf88b75bf957eb360f09b09eea42c4348bf1d32fc",
+    "p10": "4868246602b66542cc2ef81e33c6279364e0e4aae515695d4e606b526f56007e",
+    "p11": "ea398498a6d99d555f7fd2d97d312fc84160a62d4af0a33e6c98f37cbedacb52",
+    "p12": "ff9a9f71d853c1eab98fc0ff9a5272a3ca90afb756153034002e58b646e5986c"
+  }
+}

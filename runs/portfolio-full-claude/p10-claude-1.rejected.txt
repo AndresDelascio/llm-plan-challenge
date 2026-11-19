@@ -1,0 +1,15 @@
+VERDICT: PROCEED WITH CHANGES
+
+### 1. [major] Model selection and final evaluation share the same holdout
+- Failure: Candidates are compared on the final eight Mondays, and the same eight Mondays yield the reported result against the baseline. Picking the winner there biases its MAE optimistically, so a win over last-week may not survive deployment.
+- Fix: Split the folds. Select candidates and features on earlier expanding-window Mondays, then score the single frozen winner once on the final eight.
+
+### 2. [major] Eight consecutive Mondays cover only one season
+- Failure: The holdout spans about two months of a two-year history. Holiday or seasonal weeks, where a last-week baseline behaves very differently, may never be tested, and eight paired points per store give weak comparisons.
+- Fix: Add earlier evaluation origins spread across the second year, keeping the expanding-window fitting unchanged.
+
+### 3. [minor] Baseline availability rule is unstated
+- Failure: Step 3 restricts the model's feature to finalized values available at the cutoff, but the plan does not say the same of the last-week baseline. If the baseline uses later-revised values, the paired comparison is not like for like.
+- Fix: Compute the baseline from the same as-of-Monday snapshot as the model's inputs.
+
+The leakage controls in steps 3 and 4 (the feature ends before the cutoff, medians are fitted per training fold) are sound as written.

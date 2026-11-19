@@ -1,6 +1,6 @@
 # Plan review evaluation
 
-Twelve synthetic plans form six matched pairs. Each pair has a flawed plan with two seeded issues and a control with both seeds repaired. Cases cover camera calibration, timing gates, clip ranking, offline sync, forecasting, and inventory. Controls can still contain genuine concerns. This suite is authored with AI assistance and currently has no scored model runs.
+Twelve synthetic plans form six matched pairs. Each pair has a flawed plan with two seeded issues and a control with both seeds repaired. Cases cover camera calibration, timing gates, clip ranking, offline sync, forecasting, and inventory. Controls can still contain genuine concerns. This suite is authored with AI assistance. The scored runs are in [the results](../../docs/portfolio-results.md).
 
 ## Run
 
@@ -13,6 +13,8 @@ Twelve synthetic plans form six matched pairs. Each pair has a flawed plan with 
    python evals/plan-review/run_benchmark.py --suite smoke --out runs/smoke
    python evals/plan-review/run_benchmark.py --suite full --out runs/full
    ```
+
+   Add `--provider codex` or `--provider claude` to run one reviewer at a time. Score with `score.py blind <run folders> --out <folder>` and `score.py report <folder>`, following the frozen [scoring rules](scoring.md).
 
 4. Shuffle critiques and hide provider, run order and metadata before judging. Score each seeded failure from the key against the actual claim. Give credit for a specific failure at the named step or its equivalent, including when one finding clearly identifies two failures. Deduplicate repeated claims. Judge non-seeded findings separately as valid, unsupported, or unclear and note the rationale. Ask a second person to independently score a subset and report agreement before reconciling.
 5. Save raw critiques with usage JSON. For scoring, record plan ID, run ID, finding number, matched seed IDs, valid/unsupported/unclear judgment, evidence and adjudicator. Keep provider and runtime metadata in the run index. Log failures and show denominators and run counts.
