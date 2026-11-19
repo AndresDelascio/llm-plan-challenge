@@ -1,4 +1,12 @@
-# Compare critics
+# Two-reviewer modes
+
+## `both`
+
+1. Run Codex, then Claude, once each against the untouched `plan-v1.md`. Pass only the plan and rubric to each CLI. Save separate critiques. Never pass the other review as context.
+2. Merge overlapping findings for revision but preserve each critic's issue number and disposition in `decisions.md`. If one review fails, mark the result `PARTIALLY CHALLENGED` and identify the missing reviewer. If both fail, mark it `NOT CHALLENGED` and preserve the draft as `plan.md`.
+3. Apply supported changes and stop after the two calls. Surface blockers and partial outcomes before reporting completion.
+
+## `measure`
 
 1. Freeze `plan-v1.md`. Run `review.py` twice per critic on that file, with outputs `critique-<critic>-run1.md` and `critique-<critic>-run2.md`. Use independent runs and parallel calls when available. No blocker recheck here.
 2. If any run fails, record the missing runs in `decisions.md`, copy the draft to `plan.md` and report the incomplete comparison.

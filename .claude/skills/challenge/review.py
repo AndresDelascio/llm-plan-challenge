@@ -8,10 +8,12 @@ import re
 import shutil
 import subprocess
 import tempfile
+from time import monotonic
 
 
 TIMEOUT = 180
 RUBRIC = Path(__file__).with_name("critic-prompt.md")
+DEFAULT_EFFORT = {"codex": "low", "claude": "medium"}
 VERDICTS = {
     "BLOCKED": "blocker",
     "PROCEED WITH CHANGES": "changes",
@@ -79,24 +81,26 @@ def parse_claude(stdout):
     return response["result"], response.get("usage")
 
 
-def review(provider, plan, rubric):
+def review(provider, plan, rubric, model=None, effort=None):
     executable = shutil.which(provider)
     if not executable:
         raise ReviewError(f"{provider} CLI not found on PATH")
+    effort = effort or DEFAULT_EFFORT[provider]
+    model_flags = ["--model", model] if model else []
     if provider == "codex":
         flags = [
             "exec", "--json", "--ephemeral", "--skip-git-repo-check", "--ignore-user-config",
             "--ignore-rules", "-s", "read-only", "-c", "approval_policy=\"never\"",
-            "-c", "model_reasoning_effort=\"low\"", "-c", "features.shell_tool=false",
-            "-c", "web_search=\"disabled\"", "-",
+            "-c", f'model_reasoning_effort="{effort}"', "-c", "features.shell_tool=false",
+            "-c", "web_search=\"disabled\"", *model_flags, "-",
         ]
         parser = parse_codex
         stdin = rubric + "\n\n=== PLAN ===\n" + plan
     else:
         flags = [
-            "-p", "--safe-mode", "--tools", "", "--strict-mcp-config", "--effort", "low",
+            "-p", "--safe-mode", "--tools", "", "--strict-mcp-config", "--effort", effort,
             "--max-turns", "1", "--no-session-persistence", "--output-format", "json",
-            "--system-prompt", rubric,
+            "--system-prompt", rubric, *model_flags,
         ]
         parser = parse_claude
         stdin = "=== PLAN ===\n" + plan
@@ -121,7 +125,7 @@ def review(provider, plan, rubric):
     return validate(answer), usage
 
 
-def save_review(provider, plan_path, output):
+def save_review(provider, plan_path, output, *, model=None, effort=None):
     usage_path = output.with_suffix(".usage.json")
     if output.exists() or usage_path.exists():
         raise ReviewError("output already exists; choose a new filename")
@@ -132,9 +136,18 @@ def save_review(provider, plan_path, output):
     plan = plan_path.read_text(encoding="utf-8-sig").strip()
     if not plan or len(plan.split()) > 500:
         raise ReviewError("plan must have 1–500 words")
-    critique, usage = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip())
+    effort = effort or DEFAULT_EFFORT[provider]
+    started = monotonic()
+    critique, usage = review(provider, plan, RUBRIC.read_text(encoding="utf-8").strip(), model, effort)
+    metadata = {
+        "provider": provider,
+        "requested_model": model,
+        "requested_effort": effort,
+        "wall_ms": round(1000 * (monotonic() - started)),
+        "usage": usage,
+    }
     with usage_path.open("x", encoding="utf-8") as sidecar:
-        json.dump({"provider": provider, "usage": usage}, sidecar, indent=2)
+        json.dump(metadata, sidecar, indent=2)
         sidecar.write("\n")
     try:
         with output.open("x", encoding="utf-8") as report:
@@ -149,9 +162,11 @@ def main():
     cli.add_argument("critic", choices=("codex", "claude"))
     cli.add_argument("plan", type=Path)
     cli.add_argument("output", type=Path)
+    cli.add_argument("--model", help="Optional model ID; omit for the CLI default")
+    cli.add_argument("--effort", choices=("low", "medium", "high"))
     args = cli.parse_args()
     try:
-        save_review(args.critic, args.plan, args.output)
+        save_review(args.critic, args.plan, args.output, model=args.model, effort=args.effort)
     except subprocess.TimeoutExpired:
         cli.exit(1, f"NOT CHALLENGED: {args.critic} timed out after {TIMEOUT}s\n")
     except (ReviewError, OSError, UnicodeError) as error:
