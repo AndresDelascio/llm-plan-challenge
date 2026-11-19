@@ -141,7 +141,7 @@ The runs above could not say which critic misses obvious problems, because nobod
 
 See **challenge/seeded-test/results.md** for the per-flaw table and every token count.
 
-**What I decided from it:** the default critic is Codex. It costs about a tenth to a quarter of the tokens, and that matters for a check I run on every plan. On planted flaws it caught everything Claude caught. The price is coverage of the less obvious problems: on the three real plans it raised 6 of the 20 accepted issues against Claude's 18. For a plan that matters I use `/challenge claude`, and `/challenge measure` repeats the comparison on any new plan.
+**What I decided from it:** the default critic is Codex. It costs about a tenth to a quarter of the tokens, and that matters for a check I run on every plan. On planted flaws it caught everything Claude caught. The price is coverage of the less obvious problems: on the three real plans it raised 6 of the 20 accepted issues against Claude's 18. When a plan is very important (real money or safety, public under my name, or hard to undo), the command asks me whether to switch to the Claude critic before it runs. I can also force it with `/challenge claude`, and `/challenge measure` repeats the comparison on any new plan.
 
 ## What this is not
 

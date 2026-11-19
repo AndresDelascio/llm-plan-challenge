@@ -22,6 +22,8 @@ Turn an idea into a plan that has survived one independent critique.
 - `codex` (default): ChatGPT through Codex CLI, which must be installed and signed in. About 6,000–15,000 tokens per run (measured on six runs, 2026-11-19). Sends the plan text to OpenAI.
 - `measure`: the comparison procedure at the end of this file. Slower and needs the user to judge the issues. Only for measuring whether the second model earns its place.
 
+**Very important plans: ask before using the default.** If no critic was named and the plan is very important, ask the user one question before step 2: "This looks important. Use the Claude critic instead of Codex (about 8 times the tokens, raised more issues on real plans)?" Then use what they answer. Very important means any of: real money or safety is at stake, it will go public under the user's name, it is hard to undo, or the user said it is important. Never switch without asking, and never ask when a critic was named.
+
 ## Steps
 
 ### 1. Write `plan.md`
