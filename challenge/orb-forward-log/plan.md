@@ -4,16 +4,16 @@
 - Non-goals: No broker connection, no orders, no real money. No new strategies and no tuning. No dashboard beyond one generated text file. No cloud hosting.
 
 ## Plan
-1. Add one entry point, `run_forward.py`. It builds the list of trading sessions from 2026-11-17 to the last completed session using the existing NYSE calendar, and processes every session not yet in the log, oldest first. This is the catch-up for days the PC was off.
-2. Windows Task Scheduler starts it on weekdays at 18:00 Toronto time, with "run as soon as possible after a missed start" switched on. The task starts only if a network connection is available and restarts on failure every 10 minutes, up to 3 times, so a run that fires at boot does not fail once and wait for the next boot.
-3. For each session it downloads the day's 1-minute bars for SPY and QQQ, checks them (390 regular-session bars on a full day, fewer on calendar half days, no gaps, no duplicate timestamps), saves the raw bars to a file and records the file's hash.
-4. It then calls the existing paper trader for that date. Results go to an append-only log: one row per candidate per session, with the data hash, the code commit id and the run time.
-5. A session already in the log is never recomputed. A deliberate rerun needs an explicit flag and adds a correction row; it never overwrites.
-6. If the download fails or the bars fail the check, nothing is written for that session. The failure goes to a run log and the session is retried on the next run. After 3 failed runs for the same session the status file flags it.
-7. Every run regenerates `forward_status.md`: sessions expected, logged and missing; last run time; progress of the 14-session warm-up that some candidates need; and cumulative results under both registered scorings. The file opens with a fixed line: simulated fills, a record only, cannot promote any candidate.
-8. Tests on synthetic data: catch-up after a gap, a holiday, a half day, a duplicate run changing nothing, incomplete bars refused, a date before the start refused.
-9. Before the schedule is switched on: download and check one real session from before 2026-11-17 (download and check only, nothing is logged). Confirm the bar count and the timestamp convention match what the check in step 3 expects. If they do not, fix the check first.
-10. Done when, after 5 consecutive trading sessions, the status file shows 5 expected, 5 logged and 0 missing, and I started none of the runs by hand.
+1. Add one entry point, `run_forward.py`. It lists the trading sessions from 2026-11-17 to the last completed session with the existing NYSE calendar and processes every session not yet logged, oldest first.
+2. Windows Task Scheduler starts it on weekdays at 18:00 Toronto time, with "run as soon as possible after a missed start" on. The task starts only if a network connection is available and restarts on failure every 10 minutes, up to 3 times.
+3. For each session it downloads the 1-minute bars for SPY and QQQ, checks them (390 bars on a full day, fewer on calendar half days, no gaps or duplicate timestamps), saves the raw bars and records the file's hash.
+4. It then calls the existing paper trader, which reads the saved file from step 3, not a fresh download. The append-only log gets one row per candidate per session, with the hash of the file actually read, the code commit id and the run time. A session's 12 rows are written in one DuckDB transaction; a session counts as logged only with exactly 12 rows.
+5. A logged session is never recomputed. A deliberate rerun needs an explicit flag and adds 12 correction rows with a version number and the version replaced; nothing is overwritten. Status and both scorings use only each session's latest version.
+6. If the download or the check fails, nothing is written for that session, the failure is logged and the run stops before any later session. The session is retried on the next run; after 3 failed runs the status file flags it. Only I can close a session that will never have data, with a flag that writes 12 "no data" rows.
+7. Every run regenerates `forward_status.md`, also when the run fails (a `finally` block, absolute paths). Line 1: the time generated and the last session covered. Line 2, fixed: simulated fills, a record only, cannot promote any candidate. Then: sessions expected, logged and missing; sessions without exactly 12 rows or whose saved bars no longer match their hash; 14-session warm-up progress; cumulative results under both registered scorings.
+8. Tests on synthetic data: gap catch-up, holiday, half day, duplicate run changes nothing, incomplete bars refused, pre-start date refused, stop at a failed session, interrupted write leaves no rows, correction counted once.
+9. Before scheduling: download and check one real session from before 2026-11-17 (nothing is logged). Confirm the bar count and timestamp convention match step 3's check; if not, fix the check first.
+10. Done when, after 5 consecutive trading sessions, the status file shows 5 expected, 5 logged and 0 missing, with no run started by hand.
 
 ## Risks I already know about
 - The data vendor may revise or backfill bars after the close, so bars fetched late can differ from bars fetched the same evening.

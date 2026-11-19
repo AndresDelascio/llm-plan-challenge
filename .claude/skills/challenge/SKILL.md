@@ -10,7 +10,7 @@ Turn an idea into a plan that has survived one independent critique.
 
 ## Settings (change here only)
 
-- Default critic: `claude` (was `codex` until 2026-11-19; changed after the measured comparison in the README)
+- Default critic: `codex` (chosen 2026-11-19 for its token cost, about a tenth to a quarter of `claude`; in the measured comparison in the README `claude` raised more of the accepted issues)
 - Plan length cap: 700 words
 - Max critique rounds: 2
 - Codex timeout: 180 s (set the shell tool's own timeout to 240 s; its default of 120 s would cut Codex off first)
@@ -18,8 +18,8 @@ Turn an idea into a plan that has survived one independent critique.
 
 ## Critic argument
 
-- `claude` (default): a fresh Claude subagent. Needs no install. Used about 64,000–69,000 tokens per run (measured on nine runs, 2026-11-19) because every subagent starts with Claude Code's own context.
-- `codex`: ChatGPT through Codex CLI, which must be installed and signed in. About 6,000–15,000 tokens per run (measured on six runs, 2026-11-19). Sends the plan text to OpenAI.
+- `claude`: a fresh Claude subagent. Needs no install. Used about 64,000–69,000 tokens per run (measured on nine runs, 2026-11-19) because every subagent starts with Claude Code's own context.
+- `codex` (default): ChatGPT through Codex CLI, which must be installed and signed in. About 6,000–15,000 tokens per run (measured on six runs, 2026-11-19). Sends the plan text to OpenAI.
 - `measure`: the comparison procedure at the end of this file. Slower and needs the user to judge the issues. Only for measuring whether the second model earns its place.
 
 ## Steps
