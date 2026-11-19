@@ -65,7 +65,7 @@ The replay assumes the user accepts the Claude recommendation every time. It lea
 ## Failures
 
 - **Claude smoke, 4 of 6 rejected.** The validator had a hard 250-word limit and Claude wrote slightly more (270 words on the one reply inspected). The limit in the validator was raised to 400 words before the full run. The rubric text the reviewers see was not changed, so the Codex runs stay comparable. The 4096-byte cap still applies.
-- **Claude full, 3 of 24 rejected.** All three added a sentence of plain text after the required format: two "NO BLOCKING ISSUES" replies with an explanation, one review with a closing remark. All three were on control plans, which is why the recall numbers do not change when failed runs count as zero. The raw replies are saved next to the runs as `.rejected.txt`. In the real skill these would be reported to the user as `NOT CHALLENGED`.
+- **Claude full, 3 of 24 rejected.** All three added a sentence of plain text after the required format: two "NO BLOCKING ISSUES" replies with an explanation, one review with a closing remark. All three were on control plans, which is why the recall numbers do not change when failed runs count as zero. The raw replies are saved next to the runs as `.rejected.txt`. After the benchmark the validator was changed to drop such a closing remark and keep the review. Replayed offline, it accepts all three saved replies. The benchmark numbers above are not recomputed: these three stay counted as failed and were not graded.
 
 ## Limits
 

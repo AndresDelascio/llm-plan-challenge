@@ -69,7 +69,7 @@ flowchart TD
 
 ## Evaluation and engineering
 
-The benchmark contains **12 plans in six matched pairs**, with **9 planted blockers and 3 major issues**. The paired controls test whether a reviewer drops a claim once the flaw is repaired. Plans, answer key and scoring rules were frozen before the first call. Each run keeps plan and rubric hashes, CLI versions, usage and failures. 22 offline tests cover both CLI adapters with no model calls.
+The benchmark contains **12 plans in six matched pairs**, with **9 planted blockers and 3 major issues**. The paired controls test whether a reviewer drops a claim once the flaw is repaired. Plans, answer key and scoring rules were frozen before the first call. Each run keeps plan and rubric hashes, CLI versions, usage and failures. 23 offline tests cover both CLI adapters with no model calls.
 
 ```sh
 python -B -m unittest discover -s tests -v

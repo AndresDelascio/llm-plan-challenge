@@ -117,7 +117,7 @@ class ReviewTests(unittest.TestCase):
         self.assertFalse(self.metrics.exists())
 
     def test_rejects_malformed_and_inconsistent_critique(self):
-        for answer in ("", "VERDICT: BLOCKED", BLOCKED.replace("### 1.", "### 3."), BLOCKED + "\nextra"):
+        for answer in ("", "VERDICT: BLOCKED", BLOCKED.replace("### 1.", "### 3.")):
             with self.subTest(answer=answer), self.assertRaises(runner.ReviewError):
                 runner.validate(answer)
 
