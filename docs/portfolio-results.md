@@ -1,6 +1,6 @@
 # Paired benchmark results (2026-11-19)
 
-Live runs of both reviewers on the [12-plan paired benchmark](../evals/plan-review/). The plans, answer key, [scoring rules](../evals/plan-review/scoring.md) and [stakes labels](../evals/plan-review/stakes.jsonl) were frozen in commit `4a52b07` before the first call. All numbers below are measured from the saved usage files or counted from the grader's rows, unless marked otherwise.
+Live runs of both reviewers on the [12-plan paired benchmark](../evals/plan-review/). The plans, answer key, [scoring rules](../evals/plan-review/scoring.md) and [stakes labels](../evals/plan-review/stakes.jsonl) were frozen in commit `5aaacac` before the first call. All numbers below are measured from the saved usage files or counted from the grader's rows, unless marked otherwise.
 
 ## What was run
 

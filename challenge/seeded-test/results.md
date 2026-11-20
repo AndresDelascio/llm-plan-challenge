@@ -1,6 +1,6 @@
 # Seeded-flaw test: results (2026-11-19)
 
-Three made-up plans, each with 4 flaws planted on purpose (2 serious, 2 small), 12 in total. Each critic read each plan twice, so 6 runs per critic. Scoring follows **answer-key.md**, which was committed (`0f651db`) before any critic ran.
+Three made-up plans, each with 4 flaws planted on purpose (2 serious, 2 small), 12 in total. Each critic read each plan twice, so 6 runs per critic. Scoring follows **answer-key.md**, which was committed (`ed91d17`) before any critic ran.
 
 ## Result
 
