@@ -1,0 +1,578 @@
+[
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:17:08+00:00",
+    "critique": "p01-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 18140,
+      "usage": {
+        "input_tokens": 13187,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 469,
+        "reasoning_output_tokens": 317
+      }
+    },
+    "blind_id": "c14"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:17:33+00:00",
+    "critique": "p02-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 24508,
+      "usage": {
+        "input_tokens": 14391,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 546,
+        "reasoning_output_tokens": 273
+      }
+    },
+    "blind_id": "c13"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:17:50+00:00",
+    "critique": "p03-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16182,
+      "usage": {
+        "input_tokens": 14388,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 226,
+        "reasoning_output_tokens": 82
+      }
+    },
+    "blind_id": "c16"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:18:04+00:00",
+    "critique": "p04-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 13419,
+      "usage": {
+        "input_tokens": 14416,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 174,
+        "reasoning_output_tokens": 42
+      }
+    },
+    "blind_id": "c07"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:18:20+00:00",
+    "critique": "p05-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16351,
+      "usage": {
+        "input_tokens": 13211,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 454,
+        "reasoning_output_tokens": 207
+      }
+    },
+    "blind_id": "c23"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:18:33+00:00",
+    "critique": "p06-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12229,
+      "usage": {
+        "input_tokens": 14368,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 280,
+        "reasoning_output_tokens": 69
+      }
+    },
+    "blind_id": "c21"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:18:46+00:00",
+    "critique": "p07-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12605,
+      "usage": {
+        "input_tokens": 13201,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 380,
+        "reasoning_output_tokens": 169
+      }
+    },
+    "blind_id": "c19"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:18:56+00:00",
+    "critique": "p08-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 9833,
+      "usage": {
+        "input_tokens": 13182,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 216,
+        "reasoning_output_tokens": 58
+      }
+    },
+    "blind_id": "c04"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:19:14+00:00",
+    "critique": "p09-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 17501,
+      "usage": {
+        "input_tokens": 14416,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 507,
+        "reasoning_output_tokens": 336
+      }
+    },
+    "blind_id": "c03"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:19:29+00:00",
+    "critique": "p10-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 14842,
+      "usage": {
+        "input_tokens": 13194,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 465,
+        "reasoning_output_tokens": 178
+      }
+    },
+    "blind_id": "c22"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:19:38+00:00",
+    "critique": "p11-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 9165,
+      "usage": {
+        "input_tokens": 13190,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 258,
+        "reasoning_output_tokens": 95
+      }
+    },
+    "blind_id": "c24"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 1,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:19:55+00:00",
+    "critique": "p12-codex-1.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16506,
+      "usage": {
+        "input_tokens": 14405,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 370,
+        "reasoning_output_tokens": 189
+      }
+    },
+    "blind_id": "c18"
+  },
+  {
+    "case": "p01",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:20:12+00:00",
+    "critique": "p01-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 16253,
+      "usage": {
+        "input_tokens": 14374,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 456,
+        "reasoning_output_tokens": 309
+      }
+    },
+    "blind_id": "c20"
+  },
+  {
+    "case": "p02",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:20:24+00:00",
+    "critique": "p02-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 11944,
+      "usage": {
+        "input_tokens": 14391,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 309,
+        "reasoning_output_tokens": 103
+      }
+    },
+    "blind_id": "c17"
+  },
+  {
+    "case": "p03",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:20:37+00:00",
+    "critique": "p03-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12291,
+      "usage": {
+        "input_tokens": 14382,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 218,
+        "reasoning_output_tokens": 76
+      }
+    },
+    "blind_id": "c02"
+  },
+  {
+    "case": "p04",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:20:47+00:00",
+    "critique": "p04-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 9118,
+      "usage": {
+        "input_tokens": 14416,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 181,
+        "reasoning_output_tokens": 37
+      }
+    },
+    "blind_id": "c10"
+  },
+  {
+    "case": "p05",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:21:02+00:00",
+    "critique": "p05-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 15178,
+      "usage": {
+        "input_tokens": 14398,
+        "cached_input_tokens": 13184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 401,
+        "reasoning_output_tokens": 129
+      }
+    },
+    "blind_id": "c01"
+  },
+  {
+    "case": "p06",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:21:17+00:00",
+    "critique": "p06-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 14286,
+      "usage": {
+        "input_tokens": 14368,
+        "cached_input_tokens": 13184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 292,
+        "reasoning_output_tokens": 85
+      }
+    },
+    "blind_id": "c12"
+  },
+  {
+    "case": "p07",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:21:30+00:00",
+    "critique": "p07-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 12744,
+      "usage": {
+        "input_tokens": 14394,
+        "cached_input_tokens": 13184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 233,
+        "reasoning_output_tokens": 58
+      }
+    },
+    "blind_id": "c05"
+  },
+  {
+    "case": "p08",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:21:41+00:00",
+    "critique": "p08-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 10047,
+      "usage": {
+        "input_tokens": 14367,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 200,
+        "reasoning_output_tokens": 35
+      }
+    },
+    "blind_id": "c15"
+  },
+  {
+    "case": "p09",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:21:57+00:00",
+    "critique": "p09-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 15146,
+      "usage": {
+        "input_tokens": 14418,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 385,
+        "reasoning_output_tokens": 157
+      }
+    },
+    "blind_id": "c08"
+  },
+  {
+    "case": "p10",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:22:12+00:00",
+    "critique": "p10-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 15335,
+      "usage": {
+        "input_tokens": 14381,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 353,
+        "reasoning_output_tokens": 144
+      }
+    },
+    "blind_id": "c09"
+  },
+  {
+    "case": "p11",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:22:22+00:00",
+    "critique": "p11-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 9662,
+      "usage": {
+        "input_tokens": 14379,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 246,
+        "reasoning_output_tokens": 84
+      }
+    },
+    "blind_id": "c11"
+  },
+  {
+    "case": "p12",
+    "provider": "codex",
+    "repeat": 2,
+    "ok": true,
+    "finished_utc": "2026-11-20T01:22:36+00:00",
+    "critique": "p12-codex-2.md",
+    "error": null,
+    "run_dir": "matched-full-codex",
+    "usage": {
+      "provider": "codex",
+      "requested_model": null,
+      "requested_effort": "medium",
+      "wall_ms": 13436,
+      "usage": {
+        "input_tokens": 14405,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 332,
+        "reasoning_output_tokens": 156
+      }
+    },
+    "blind_id": "c06"
+  }
+]

@@ -56,7 +56,7 @@ This repo holds the skill, the benchmark I built to test it, and every raw reply
 - **No person checked the grading.** The grader is Claude, which is also one of the two reviewers. Two blind grading passes over the Codex findings agreed on 47 of 55.
 - **It does not say which reviewer catches more blockers.** Both hit the ceiling. The case for Claude on important plans rests on the extra findings, not on recall.
 - **Dollar cost is unknown for Codex.** Its CLI does not report cost, and tokens are not dollars.
-- **Effort settings differ** (Codex low, Claude medium), as the skill ships them. The Codex CLI did not report which model it used.
+- **Effort settings differ** (Codex low, Claude medium), as the skill ships them. I reran Codex at medium to check: it took twice as long (13.9 s), found the same 18 of 18 blockers, and did not add valid findings (12 against 17 at low, within grading noise). Claude's lead in extra findings is not explained by the effort setting. ([follow-up](docs/portfolio-results.md#follow-up-codex-at-medium-effort)) The Codex CLI did not report which model it used.
 - **In the pilot I accepted every issue**, so it shows which reviewer raised more, not which was more often right.
 
 ## Try it

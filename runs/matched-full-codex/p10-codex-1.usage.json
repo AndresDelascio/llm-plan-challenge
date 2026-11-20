@@ -1,0 +1,13 @@
+{
+  "provider": "codex",
+  "requested_model": null,
+  "requested_effort": "medium",
+  "wall_ms": 14842,
+  "usage": {
+    "input_tokens": 13194,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 465,
+    "reasoning_output_tokens": 178
+  }
+}

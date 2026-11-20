@@ -62,6 +62,25 @@ The replay assumes the user accepts the Claude recommendation every time. It lea
 - **"Fewer tokens means cheaper."** Tokens are not dollars. Claude reported $0.058 per run. Codex reported no cost, so the dollar comparison is unknown. Most of Claude's tokens are output, which is priced higher than cached input.
 - **"Codex is the low-cost default."** Supported for speed and reliability. Not supported for tokens. Unknown for dollars.
 
+## Follow-up: Codex at medium effort
+
+The main comparison has Codex at low effort and Claude at medium. To check whether that explains Claude's extra findings, Codex was run again on the same 12 plans, twice each, at medium effort (24 calls, 2026-11-19, [runs/matched-full-codex](../runs/matched-full-codex/)). Claude was not rerun because its runs were already at medium. A separate blind grader judged the 61 findings ([runs/matched-score-codex](../runs/matched-score-codex/)).
+
+| Measure | Codex low | Codex medium | Claude medium |
+| --- | ---: | ---: | ---: |
+| Completed / attempted runs | 24/24 | 24/24 | 21/24 |
+| Seeded blockers found | 18/18 | 18/18 | 18/18 |
+| Control runs that repeated a repaired flaw | 2/12 | 2/12 | 0/9 |
+| Other findings judged valid | 17 | 12 | 37 |
+| Other findings judged unsupported | 12 | 23 | 19 |
+| Median total tokens per run | 14,184 | 14,626 | 2,417 |
+| Median wall time per run | 7.1 s | 13.9 s | 17.9 s |
+
+- **Medium effort did not close the gap.** Codex wrote more findings at medium (61 against 55), but the extra ones were mostly judged unsupported. Valid extras per run were 0.5 at medium, 0.7 at low and 1.8 for Claude.
+- **It cost about twice the time** (13.9 s against 7.1 s) for no gain in blockers found, which were already at the ceiling.
+- **Both false alarms were again on the inventory control (p05)**, and the grader again marked them borderline.
+- **Limits.** Each column was graded in a separate blind pass, and two passes over the same findings agreed on 85%, so the drop from 17 to 12 valid is within grading noise. The gap to Claude's 37 is not. The same effort label does not mean the same compute at two providers. The grader saw one reviewer's findings only, with no names.
+
 ## Failures
 
 - **Claude smoke, 4 of 6 rejected.** The validator had a hard 250-word limit and Claude wrote slightly more (270 words on the one reply inspected). The limit in the validator was raised to 400 words before the full run. The rubric text the reviewers see was not changed, so the Codex runs stay comparable. The 4096-byte cap still applies.
@@ -73,14 +92,13 @@ The replay assumes the user accepts the Claude recommendation every time. It lea
 - The grader is an AI (Claude), which is one of the two reviewer families. It graded blind: random file names, no reviewer names, no usage files. No person has checked the judgments.
 - Grading is not fully repeatable. The 55 Codex findings were graded twice by separate blind graders. They agreed on 47 (85%). All disagreements were between valid, unsupported and unclear. None changed a seed match or a false alarm. The earlier pass is kept in [runs/portfolio-score-codex](../runs/portfolio-score-codex/).
 - Two repeats of the same plan are related, not independent. Twelve plans is a small set.
-- Effort settings differ (Codex low, Claude medium), as the skill ships them. An equal-effort run was not done.
+- Effort settings differ in the main comparison (Codex low, Claude medium), as the skill ships them. The follow-up above reruns Codex at medium.
 - The Codex model is unknown because the CLI did not report it.
 
 ## What I would do next
 
 - Write harder plans, where a flaw only shows when two steps are read together, so the blocker test stops hitting its ceiling.
 - Have a person grade a sample of the findings and compare with the AI grader.
-- Run both reviewers at the same effort setting.
 - Rerun Claude with the validator that keeps a review with a closing remark, and report the completion rate again.
 
 ## Reproduce
