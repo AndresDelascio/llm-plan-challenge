@@ -1,0 +1,560 @@
+[
+  {
+    "blind_id": "f001",
+    "case": "p02",
+    "run_dir": "followup-better-codex",
+    "file": "p02-better-codex-2.md"
+  },
+  {
+    "blind_id": "f002",
+    "case": "p02",
+    "run_dir": "followup-revise-claude",
+    "file": "p02-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f003",
+    "case": "p03",
+    "run_dir": "followup-revise-codex",
+    "file": "p03-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f004",
+    "case": "p12",
+    "run_dir": "followup-revise-codex",
+    "file": "p12-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f005",
+    "case": "p01",
+    "run_dir": "followup-better-codex",
+    "file": "p01-better-codex-1.md"
+  },
+  {
+    "blind_id": "f006",
+    "case": "p12",
+    "run_dir": "followup-better-claude",
+    "file": "p12-better-claude-1.md"
+  },
+  {
+    "blind_id": "f007",
+    "case": "p09",
+    "run_dir": "followup-better-codex",
+    "file": "p09-better-codex-2.md"
+  },
+  {
+    "blind_id": "f008",
+    "case": "p06",
+    "run_dir": "followup-revise-codex",
+    "file": "p06-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f009",
+    "case": "p08",
+    "run_dir": "followup-better-claude",
+    "file": "p08-better-claude-2.md"
+  },
+  {
+    "blind_id": "f010",
+    "case": "p08",
+    "run_dir": "followup-better-codex",
+    "file": "p08-better-codex-1.md"
+  },
+  {
+    "blind_id": "f011",
+    "case": "p10",
+    "run_dir": "followup-revise-codex",
+    "file": "p10-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f012",
+    "case": "p08",
+    "run_dir": "followup-better-claude",
+    "file": "p08-better-claude-1.md"
+  },
+  {
+    "blind_id": "f013",
+    "case": "p07",
+    "run_dir": "followup-revise-claude",
+    "file": "p07-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f014",
+    "case": "p05",
+    "run_dir": "followup-revise-codex",
+    "file": "p05-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f015",
+    "case": "p03",
+    "run_dir": "followup-revise-claude",
+    "file": "p03-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f016",
+    "case": "p07",
+    "run_dir": "followup-revise-codex",
+    "file": "p07-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f017",
+    "case": "p07",
+    "run_dir": "followup-better-codex",
+    "file": "p07-better-codex-2.md"
+  },
+  {
+    "blind_id": "f018",
+    "case": "p03",
+    "run_dir": "followup-better-codex",
+    "file": "p03-better-codex-2.md"
+  },
+  {
+    "blind_id": "f019",
+    "case": "p11",
+    "run_dir": "followup-revise-codex",
+    "file": "p11-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f020",
+    "case": "p12",
+    "run_dir": "followup-better-claude",
+    "file": "p12-better-claude-2.md"
+  },
+  {
+    "blind_id": "f021",
+    "case": "p07",
+    "run_dir": "followup-revise-claude",
+    "file": "p07-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f022",
+    "case": "p04",
+    "run_dir": "followup-revise-claude",
+    "file": "p04-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f023",
+    "case": "p08",
+    "run_dir": "followup-revise-codex",
+    "file": "p08-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f024",
+    "case": "p04",
+    "run_dir": "followup-better-claude",
+    "file": "p04-better-claude-2.md"
+  },
+  {
+    "blind_id": "f025",
+    "case": "p12",
+    "run_dir": "followup-revise-claude",
+    "file": "p12-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f026",
+    "case": "p06",
+    "run_dir": "followup-revise-claude",
+    "file": "p06-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f027",
+    "case": "p11",
+    "run_dir": "followup-revise-codex",
+    "file": "p11-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f028",
+    "case": "p11",
+    "run_dir": "followup-better-claude",
+    "file": "p11-better-claude-2.md"
+  },
+  {
+    "blind_id": "f029",
+    "case": "p01",
+    "run_dir": "followup-better-claude",
+    "file": "p01-better-claude-1.md"
+  },
+  {
+    "blind_id": "f030",
+    "case": "p06",
+    "run_dir": "followup-revise-codex",
+    "file": "p06-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f031",
+    "case": "p09",
+    "run_dir": "followup-revise-codex",
+    "file": "p09-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f032",
+    "case": "p04",
+    "run_dir": "followup-revise-codex",
+    "file": "p04-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f033",
+    "case": "p02",
+    "run_dir": "followup-revise-codex",
+    "file": "p02-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f034",
+    "case": "p05",
+    "run_dir": "followup-revise-claude",
+    "file": "p05-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f035",
+    "case": "p01",
+    "run_dir": "followup-better-claude",
+    "file": "p01-better-claude-2.md"
+  },
+  {
+    "blind_id": "f036",
+    "case": "p03",
+    "run_dir": "followup-better-claude",
+    "file": "p03-better-claude-2.md"
+  },
+  {
+    "blind_id": "f037",
+    "case": "p09",
+    "run_dir": "followup-better-codex",
+    "file": "p09-better-codex-1.md"
+  },
+  {
+    "blind_id": "f038",
+    "case": "p08",
+    "run_dir": "followup-revise-codex",
+    "file": "p08-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f039",
+    "case": "p05",
+    "run_dir": "followup-better-claude",
+    "file": "p05-better-claude-2.md"
+  },
+  {
+    "blind_id": "f040",
+    "case": "p12",
+    "run_dir": "followup-revise-codex",
+    "file": "p12-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f041",
+    "case": "p11",
+    "run_dir": "followup-better-claude",
+    "file": "p11-better-claude-1.md"
+  },
+  {
+    "blind_id": "f042",
+    "case": "p09",
+    "run_dir": "followup-better-claude",
+    "file": "p09-better-claude-2.md"
+  },
+  {
+    "blind_id": "f043",
+    "case": "p12",
+    "run_dir": "followup-better-codex",
+    "file": "p12-better-codex-1.md"
+  },
+  {
+    "blind_id": "f044",
+    "case": "p10",
+    "run_dir": "followup-better-claude",
+    "file": "p10-better-claude-2.md"
+  },
+  {
+    "blind_id": "f045",
+    "case": "p10",
+    "run_dir": "followup-better-codex",
+    "file": "p10-better-codex-1.md"
+  },
+  {
+    "blind_id": "f046",
+    "case": "p11",
+    "run_dir": "followup-better-codex",
+    "file": "p11-better-codex-2.md"
+  },
+  {
+    "blind_id": "f047",
+    "case": "p04",
+    "run_dir": "followup-revise-codex",
+    "file": "p04-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f048",
+    "case": "p10",
+    "run_dir": "followup-better-codex",
+    "file": "p10-better-codex-2.md"
+  },
+  {
+    "blind_id": "f049",
+    "case": "p05",
+    "run_dir": "followup-better-claude",
+    "file": "p05-better-claude-1.md"
+  },
+  {
+    "blind_id": "f050",
+    "case": "p12",
+    "run_dir": "followup-better-codex",
+    "file": "p12-better-codex-2.md"
+  },
+  {
+    "blind_id": "f051",
+    "case": "p03",
+    "run_dir": "followup-better-claude",
+    "file": "p03-better-claude-1.md"
+  },
+  {
+    "blind_id": "f052",
+    "case": "p01",
+    "run_dir": "followup-better-codex",
+    "file": "p01-better-codex-2.md"
+  },
+  {
+    "blind_id": "f053",
+    "case": "p05",
+    "run_dir": "followup-revise-claude",
+    "file": "p05-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f054",
+    "case": "p04",
+    "run_dir": "followup-better-claude",
+    "file": "p04-better-claude-1.md"
+  },
+  {
+    "blind_id": "f055",
+    "case": "p02",
+    "run_dir": "followup-revise-codex",
+    "file": "p02-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f056",
+    "case": "p01",
+    "run_dir": "followup-revise-codex",
+    "file": "p01-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f057",
+    "case": "p05",
+    "run_dir": "followup-revise-codex",
+    "file": "p05-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f058",
+    "case": "p10",
+    "run_dir": "followup-better-claude",
+    "file": "p10-better-claude-1.md"
+  },
+  {
+    "blind_id": "f059",
+    "case": "p04",
+    "run_dir": "followup-revise-claude",
+    "file": "p04-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f060",
+    "case": "p02",
+    "run_dir": "followup-revise-claude",
+    "file": "p02-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f061",
+    "case": "p08",
+    "run_dir": "followup-better-codex",
+    "file": "p08-better-codex-2.md"
+  },
+  {
+    "blind_id": "f062",
+    "case": "p08",
+    "run_dir": "followup-revise-claude",
+    "file": "p08-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f063",
+    "case": "p02",
+    "run_dir": "followup-better-claude",
+    "file": "p02-better-claude-1.md"
+  },
+  {
+    "blind_id": "f064",
+    "case": "p01",
+    "run_dir": "followup-revise-claude",
+    "file": "p01-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f065",
+    "case": "p05",
+    "run_dir": "followup-better-codex",
+    "file": "p05-better-codex-1.md"
+  },
+  {
+    "blind_id": "f066",
+    "case": "p06",
+    "run_dir": "followup-better-claude",
+    "file": "p06-better-claude-1.md"
+  },
+  {
+    "blind_id": "f067",
+    "case": "p07",
+    "run_dir": "followup-better-claude",
+    "file": "p07-better-claude-1.md"
+  },
+  {
+    "blind_id": "f068",
+    "case": "p03",
+    "run_dir": "followup-revise-codex",
+    "file": "p03-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f069",
+    "case": "p11",
+    "run_dir": "followup-revise-claude",
+    "file": "p11-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f070",
+    "case": "p09",
+    "run_dir": "followup-revise-codex",
+    "file": "p09-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f071",
+    "case": "p04",
+    "run_dir": "followup-better-codex",
+    "file": "p04-better-codex-1.md"
+  },
+  {
+    "blind_id": "f072",
+    "case": "p03",
+    "run_dir": "followup-better-codex",
+    "file": "p03-better-codex-1.md"
+  },
+  {
+    "blind_id": "f073",
+    "case": "p07",
+    "run_dir": "followup-better-claude",
+    "file": "p07-better-claude-2.md"
+  },
+  {
+    "blind_id": "f074",
+    "case": "p02",
+    "run_dir": "followup-better-codex",
+    "file": "p02-better-codex-1.md"
+  },
+  {
+    "blind_id": "f075",
+    "case": "p03",
+    "run_dir": "followup-revise-claude",
+    "file": "p03-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f076",
+    "case": "p10",
+    "run_dir": "followup-revise-codex",
+    "file": "p10-revise-codex-1.md"
+  },
+  {
+    "blind_id": "f077",
+    "case": "p11",
+    "run_dir": "followup-revise-claude",
+    "file": "p11-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f078",
+    "case": "p06",
+    "run_dir": "followup-better-claude",
+    "file": "p06-better-claude-2.md"
+  },
+  {
+    "blind_id": "f079",
+    "case": "p04",
+    "run_dir": "followup-better-codex",
+    "file": "p04-better-codex-2.md"
+  },
+  {
+    "blind_id": "f080",
+    "case": "p05",
+    "run_dir": "followup-better-codex",
+    "file": "p05-better-codex-2.md"
+  },
+  {
+    "blind_id": "f081",
+    "case": "p09",
+    "run_dir": "followup-revise-claude",
+    "file": "p09-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f082",
+    "case": "p09",
+    "run_dir": "followup-better-claude",
+    "file": "p09-better-claude-1.md"
+  },
+  {
+    "blind_id": "f083",
+    "case": "p10",
+    "run_dir": "followup-revise-claude",
+    "file": "p10-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f084",
+    "case": "p07",
+    "run_dir": "followup-better-codex",
+    "file": "p07-better-codex-1.md"
+  },
+  {
+    "blind_id": "f085",
+    "case": "p02",
+    "run_dir": "followup-better-claude",
+    "file": "p02-better-claude-2.md"
+  },
+  {
+    "blind_id": "f086",
+    "case": "p11",
+    "run_dir": "followup-better-codex",
+    "file": "p11-better-codex-1.md"
+  },
+  {
+    "blind_id": "f087",
+    "case": "p08",
+    "run_dir": "followup-revise-claude",
+    "file": "p08-revise-claude-1.md"
+  },
+  {
+    "blind_id": "f088",
+    "case": "p06",
+    "run_dir": "followup-better-codex",
+    "file": "p06-better-codex-1.md"
+  },
+  {
+    "blind_id": "f089",
+    "case": "p06",
+    "run_dir": "followup-better-codex",
+    "file": "p06-better-codex-2.md"
+  },
+  {
+    "blind_id": "f090",
+    "case": "p06",
+    "run_dir": "followup-revise-claude",
+    "file": "p06-revise-claude-2.md"
+  },
+  {
+    "blind_id": "f091",
+    "case": "p01",
+    "run_dir": "followup-revise-codex",
+    "file": "p01-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f092",
+    "case": "p07",
+    "run_dir": "followup-revise-codex",
+    "file": "p07-revise-codex-2.md"
+  },
+  {
+    "blind_id": "f093",
+    "case": "p09",
+    "run_dir": "followup-revise-claude",
+    "file": "p09-revise-claude-2.md"
+  }
+]

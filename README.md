@@ -6,7 +6,7 @@ AI coding assistants write confident plans, and the model that wrote a plan tend
 
 This repo holds the skill, the benchmark I built to test it, and every raw reply behind the numbers below.
 
-**Short answer: yes, on my own plans.** One review pass on three real project plans raised 20 issues, and I accepted all 20 before writing any code. A review takes about 7 seconds with Codex.
+**Short answer: yes, on my own plans, but the second model is not the reason.** One review pass on three real project plans raised 20 issues, and I accepted all 20 before writing any code. A review takes about 7 seconds with Codex. When I tested the idea itself, a fresh read was what helped: a second Claude review added more than a Codex review did, and a plain "make this plan better" fixed the planted flaws just as well. ([four follow-up tests](docs/portfolio-results.md#follow-up-four-tests-of-the-idea-itself-2026-11-20))
 
 ## Why download it
 
@@ -21,8 +21,11 @@ This repo holds the skill, the benchmark I built to test it, and every raw reply
 
 1. **A fresh reviewer finds real problems.** On three of my own project plans, the two reviewers raised 20 distinct issues and I accepted all 20. Claude raised 18 of them and Codex 6. Only 4 were raised by both. ([pilot](docs/benchmarks.md))
 2. **On planted flaws the two reviewers tied.** Both found all 18 planted blockers in every completed review. The test is too easy to separate them on this measure.
-3. **They differ in speed, reliability and depth.** Codex took 7.1 s per review and always returned a usable reply. Claude took 17.9 s and 3 of its 24 replies broke the required format. Claude wrote about twice as many extra findings that held up (1.8 per review against 0.7).
+3. **They differ in speed, reliability and depth.** Codex took 7.1 s per review and always returned a usable reply. Claude took 17.9 s and 3 of its 24 replies broke the required format (24 of 24 passed in a later rerun, after the format check was changed to drop a closing remark). Claude wrote about twice as many extra findings that held up (1.8 per review against 0.7).
 4. **The token gap I had measured came from the setup, not the model.** In the pilot, Claude used 7.6 times the tokens of Codex. That was Claude Code loading its own startup context into every subagent. Run as a standalone process, Claude used about one sixth of Codex's tokens (2,417 against 14,184 median).
+
+5. **A plain "make it better" tied the review on planted flaws.** In a follow-up, one fresh call with that prompt fixed 24 of 24 planted flaws, the same as a review followed by a revision. The rewrite made plans three to four times longer (472 and 381 words against 183 and 212 median). The review route keeps the plan short and leaves a decision log.
+6. **A second read helped more than a second model.** On 9 plans, two Claude reviews found 19 distinct valid issues, one Codex plus one Claude found 17, and two Codex reviews found 6.
 
 **What I do with this:** Codex reviews every plan by default because it is fast and reliable. When a mistake would be expensive (money, safety, a public release, something hard to undo), the skill recommends Claude and asks me first.
 
@@ -57,6 +60,8 @@ This repo holds the skill, the benchmark I built to test it, and every raw reply
 - **It does not say which reviewer catches more blockers.** Both hit the ceiling. The case for Claude on important plans rests on the extra findings, not on recall.
 - **Dollar cost is unknown for Codex.** Its CLI does not report cost, and tokens are not dollars.
 - **Effort settings differ** (Codex low, Claude medium), as the skill ships them. I reran Codex at medium to check: it took twice as long (13.9 s), found the same 18 of 18 blockers, and did not add valid findings (12 against 17 at low, within grading noise). Claude's lead in extra findings is not explained by the effort setting. ([follow-up](docs/portfolio-results.md#follow-up-codex-at-medium-effort)) The Codex CLI did not report which model it used.
+- **It does not show that the review beats a simple rewrite.** On the planted flaws both fixed everything, so that test hit its ceiling. Real plans with context outside the plan text are not tested.
+- **The stakes rule missed one of two consequential pairs.** Both models called the store forecast plan routine. They flagged no routine plan by mistake.
 - **In the pilot I accepted every issue**, so it shows which reviewer raised more, not which was more often right.
 
 ## Try it
@@ -96,7 +101,7 @@ For a real example, read the [camera-swap decision log](challenge/shot-tracker-n
 
 ## Reproduce
 
-23 offline tests cover both CLI adapters with no model calls. The dry run prints the benchmark plan without calling a reviewer.
+24 offline tests cover both CLI adapters with no model calls. The dry run prints the benchmark plan without calling a reviewer.
 
 ```sh
 python -B -m unittest discover -s tests -v

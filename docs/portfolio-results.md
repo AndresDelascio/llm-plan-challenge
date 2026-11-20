@@ -81,6 +81,71 @@ The main comparison has Codex at low effort and Claude at medium. To check wheth
 - **Both false alarms were again on the inventory control (p05)**, and the grader again marked them borderline.
 - **Limits.** Each column was graded in a separate blind pass, and two passes over the same findings agreed on 85%, so the drop from 17 to 12 valid is within grading noise. The gap to Claude's 37 is not. The same effort label does not mean the same compute at two providers. The grader saw one reviewer's findings only, with no names.
 
+## Follow-up: four tests of the idea itself (2026-11-20)
+
+The benchmark above compares two reviewers with each other. These four tests ask whether the review step earns its place at all. The [rules](../evals/plan-review/followup.md) were committed before the first call. 141 live calls, none failed, none rerun. Grading is by an AI (Claude), blind. No person checked it. Raw replies are in `runs/followup-*`. The counts for tests 1 and 2 are printed by `python evals/plan-review/followup_report.py`.
+
+**Two of the four results go against this repo's story.** They are reported as measured.
+
+### 1. Does `/challenge` beat asking one model to "make it better"? Not on these plans.
+
+| Measured, two runs per plan | "Make it better", Claude | "Make it better", Codex | Codex review, Claude revises | Claude review, Claude revises |
+| --- | ---: | ---: | ---: | ---: |
+| Final plans | 24 | 24 | 24 | 21 |
+| Planted flaws fixed | 24 / 24 | 24 / 24 | 24 / 24 | 24 / 24 |
+| Repaired plans with a repair removed | 0 / 12 | 0 / 12 | 0 / 12 | 0 / 9 |
+| Final plans with a new defect | 0 / 24 | 0 / 24 | 0 / 24 | 0 / 21 |
+| Median words in the final plan (original: 123) | 472 | 381 | 183 | 212 |
+| Median reported tokens, all calls | 2,499 | 14,674 | 16,212 | 5,718 |
+| Median wall time, all calls | 20.0 s | 13.3 s | 21.0 s | 41.5 s |
+
+- **A one-line "make this plan better" in a fresh chat fixed every planted flaw**, with one call instead of two. The review step added nothing on this measure.
+- **The only measured difference is size.** A plain rewrite made the plan three to four times longer. A review followed by a revision made it about one and a half times longer. The grader did not count the added length as a defect.
+- **What the review route still gives** is a list of issues with a decision on each. This test does not measure whether that is worth the second call.
+- **Strongest case against this result:** the planted flaws were already too easy for both reviewers, so any capable model fixes them. The test hit its ceiling and cannot show a gap in either direction. The grader also passed all 93 plans without one regression or new defect, which may mean it was lenient. Confidence that "make it better" matches the review route on easy, self-contained flaws: 80%. Confidence that this carries over to real plans with hidden context: 35%.
+
+### 2. A second model, or the same model twice? The same model twice, if it is Claude.
+
+Input: the 54 extra findings judged valid in the main benchmark, grouped by a blind grader into 26 distinct issues. Counted on the 9 plans where all four reviews completed.
+
+| Distinct valid issues found, sum over 9 plans | Computed |
+| --- | ---: |
+| One Codex review (mean of two) | 4.5 |
+| One Claude review (mean of two) | 16.0 |
+| Codex twice | 6 |
+| One Codex and one Claude (mean of four pairings) | 17.0 |
+| Claude twice | 19 |
+| All four reviews | 20 |
+
+- **Adding Codex to one Claude review added 1.0 issue. Adding a second Claude review added 3.0.** The gain came from a second read, not from a different model.
+- **Codex found 1 issue of the 20 that no Claude review found.**
+- **Strongest case against:** the grader that judged the findings valid is Claude, and it may favour findings written the way Claude writes. The counts are small (20 issues, 9 plans). In the earlier pilot on three real plans, Codex raised 2 accepted issues that Claude did not. Confidence that Claude twice finds at least as many valid issues as one of each on plans like these: 70%.
+
+### 3. Is Claude still less reliable with the current validator? No.
+
+The Claude run was repeated with the validator as it ships now: **24 of 24 reviews passed the format check** (21 of 24 in the main run). The three earlier rejections were all a closing sentence after the required format, which the validator now drops. One rerun, not graded. Confidence that the format gap between the reviewers is closed: 75%.
+
+### 4. Does the stakes rule fire correctly? On one of the two consequential pairs.
+
+Each model classified each of the 12 plans once, using the wording of the skill.
+
+| Measured | Codex | Claude |
+| --- | ---: | ---: |
+| Correct against the frozen labels | 10 / 12 | 10 / 12 |
+| Routine plans called consequential | 0 / 8 | 0 / 8 |
+| Inventory pair (customer money) called consequential | 2 / 2 | 2 / 2 |
+| Forecast pair (deployed to stores) called consequential | 0 / 2 | 0 / 2 |
+
+- **No false alarms, and both models missed the same pair.** The forecast plan says the service "will be deployed to stores", and neither model read that as material money.
+- **Strongest case against the label:** a reasonable person could also call the forecast plan routine, so this may be a labelling disagreement, not a model error. Either way the rule as worded does not catch "an error here costs money later". Confidence that the rule misses indirect money risk: 65%.
+
+### What this changes
+
+- **The claim "a second model catches what the first misses" is not supported here.** The supported claim is narrower: a fresh read with no chat history finds real issues, and a second fresh read finds more.
+- **When a plain "make it better" is enough:** short, self-contained plans where a longer plan is acceptable and no record of decisions is needed.
+- **When the review route is the better fit (not measured, my reasoning):** when the plan should stay short, when each change needs a reason on record, or when the writer's chat holds context that a blind rewrite would overwrite.
+- **Not tested:** real plans, flaws that need outside knowledge, and a long chat that already holds the reasoning.
+
 ## Failures
 
 - **Claude smoke, 4 of 6 rejected.** The validator had a hard 250-word limit and Claude wrote slightly more (270 words on the one reply inspected). The limit in the validator was raised to 400 words before the full run. The rubric text the reviewers see was not changed, so the Codex runs stay comparable. The 4096-byte cap still applies.
@@ -99,7 +164,8 @@ The main comparison has Codex at low effort and Claude at medium. To check wheth
 
 - Write harder plans, where a flaw only shows when two steps are read together, so the blocker test stops hitting its ceiling.
 - Have a person grade a sample of the findings and compare with the AI grader.
-- Rerun Claude with the validator that keeps a review with a closing remark, and report the completion rate again.
+- Reword the stakes rule so it catches plans where an error costs money later, and test it again.
+- Repeat the "make it better" comparison on real plans, where the writer's chat holds context the plan text does not.
 
 ## Reproduce
 

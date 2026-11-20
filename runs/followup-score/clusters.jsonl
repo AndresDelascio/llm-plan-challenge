@@ -1,0 +1,54 @@
+{"case": "p07", "blind_id": "c01", "issue": 3, "cluster": "p07-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p07", "blind_id": "c01", "issue": 4, "cluster": "p07-b", "label": "No timeout on second beam; intervals over 6.5536 s alias into valid range"}
+{"case": "p07", "blind_id": "c01", "issue": 5, "cluster": "p07-c", "label": "Step 4 acceptance has no tolerance and may miss interval limits"}
+{"case": "p02", "blind_id": "c02", "issue": 1, "cluster": "p02-a", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p02", "blind_id": "c02", "issue": 3, "cluster": "p02-b", "label": "Step 3 split method unspecified; evaluation may get no positive-label recordings"}
+{"case": "p07", "blind_id": "c03", "issue": 3, "cluster": "p07-b", "label": "No timeout on second beam; intervals over 6.5536 s alias into valid range"}
+{"case": "p07", "blind_id": "c03", "issue": 4, "cluster": "p07-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p07", "blind_id": "c03", "issue": 5, "cluster": "p07-d", "label": "Step 3 absolute difference hides reversed beam order"}
+{"case": "p02", "blind_id": "c06", "issue": 1, "cluster": "p02-a", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p12", "blind_id": "c07", "issue": 1, "cluster": "p12-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p12", "blind_id": "c07", "issue": 2, "cluster": "p12-b", "label": "No expiry on pending start; late finish aliases into valid range"}
+{"case": "p06", "blind_id": "c09", "issue": 3, "cluster": "p06-a", "label": "Step 4 leaves unknown payment state after timeout unhandled (late/actual success)"}
+{"case": "p02", "blind_id": "c10", "issue": 1, "cluster": "p02-a", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p02", "blind_id": "c10", "issue": 3, "cluster": "p02-b", "label": "Step 3 split method unspecified; evaluation may get no positive-label recordings"}
+{"case": "p05", "blind_id": "c12", "issue": 1, "cluster": "p05-a", "label": "Step 4 decline release not state-guarded; decline plus expiry can double-release stock"}
+{"case": "p05", "blind_id": "c12", "issue": 3, "cluster": "p05-b", "label": "Step 4 polling stops at deadline; late payment success never detected or refunded"}
+{"case": "p05", "blind_id": "c12", "issue": 5, "cluster": "p05-c", "label": "Step 2 tests miss decline, late success and release paths"}
+{"case": "p11", "blind_id": "c13", "issue": 3, "cluster": "p11-a", "label": "Step 3 splits by window but step 4 scores whole recordings"}
+{"case": "p11", "blind_id": "c13", "issue": 4, "cluster": "p11-b", "label": "New editor configuration never frozen before evaluation"}
+{"case": "p11", "blind_id": "c13", "issue": 5, "cluster": "p11-c", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p06", "blind_id": "c15", "issue": 3, "cluster": "p06-a", "label": "Step 4 leaves unknown payment state after timeout unhandled (late/actual success)"}
+{"case": "p06", "blind_id": "c15", "issue": 5, "cluster": "p06-b", "label": "Step 2 tests assert nothing about release behaviour"}
+{"case": "p10", "blind_id": "c16", "issue": 2, "cluster": "p10-a", "label": "Last-week baseline not held to the as-of/finalized availability rule"}
+{"case": "p05", "blind_id": "c17", "issue": 3, "cluster": "p05-b", "label": "Step 4 polling stops at deadline; late payment success never detected or refunded"}
+{"case": "p12", "blind_id": "c20", "issue": 1, "cluster": "p12-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p12", "blind_id": "c20", "issue": 2, "cluster": "p12-b", "label": "No expiry on pending start; late finish aliases into valid range"}
+{"case": "p08", "blind_id": "c21", "issue": 4, "cluster": "p08-a", "label": "Step 5 defines no response for a detected duplicate retry"}
+{"case": "p08", "blind_id": "c21", "issue": 5, "cluster": "p08-b", "label": "Step 3 fault simulation states no pass condition"}
+{"case": "p03", "blind_id": "c22", "issue": 3, "cluster": "p03-a", "label": "Final eight Mondays used for both candidate selection and final score"}
+{"case": "p03", "blind_id": "c22", "issue": 5, "cluster": "p03-b", "label": "Eight consecutive Mondays test only one season"}
+{"case": "p03", "blind_id": "c24", "issue": 3, "cluster": "p03-a", "label": "Final eight Mondays used for both candidate selection and final score"}
+{"case": "p03", "blind_id": "c24", "issue": 5, "cluster": "p03-b", "label": "Eight consecutive Mondays test only one season"}
+{"case": "p08", "blind_id": "c25", "issue": 3, "cluster": "p08-a", "label": "Step 5 defines no response for a detected duplicate retry"}
+{"case": "p08", "blind_id": "c25", "issue": 4, "cluster": "p08-b", "label": "Step 3 fault simulation states no pass condition"}
+{"case": "p02", "blind_id": "c26", "issue": 1, "cluster": "p02-c", "label": "Step 4 one-to-one matching undercounts when one clip covers two moments"}
+{"case": "p02", "blind_id": "c26", "issue": 2, "cluster": "p02-a", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p02", "blind_id": "c26", "issue": 3, "cluster": "p02-b", "label": "Step 3 split method unspecified; evaluation may get no positive-label recordings"}
+{"case": "p10", "blind_id": "c28", "issue": 1, "cluster": "p10-b", "label": "Final eight Mondays used for both candidate selection and final score"}
+{"case": "p10", "blind_id": "c28", "issue": 3, "cluster": "p10-a", "label": "Last-week baseline not held to the as-of/finalized availability rule"}
+{"case": "p10", "blind_id": "c28", "issue": 5, "cluster": "p10-c", "label": "Eight Mondays miss seasonal periods"}
+{"case": "p01", "blind_id": "c29", "issue": 2, "cluster": "p01-a", "label": "Step 3 retry test states no assertion"}
+{"case": "p05", "blind_id": "c33", "issue": 3, "cluster": "p05-b", "label": "Step 4 polling stops at deadline; late payment success never detected or refunded"}
+{"case": "p05", "blind_id": "c33", "issue": 4, "cluster": "p05-a", "label": "Step 4 decline release not state-guarded; decline plus expiry can double-release stock"}
+{"case": "p12", "blind_id": "c34", "issue": 1, "cluster": "p12-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p12", "blind_id": "c34", "issue": 2, "cluster": "p12-b", "label": "No expiry on pending start; late finish aliases into valid range"}
+{"case": "p11", "blind_id": "c38", "issue": 3, "cluster": "p11-b", "label": "New editor configuration never frozen before evaluation"}
+{"case": "p11", "blind_id": "c38", "issue": 4, "cluster": "p11-c", "label": "Step 2 reports paired differences with no decision rule"}
+{"case": "p11", "blind_id": "c38", "issue": 5, "cluster": "p11-d", "label": "Step 4 recall undefined for recordings with zero labeled moments"}
+{"case": "p07", "blind_id": "c39", "issue": 3, "cluster": "p07-a", "label": "Synthetic replay never verifies the 2 ms bound on real hardware"}
+{"case": "p05", "blind_id": "c40", "issue": 1, "cluster": "p05-a", "label": "Step 4 decline release not state-guarded; decline plus expiry can double-release stock"}
+{"case": "p05", "blind_id": "c40", "issue": 3, "cluster": "p05-b", "label": "Step 4 polling stops at deadline; late payment success never detected or refunded"}
+{"case": "p05", "blind_id": "c40", "issue": 5, "cluster": "p05-c", "label": "Step 2 tests miss decline, late success and release paths"}
+{"case": "p10", "blind_id": "c44", "issue": 2, "cluster": "p10-a", "label": "Last-week baseline not held to the as-of/finalized availability rule"}
+{"case": "p10", "blind_id": "c44", "issue": 3, "cluster": "p10-b", "label": "Final eight Mondays used for both candidate selection and final score"}

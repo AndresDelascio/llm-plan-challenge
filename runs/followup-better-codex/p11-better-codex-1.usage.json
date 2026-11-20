@@ -1,0 +1,12 @@
+{
+  "provider": "codex",
+  "requested_effort": "low",
+  "wall_ms": 10242,
+  "usage": {
+    "input_tokens": 13061,
+    "cached_input_tokens": 10368,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 371,
+    "reasoning_output_tokens": 0
+  }
+}
