@@ -1,0 +1,145 @@
+{
+  "arm": "plan",
+  "task": "t4-recall",
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 17078,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1047,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1245,
+        "output_tokens_details": {
+          "thinking_tokens": 415
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1047,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1245,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1047,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1047
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.066568,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `clip_recall(highlights, clips)`, returning the fraction of highlights found (a float from 0.0 to 1.0) under the best possible assignment of clips to highlights.\n\n**Constraints:**\n- Both inputs are lists of `(start_s, end_s)` tuples.\n- A clip finds a highlight only if overlap is strictly positive: `min(ends) - max(starts) > 0`.\n- Each clip credits at most one highlight, and each highlight needs only one clip.\n- Credit must be maximal, so this is maximum bipartite matching, not greedy first-fit.\n- `highlights` is never empty; `clips` may be.\n\n**Non-goals:** Precision/F1, IoU thresholds, merging or deduplicating intervals, input validation, I/O or CLI.\n\n## Plan\n\n1. Create `clip_recall.py` in the working directory, standard library only.\n2. Write a helper that tests two intervals for strictly positive overlap.\n3. Build an adjacency list: for each highlight, the indices of the clips that overlap it.\n4. Compute a maximum bipartite matching with augmenting paths (Kuhn's algorithm), implemented iteratively.\n5. Return `matched / len(highlights)`.\n6. Add tests covering:\n   - empty `clips` returns 0.0;\n   - intervals that only touch (`(0,5)` vs `(5,10)`) do not match;\n   - one long clip spanning two highlights credits only one;\n   - a greedy trap that needs reassignment: highlights `A=(0,10)`, `B=(8,12)`, clips `X=(7,9)`, `Y=(1,2)`. Giving X to A first must not strand B; the expected result is 1.0;\n   - duplicate highlights count separately;\n   - zero-length intervals never match;\n   - float timestamps.\n7. Run the tests and report the results.\n\n## Risks I already know about\n\n- Greedy assignment undercounts; step 4 and the trap test guard against this.\n- Using `>=` instead of `>` would wrongly credit touching intervals.\n- A recursive augmenting-path search could hit Python's recursion limit on large inputs, hence the iterative version.\n- Building all pairs is O(H\u00d7C), which is fine for match-length data but slow for huge lists.\n- Reversed intervals (`start > end`) will silently yield no overlap; this is not validated.\n- Float rounding could produce spurious tiny overlaps at near-touching boundaries."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 22288,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1834,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2275,
+        "output_tokens_details": {
+          "thinking_tokens": 757
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1834,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2275,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1834,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1834
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.12036,
+      "error": null,
+      "reply": "```python\n\"\"\"Recall scoring for a soccer highlight finder.\"\"\"\n\nimport unittest\n\n\ndef _overlaps(a, b):\n    \"\"\"True if intervals a and b overlap by strictly more than zero seconds.\"\"\"\n    return min(a[1], b[1]) - max(a[0], b[0]) > 0\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by clips.\n\n    A highlight is found when a clip overlaps it by more than zero seconds.\n    Each clip can be credited to at most one highlight; the assignment is\n    chosen to credit as many highlights as possible (maximum bipartite\n    matching via iterative augmenting paths).\n    \"\"\"\n    # adj[h] = indices of clips that overlap highlight h\n    adj = [\n        [c for c, clip in enumerate(clips) if _overlaps(hl, clip)]\n        for hl in highlights\n    ]\n\n    clip_owner = [-1] * len(clips)  # clip index -> highlight index, or -1\n\n    def try_augment(root):\n        visited = set()\n        stack = [(root, iter(adj[root]))]\n        path_clips = []  # path_clips[i] is the clip linking stack[i] to stack[i+1]\n        while stack:\n            h, it = stack[-1]\n            for c in it:\n                if c in visited:\n                    continue\n                visited.add(c)\n                owner = clip_owner[c]\n                path_clips.append(c)\n                if owner == -1:\n                    # Free clip found: flip assignments along the path.\n                    for (hh, _), cc in zip(stack, path_clips):\n                        clip_owner[cc] = hh\n                    return True\n                # Clip is taken: try to move its owner to another clip.\n                stack.append((owner, iter(adj[owner])))\n                break\n            else:\n                stack.pop()\n                if path_clips:\n                    path_clips.pop()\n        return False\n\n    matched = sum(1 for h in range(len(highlights)) if adj[h] and try_augment(h))\n    return matched / len(highlights)\n\n\nclass ClipRecallTests(unittest.TestCase):\n    def test_empty_clips(self):\n        self.assertEqual(clip_recall([(0, 10)], []), 0.0)\n\n    def test_touching_intervals_do_not_match(self):\n        self.assertEqual(clip_recall([(0, 5)], [(5, 10)]), 0.0)\n        self.assertEqual(clip_recall([(5, 10)], [(0, 5)]), 0.0)\n\n    def test_simple_match(self):\n        self.assertEqual(clip_recall([(0, 5)], [(4, 6)]), 1.0)\n\n    def test_long_clip_credits_only_one_highlight(self):\n        self.assertEqual(clip_recall([(0, 5), (10, 15)], [(0, 20)]), 0.5)\n\n    def test_greedy_trap_requires_reassignment(self):\n        highlights = [(0, 10), (8, 12)]  # A, B\n        clips = [(7, 9), (1, 2)]  # X, Y\n        self.assertEqual(clip_recall(highlights, clips), 1.0)\n\n    def test_duplicate_highlights_count_separately(self):\n        self.assertEqual(clip_recall([(0, 10), (0, 10)], [(1, 2)]), 0.5)\n        self.assertEqual(clip_recall([(0, 10), (0, 10)], [(1, 2), (3, 4)]), 1.0)\n\n    def test_zero_length_intervals_never_match(self):\n        self.assertEqual(clip_recall([(5, 5)], [(0, 10)]), 0.0)\n        self.assertEqual(clip_recall([(0, 10)], [(5, 5)]), 0.0)\n\n    def test_float_timestamps(self):\n        self.assertEqual(clip_recall([(0.5, 1.5), (2.25, 3.75)], [(1.25, 2.0)]), 0.5)\n\n    def test_long_augmenting_chain(self):\n        # Highlight i overlaps clips i-1 and i; listing forces a long chain\n        # of reassignments, which the iterative search handles without\n        # hitting the recursion limit.\n        n = 3000\n        highlights = [(i, i + 2) for i in range(n)]\n        clips = [(i + 1.5, i + 2.5) for i in range(n - 1)] + [(0, 0.5)]\n        self.assertEqual(clip_recall(highlights, clips), 1.0)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": "the code crashed when it was loaded"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 34285,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 3405,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 3324,
+        "output_tokens_details": {
+          "thinking_tokens": 1769
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 3405,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 3324,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 3405,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 3405
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.18745599999999998,
+      "error": null,
+      "reply": "```python\n\"\"\"Recall scoring for a soccer highlight finder.\"\"\"\n\nimport unittest\n\n\ndef _overlaps(a, b):\n    \"\"\"True if intervals a and b overlap by strictly more than zero seconds.\"\"\"\n    return min(a[1], b[1]) - max(a[0], b[0]) > 0\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by clips.\n\n    A highlight is found when a clip overlaps it by more than zero seconds.\n    Each clip can be credited to at most one highlight; the assignment is\n    chosen to credit as many highlights as possible (maximum bipartite\n    matching via iterative augmenting paths).\n    \"\"\"\n    highlights = list(highlights)\n    clips = list(clips)\n\n    # adj[h] = indices of clips that overlap highlight h\n    adj = [\n        [c for c, clip in enumerate(clips) if _overlaps(hl, clip)]\n        for hl in highlights\n    ]\n\n    clip_owner = [-1] * len(clips)  # clip index -> highlight index, or -1\n\n    def try_augment(root):\n        visited = set()\n        stack = [(root, iter(adj[root]))]\n        path_clips = []  # path_clips[i] is the clip linking stack[i] to stack[i+1]\n        while stack:\n            h, it = stack[-1]\n            for c in it:\n                if c in visited:\n                    continue\n                visited.add(c)\n                owner = clip_owner[c]\n                path_clips.append(c)\n                if owner == -1:\n                    # Free clip found: flip assignments along the path.\n                    for (hh, _), cc in zip(stack, path_clips):\n                        clip_owner[cc] = hh\n                    return True\n                # Clip is taken: try to move its owner to another clip.\n                stack.append((owner, iter(adj[owner])))\n                break\n            else:\n                stack.pop()\n                if path_clips:\n                    path_clips.pop()\n        return False\n\n    matched = 0\n    for h in range(len(highlights)):\n        if adj[h] and try_augment(h):\n            matched += 1\n    return matched / len(highlights)\n\n\nclass ClipRecallTests(unittest.TestCase):\n    def test_empty_clips(self):\n        self.assertEqual(clip_recall([(0, 10)], []), 0.0)\n\n    def test_touching_intervals_do_not_match(self):\n        self.assertEqual(clip_recall([(0, 5)], [(5, 10)]), 0.0)\n        self.assertEqual(clip_recall([(5, 10)], [(0, 5)]), 0.0)\n\n    def test_simple_match(self):\n        self.assertEqual(clip_recall([(0, 5)], [(4, 6)]), 1.0)\n\n    def test_long_clip_credits_only_one_highlight(self):\n        self.assertEqual(clip_recall([(0, 5), (10, 15)], [(0, 20)]), 0.5)\n\n    def test_greedy_trap_requires_reassignment(self):\n        highlights = [(0, 10), (8, 12)]  # A, B\n        clips = [(7, 9), (1, 2)]  # X, Y\n        self.assertEqual(clip_recall(highlights, clips), 1.0)\n\n    def test_duplicate_highlights_count_separately(self):\n        self.assertEqual(clip_recall([(0, 10), (0, 10)], [(1, 2)]), 0.5)\n        self.assertEqual(clip_recall([(0, 10), (0, 10)], [(1, 2), (3, 4)]), 1.0)\n\n    def test_zero_length_intervals_never_match(self):\n        self.assertEqual(clip_recall([(5, 5)], [(0, 10)]), 0.0)\n        self.assertEqual(clip_recall([(0, 10)], [(5, 5)]), 0.0)\n\n    def test_float_timestamps(self):\n        self.assertEqual(clip_recall([(0.5, 1.5), (2.25, 3.75)], [(1.25, 2.0)]), 0.5)\n\n    def test_deep_search_does_not_hit_recursion_limit(self):\n        # Highlight i overlaps clips i-1 and i. Each highlight i ends up\n        # owning clip i, so the last highlight's search walks the whole\n        # chain (depth n) before falling back to its own free clip.\n        n = 1500\n        highlights = [(i, i + 2) for i in range(n)]\n        clips = [(i + 1.5, i + 2.5) for i in range(n - 1)] + [(n + 0.5, n + 1)]\n        self.assertEqual(clip_recall(highlights, clips), 1.0)\n```",
+      "symptom": null
+    }
+  ]
+}

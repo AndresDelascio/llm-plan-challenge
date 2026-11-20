@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t2-attendance",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 10428,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1017,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 635,
+        "output_tokens_details": {
+          "thinking_tokens": 168
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1017,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 635,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1017,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1017
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.041688,
+      "error": null,
+      "reply": "```python\nfrom datetime import datetime, timezone\n\n\ndef _parse_updated_at(text):\n    \"\"\"Parse ISO 8601 text with a UTC offset into an aware datetime.\"\"\"\n    text = text.strip()\n    # Python versions before 3.11 do not accept a trailing \"Z\".\n    if text[-1:] in (\"Z\", \"z\"):\n        text = text[:-1] + \"+00:00\"\n    parsed = datetime.fromisoformat(text)\n    if parsed.tzinfo is None:\n        # The format promises an offset; assume UTC if one is missing.\n        parsed = parsed.replace(tzinfo=timezone.utc)\n    return parsed\n\n\ndef merge_attendance(records):\n    \"\"\"Keep one record per (player, date): the most recently updated one.\n\n    Timestamps are compared as real instants, so different UTC offsets are\n    handled correctly. If two records for the same player and date have the\n    same instant, the one later in the list wins. The result is ordered by\n    each player/date pair's first appearance in the input.\n    \"\"\"\n    latest = {}  # (player, date) -> (updated_at as datetime, record)\n    for record in records:\n        key = (record[\"player\"], record[\"date\"])\n        updated = _parse_updated_at(record[\"updated_at\"])\n        current = latest.get(key)\n        if current is None or updated >= current[0]:\n            latest[key] = (updated, record)\n    return [record for _, record in latest.values()]\n```",
+      "symptom": null
+    }
+  ]
+}

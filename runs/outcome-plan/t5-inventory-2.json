@@ -1,0 +1,145 @@
+{
+  "arm": "plan",
+  "task": "t5-inventory",
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 13086,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1036,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 968,
+        "output_tokens_details": {
+          "thinking_tokens": 203
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1036,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 968,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1036,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1036
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.055312,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Write `available(stock, reservations, now_s)`, a pure Python function that returns the units still sellable: `stock` minus the units held by live reservations, floored at 0.\n\n**Constraints:**\n- Each reservation is a dict with `qty`, `created_s` and `paid`.\n- A paid reservation always holds its units.\n- An unpaid reservation holds its units only while `now_s - created_s < 300`.\n- The result is an integer and never negative.\n- The function does not mutate its inputs or read the clock; time comes only from `now_s`.\n\n**Non-goals:**\n- No persistence, locking or concurrency handling.\n- No purging of expired reservations.\n- No validation or repair of malformed data.\n- No integration with the rest of the shop.\n\n## Plan\n\n1. Create one module (e.g. `inventory.py`) with a named constant `HOLD_SECONDS = 300`.\n2. Define `available(stock, reservations, now_s)` with a docstring stating the expiry rule and the boundary.\n3. Iterate over the reservations and sum `qty` for each one that is paid or whose age is under `HOLD_SECONDS`.\n4. Return `max(0, stock - held)`.\n5. Write tests covering:\n   - an empty reservation list;\n   - a paid reservation of any age;\n   - unpaid reservations at ages 299, 300 and 301;\n   - a mix of paid and unpaid;\n   - holds exceeding stock, which must return 0;\n   - zero stock;\n   - inputs left unmodified.\n6. Run the tests and confirm they all pass.\n\n## Risks I already know about\n\n- **Boundary at exactly 300 seconds:** \"expires after 300 seconds\" is ambiguous. I will treat a reservation as expired at age 300 (held only while age < 300); confirm if you want it inclusive.\n- **Future `created_s`:** clock skew gives a negative age. I will treat such a reservation as still holding.\n- **Paid reservations and stock:** I assume `stock` has not already been reduced for paid orders. If it has, they would be double-counted.\n- **Bad data:** missing keys or negative `qty` are not handled; missing keys will raise `KeyError`.\n- **Units:** `now_s` and `created_s` must both be seconds on the same clock."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 15673,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1755,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1421,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1755,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1421,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1755,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1755
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.08493600000000001,
+      "error": null,
+      "reply": "```python\n\"\"\"Inventory availability for the web shop.\"\"\"\n\nHOLD_SECONDS = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return how many units can still be sold, never below 0.\n\n    Each reservation is a dict with the keys ``qty``, ``created_s`` and\n    ``paid``. A reservation holds its units while it is live:\n\n    * a paid reservation never expires and always holds its units;\n    * an unpaid reservation holds its units only while\n      ``now_s - created_s < HOLD_SECONDS``; at an age of exactly\n      ``HOLD_SECONDS`` seconds it is treated as expired.\n\n    A reservation with ``created_s`` in the future (negative age, e.g. from\n    clock skew) is treated as still holding its units.\n\n    ``stock`` is assumed not to have been reduced already for paid orders.\n    The function does not mutate its inputs and does not read the clock;\n    time comes only from ``now_s``.\n    \"\"\"\n    held = 0\n    for reservation in reservations:\n        if reservation[\"paid\"] or now_s - reservation[\"created_s\"] < HOLD_SECONDS:\n            held += reservation[\"qty\"]\n    return max(0, stock - held)\n\n\nif __name__ == \"__main__\":\n    import copy\n    import unittest\n\n    class AvailableTests(unittest.TestCase):\n        def test_empty_reservations(self):\n            self.assertEqual(available(10, [], 1000), 10)\n\n        def test_paid_reservation_of_any_age(self):\n            for age in (0, 299, 300, 301, 10**9):\n                reservations = [{\"qty\": 3, \"created_s\": 0, \"paid\": True}]\n                self.assertEqual(available(10, reservations, age), 7)\n\n        def test_unpaid_age_299_holds(self):\n            reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n            self.assertEqual(available(10, reservations, 1299), 6)\n\n        def test_unpaid_age_300_expired(self):\n            reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n            self.assertEqual(available(10, reservations, 1300), 10)\n\n        def test_unpaid_age_301_expired(self):\n            reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n            self.assertEqual(available(10, reservations, 1301), 10)\n\n        def test_future_created_s_still_holds(self):\n            reservations = [{\"qty\": 2, \"created_s\": 2000, \"paid\": False}]\n            self.assertEqual(available(10, reservations, 1000), 8)\n\n        def test_mix_of_paid_and_unpaid(self):\n            reservations = [\n                {\"qty\": 2, \"created_s\": 0, \"paid\": True},      # held (paid)\n                {\"qty\": 3, \"created_s\": 900, \"paid\": False},   # held (age 100)\n                {\"qty\": 5, \"created_s\": 100, \"paid\": False},   # expired (age 900)\n                {\"qty\": 1, \"created_s\": 700, \"paid\": False},   # expired (age 300)\n            ]\n            self.assertEqual(available(20, reservations, 1000), 15)\n\n        def test_holds_exceeding_stock_return_zero(self):\n            reservations = [\n                {\"qty\": 8, \"created_s\": 0, \"paid\": True},\n                {\"qty\": 8, \"created_s\": 990, \"paid\": False},\n            ]\n            self.assertEqual(available(10, reservations, 1000), 0)\n\n        def test_zero_stock(self):\n            self.assertEqual(available(0, [], 1000), 0)\n            reservations = [{\"qty\": 1, \"created_s\": 1000, \"paid\": False}]\n            self.assertEqual(available(0, reservations, 1000), 0)\n\n        def test_inputs_left_unmodified(self):\n            reservations = [\n                {\"qty\": 2, \"created_s\": 0, \"paid\": True},\n                {\"qty\": 3, \"created_s\": 900, \"paid\": False},\n                {\"qty\": 5, \"created_s\": 100, \"paid\": False},\n            ]\n            snapshot = copy.deepcopy(reservations)\n            available(20, reservations, 1000)\n            self.assertEqual(reservations, snapshot)\n\n    unittest.main()\n```",
+      "symptom": "the code crashed when it was loaded"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 19757,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 3227,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1942,
+        "output_tokens_details": {
+          "thinking_tokens": 485
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 3227,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1942,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 3227,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 3227
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.129328,
+      "error": null,
+      "reply": "```python\n\"\"\"Inventory availability for the web shop.\"\"\"\n\nimport copy\nimport unittest\n\nHOLD_SECONDS = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return how many units can still be sold, never below 0.\n\n    Each reservation is a dict with the keys ``qty``, ``created_s`` and\n    ``paid``. A reservation holds its units while it is live:\n\n    * a paid reservation never expires and always holds its units;\n    * an unpaid reservation holds its units only while\n      ``now_s - created_s < HOLD_SECONDS``; at an age of exactly\n      ``HOLD_SECONDS`` seconds it is treated as expired.\n\n    A reservation with ``created_s`` in the future (negative age, e.g. from\n    clock skew) is treated as still holding its units.\n\n    ``stock`` is assumed not to have been reduced already for paid orders.\n    The function does not mutate its inputs and does not read the clock;\n    time comes only from ``now_s``.\n    \"\"\"\n    held = 0\n    for reservation in reservations:\n        if reservation[\"paid\"] or now_s - reservation[\"created_s\"] < HOLD_SECONDS:\n            held += reservation[\"qty\"]\n    return max(0, stock - held)\n\n\nclass AvailableTests(unittest.TestCase):\n    \"\"\"Tests for available().\n\n    Nothing runs when the module is loaded. Run them explicitly with\n    ``python -m unittest inventory`` (using this file's module name).\n    \"\"\"\n\n    def test_empty_reservations(self):\n        self.assertEqual(available(10, [], 1000), 10)\n\n    def test_paid_reservation_of_any_age(self):\n        for age in (0, 299, 300, 301, 10**9):\n            reservations = [{\"qty\": 3, \"created_s\": 0, \"paid\": True}]\n            self.assertEqual(available(10, reservations, age), 7)\n\n    def test_unpaid_age_299_holds(self):\n        reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n        self.assertEqual(available(10, reservations, 1299), 6)\n\n    def test_unpaid_age_300_expired(self):\n        reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n        self.assertEqual(available(10, reservations, 1300), 10)\n\n    def test_unpaid_age_301_expired(self):\n        reservations = [{\"qty\": 4, \"created_s\": 1000, \"paid\": False}]\n        self.assertEqual(available(10, reservations, 1301), 10)\n\n    def test_future_created_s_still_holds(self):\n        reservations = [{\"qty\": 2, \"created_s\": 2000, \"paid\": False}]\n        self.assertEqual(available(10, reservations, 1000), 8)\n\n    def test_mix_of_paid_and_unpaid(self):\n        reservations = [\n            {\"qty\": 2, \"created_s\": 0, \"paid\": True},      # held (paid)\n            {\"qty\": 3, \"created_s\": 900, \"paid\": False},   # held (age 100)\n            {\"qty\": 5, \"created_s\": 100, \"paid\": False},   # expired (age 900)\n            {\"qty\": 1, \"created_s\": 700, \"paid\": False},   # expired (age 300)\n        ]\n        self.assertEqual(available(20, reservations, 1000), 15)\n\n    def test_holds_exceeding_stock_return_zero(self):\n        reservations = [\n            {\"qty\": 8, \"created_s\": 0, \"paid\": True},\n            {\"qty\": 8, \"created_s\": 990, \"paid\": False},\n        ]\n        self.assertEqual(available(10, reservations, 1000), 0)\n\n    def test_zero_stock(self):\n        self.assertEqual(available(0, [], 1000), 0)\n        reservations = [{\"qty\": 1, \"created_s\": 1000, \"paid\": False}]\n        self.assertEqual(available(0, reservations, 1000), 0)\n\n    def test_inputs_left_unmodified(self):\n        reservations = [\n            {\"qty\": 2, \"created_s\": 0, \"paid\": True},\n            {\"qty\": 3, \"created_s\": 900, \"paid\": False},\n            {\"qty\": 5, \"created_s\": 100, \"paid\": False},\n        ]\n        snapshot = copy.deepcopy(reservations)\n        available(20, reservations, 1000)\n        self.assertEqual(reservations, snapshot)\n```",
+      "symptom": null
+    }
+  ]
+}

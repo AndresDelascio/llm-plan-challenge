@@ -1,0 +1,99 @@
+{
+  "arm": "plan",
+  "task": "t6-crop",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 15122,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1035,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1069,
+        "output_tokens_details": {
+          "thinking_tokens": 265
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1035,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1069,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1035,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1035
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.05933600000000001,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `to_tracker(x, y)`, which maps a pixel position in the 1920x1080 source video to tracker coordinates (center crop 1440x1080, downscaled by 2 to 720x540) and returns `(x, y)` as floats, or `None` when the point is outside the crop.\n\n**Constraints:**\n- The crop is centered, so the offset is x = (1920 \u2212 1440) / 2 = 240 and y = 0.\n- Sub-pixel precision is kept: true division, no rounding or int casts.\n- Fractional inputs are accepted.\n\n**Non-goals:**\n- The inverse mapping (tracker to video).\n- Support for other resolutions, beyond named constants.\n- Changes to the tracker or the cropping code.\n\n## Plan\n\n1. Define constants for the source size (1920, 1080), the crop size (1440, 1080) and the scale (2), and derive the offsets (240, 0) from them.\n2. Do the bounds check in source coordinates: return `None` unless 240 \u2264 x < 1680 and 0 \u2264 y < 1080 (half-open, matching pixel extents).\n3. Convert with `tx = (x \u2212 240) / 2` and `ty = y / 2`, and return `(tx, ty)` as floats.\n4. Test the following cases:\n   - (240, 0) \u2192 (0.0, 0.0)\n   - (960, 540) \u2192 (360.0, 270.0)\n   - (241, 1) \u2192 (0.5, 0.5)\n   - (239.9, 0), (1680, 0), (500, 1080) and negative y \u2192 `None`\n5. Sanity-check against a real frame by marking a known feature and confirming the mapped point lands on it in the tracker image.\n\n## Risks I already know about\n\n- **Pixel-center convention:** If integer coordinates mean pixel centers, as in OpenCV resize, the exact mapping is `(x \u2212 240) / 2 \u2212 0.25`, a quarter-pixel shift. I will confirm which convention the tracker uses.\n- **Edge inclusivity:** Whether x = 1680 and y = 1080 count as inside is ambiguous. I am assuming they are excluded.\n- **Crop placement:** The actual pipeline may not use exactly 240, for example if the crop is rounded or not centered.\n- **Rotated or anamorphic video:** Rotation metadata or non-square pixels would break the 1920x1080 assumption."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 7773,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1798,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 318,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1798,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 318,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1798,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1798
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.041504,
+      "error": null,
+      "reply": "```python\nSRC_W, SRC_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nSCALE = 2\n\nOFFSET_X = (SRC_W - CROP_W) / 2  # 240\nOFFSET_Y = (SRC_H - CROP_H) / 2  # 0\n\n\ndef to_tracker(x, y):\n    \"\"\"Map a pixel position in the 1920x1080 source video to tracker coordinates.\n\n    The tracker runs on a centered 1440x1080 crop downscaled by 2 (720x540).\n    Returns (x, y) as floats, or None when the point is outside the crop.\n    \"\"\"\n    if not (OFFSET_X <= x < OFFSET_X + CROP_W and OFFSET_Y <= y < OFFSET_Y + CROP_H):\n        return None\n    return ((x - OFFSET_X) / SCALE, (y - OFFSET_Y) / SCALE)\n```",
+      "symptom": null
+    }
+  ]
+}

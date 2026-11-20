@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t6-crop",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 7651,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 989,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 304,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 989,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 304,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 989,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 989
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.028000000000000004,
+      "error": null,
+      "reply": "```python\ndef to_tracker(x, y):\n    \"\"\"Convert a pixel position in the original 1920x1080 video to tracker\n    coordinates (center crop of 1440x1080, downscaled by 2).\n\n    Returns (x, y) as floats with sub-pixel precision, or None if the point\n    lies outside the crop.\n    \"\"\"\n    VIDEO_W, VIDEO_H = 1920, 1080\n    CROP_W, CROP_H = 1440, 1080\n    SCALE = 2.0\n\n    off_x = (VIDEO_W - CROP_W) / 2.0  # 240\n    off_y = (VIDEO_H - CROP_H) / 2.0  # 0\n\n    cx = x - off_x\n    cy = y - off_y\n\n    if not (0 <= cx < CROP_W and 0 <= cy < CROP_H):\n        return None\n\n    return (cx / SCALE, cy / SCALE)\n```",
+      "symptom": null
+    }
+  ]
+}

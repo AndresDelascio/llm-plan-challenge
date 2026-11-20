@@ -146,8 +146,48 @@ Each model classified each of the 12 plans once, using the wording of the skill.
 - **When the review route is the better fit (not measured, my reasoning):** when the plan should stay short, when each change needs a reason on record, or when the writer's chat holds context that a blind rewrite would overwrite.
 - **Not tested:** real plans, flaws that need outside knowledge, and a long chat that already holds the reasoning.
 
+## Follow-up: does the built code get better? (2026-11-20)
+
+The tests above count review findings. This one checks the thing that gets built. Rules, tasks and the decision rule were committed before the first call ([outcome.md](../evals/outcome/outcome.md), commit `4158644`). Six small Python functions, each with a trap that the prompt reveals on a careful read. A fresh Claude builds each one twice in four ways, and hidden tests decide pass or fail. No AI grades anything. 138 live calls, none failed.
+
+![Mean tokens per run up to the first build: plain chat 1,575, make this prompt better 5,398, plan without review 5,222, plan with a challenge review 23,533. All 48 first builds passed.](outcome-tokens.svg)
+
+| Measured, 12 runs per arm | Plain chat | "Make this prompt better" | Plan, no review | Plan + `/challenge` |
+| --- | ---: | ---: | ---: | ---: |
+| First builds that pass the hidden tests | 12 / 12 | 12 / 12 | 12 / 12 | 12 / 12 |
+| Mean tokens up to the first build | 1,575 | 5,398 | 5,222 | 23,533 |
+| Median time up to the first build | 8.6 s | 31.4 s | 30.9 s | 56.9 s |
+| Claude cost reported per run (Codex reports none) | $0.04 | $0.15 | $0.14 | $0.24 |
+| Median length of the code | 21 lines | 91 lines | 74 lines | 83 lines |
+
+**Result: plain chat won.** Every arm passed every hidden test on the first build, so preparation could not add anything, and it cost 3 to 15 times the tokens (computed from the means). The code from the prepared arms was about four times longer, because the plans and rewritten prompts asked for input checks and self-tests that the user never asked for.
+
+**The decision rule, applied as written.** `/challenge` beat plain chat by 0 of 12, under the 2 needed: on small coding tasks like these the workflow is not worth its tokens. It beat the plan-only arm by 0 of 12: the review step added nothing measurable beyond writing the plan.
+
+**Break-even (computed).** The review route spent about 22,000 tokens more than plain chat before the build finished. A reprompt costs roughly one more build with the old code attached: about 1,600 tokens for plain-chat code (assumed, no plain run needed a reprompt) and about 5,300 for the longer prepared code (measured median of 30 reprompts). So the workflow pays for itself only when it saves somewhere between 4 and 14 reprompts on a task of this size. Here there was nothing to save.
+
+**The reviewer still found things to say.** Codex returned `BLOCKED` on 3 of the 12 plans and asked for changes on 6, for tasks that plain chat solved correctly with no plan at all. A review always has an opinion; that is not the same as the work needing one.
+
+**A fault in my harness, found after the run.** The first grader pasted the model's code and the hidden tests into one file. The prepared arms wrote their own self-tests, which ran in place of the hidden ones, so 19 correct first builds were recorded as "crashed" and triggered 30 reprompts that should not have happened (one run looped to the limit of 10). The grader now imports the answer as a module. The table above is regraded offline from the saved first replies with no new model call; the tasks and hidden tests were not changed. As first recorded, the passes were 12, 5, 5 and 5 of 12. The 30 wasted reprompts are in the run files and are left out of the token numbers above.
+
+Strongest case against this result: the test hit its ceiling. Six functions with every needed fact in the prompt are exactly the work a good model does right the first time, so the test could only show that planning costs more, never that it helps. It says nothing about work where the prompt is missing facts, where the plan would make the model ask a question, or where the mistake only shows up weeks later. Confidence that plain chat is the right choice for small, checkable coding tasks: about 85 percent. Confidence that this carries over to large or hard-to-check work: low, not tested.
+
+Reprint the numbers with `python evals/outcome/outcome.py report`.
+
+### When to use which (my rule after all the tests)
+
+| Use plain chat when | Use `/challenge` when |
+| --- | --- |
+| You can check the result in under a minute (run it, look at it) | A wrong plan is only discovered after hours of work or after money is spent |
+| It is easy to undo | It is hard to undo (a purchase, a data migration, a public release) |
+| The task is small and every needed fact is in your message | The plan rests on assumptions that running the code will not reveal |
+| | You want a short plan with a written reason for each change |
+
+The first column is measured here. The second is supported only by the pilot on three real plans (20 issues, all accepted) and is otherwise my reasoning.
+
 ## Failures
 
+- **Outcome test, grader fault.** 19 correct first builds were recorded as failures because the answers' own self-tests ran in place of the hidden tests. Fixed and regraded offline; details in the outcome section above.
 - **Claude smoke, 4 of 6 rejected.** The validator had a hard 250-word limit and Claude wrote slightly more (270 words on the one reply inspected). The limit in the validator was raised to 400 words before the full run. The rubric text the reviewers see was not changed, so the Codex runs stay comparable. The 4096-byte cap still applies.
 - **Claude full, 3 of 24 rejected.** All three added a sentence of plain text after the required format: two "NO BLOCKING ISSUES" replies with an explanation, one review with a closing remark. All three were on control plans, which is why the recall numbers do not change when failed runs count as zero. The raw replies are saved next to the runs as `.rejected.txt`. After the benchmark the validator was changed to drop such a closing remark and keep the review. Replayed offline, it accepts all three saved replies. The benchmark numbers above are not recomputed: these three stay counted as failed and were not graded.
 
@@ -166,6 +206,7 @@ Each model classified each of the 12 plans once, using the wording of the skill.
 - Have a person grade a sample of the findings and compare with the AI grader.
 - Reword the stakes rule so it catches plans where an error costs money later, and test it again.
 - Repeat the "make it better" comparison on real plans, where the writer's chat holds context the plan text does not.
+- Rerun the outcome test on tasks where the prompt leaves out a needed fact, so plain chat no longer passes everything on the first build.
 
 ## Reproduce
 

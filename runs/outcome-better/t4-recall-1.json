@@ -1,0 +1,99 @@
+{
+  "arm": "better",
+  "task": "t4-recall",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 16264,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 977,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1086,
+        "output_tokens_details": {
+          "thinking_tokens": 317
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 977,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1086,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 977,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 977
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.059088,
+      "error": null,
+      "reply": "Write a Python function `clip_recall(highlights, clips)` that scores my soccer highlight finder by measuring what fraction of the true highlights it found.\n\n**Inputs**\n- `highlights`: a list of `(start_s, end_s)` tuples for the ground-truth highlights, in seconds. It always contains at least one item.\n- `clips`: a list of `(start_s, end_s)` tuples for the clips my finder produced. It may be empty.\n- Times may be ints or floats.\n- Do not assume either list is sorted.\n- Do not assume intervals within a list are disjoint. Highlights can overlap each other, and so can clips.\n- Treat duplicate tuples as separate items.\n\n**Matching rules**\n- A clip can be matched to a highlight only if they overlap by strictly more than zero seconds, i.e. `min(h_end, c_end) - max(h_start, c_start) > 0`. Intervals that only touch at an endpoint do not overlap, and a zero-length interval can never match.\n- Each clip can be credited to at most one highlight, even if it overlaps several.\n- A highlight counts as found if at least one clip is credited to it. Extra clips on the same highlight add nothing.\n\n**Output**\n- Return a float: `(number of highlights found) / len(highlights)`.\n- The number found must be the largest possible under the rules above. This is a maximum bipartite matching between highlights and clips, so a naive \"first overlapping clip wins\" pass is wrong. For example, with highlights `[(0, 10), (5, 15)]` and clips `[(6, 9), (11, 14)]`, the answer is 1.0, but giving the first clip to the second highlight would wrongly leave the first one unmatched. Use an algorithm that is provably optimal for arbitrary overlapping intervals, such as augmenting-path matching.\n- Return `0.0` when `clips` is empty.\n\n**Constraints**\n- Use the standard library only.\n- Do not mutate the input lists.\n- Include a short docstring that states the overlap and one-clip-per-highlight rules.\n\n**Verification**\nInclude a few assert-based tests covering:\n- the example above\n- endpoint-touching intervals, which do not match\n- one long clip spanning several highlights, which credits only one\n- several clips on a single highlight\n- empty `clips`\n- unsorted input"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 25502,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1640,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2482,
+        "output_tokens_details": {
+          "thinking_tokens": 822
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1640,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2482,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1640,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1640
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.12553599999999998,
+      "error": null,
+      "reply": "```python\nfrom collections import deque\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of ground-truth highlights found by the clips.\n\n    Rules:\n    - A clip may be matched to a highlight only if they overlap by strictly\n      more than zero seconds:\n      min(h_end, c_end) - max(h_start, c_start) > 0.\n      Intervals that merely touch at an endpoint do not overlap, and a\n      zero-length interval never matches.\n    - Each clip is credited to at most one highlight, and a highlight counts\n      as found if at least one clip is credited to it (extra clips add\n      nothing).\n\n    The number of found highlights is the maximum possible under these rules,\n    computed as a maximum bipartite matching via augmenting paths.\n    Returns 0.0 when `clips` is empty. Inputs are not mutated.\n    \"\"\"\n    n_h = len(highlights)\n    n_c = len(clips)\n    if n_c == 0:\n        return 0.0\n\n    # Build adjacency: highlight index -> list of overlapping clip indices.\n    adj = []\n    for h_start, h_end in highlights:\n        edges = []\n        for ci, (c_start, c_end) in enumerate(clips):\n            if min(h_end, c_end) - max(h_start, c_start) > 0:\n                edges.append(ci)\n        adj.append(edges)\n\n    match_h = [-1] * n_h  # highlight -> clip\n    match_c = [-1] * n_c  # clip -> highlight\n    found = 0\n\n    # Augmenting-path matching (iterative BFS, so no recursion-depth limits).\n    for root in range(n_h):\n        if not adj[root]:\n            continue\n        parent = {}  # clip -> highlight from which it was reached\n        queue = deque([root])\n        augmented = False\n        while queue and not augmented:\n            h = queue.popleft()\n            for c in adj[h]:\n                if c in parent:\n                    continue\n                parent[c] = h\n                if match_c[c] == -1:\n                    # Free clip reached: flip the alternating path back to root.\n                    while True:\n                        ph = parent[c]\n                        prev_c = match_h[ph]\n                        match_h[ph] = c\n                        match_c[c] = ph\n                        if ph == root:\n                            break\n                        c = prev_c\n                    augmented = True\n                    break\n                queue.append(match_c[c])\n        if augmented:\n            found += 1\n\n    return found / n_h\n\n\nif __name__ == \"__main__\":\n    # Example from the spec: greedy \"first overlap wins\" could fail here.\n    assert clip_recall([(0, 10), (5, 15)], [(6, 9), (11, 14)]) == 1.0\n    assert clip_recall([(5, 15), (0, 10)], [(6, 9), (1, 3)]) == 1.0\n\n    # Endpoint-touching intervals do not match.\n    assert clip_recall([(0, 10)], [(10, 20)]) == 0.0\n    assert clip_recall([(10, 20)], [(0, 10)]) == 0.0\n\n    # Zero-length intervals never match.\n    assert clip_recall([(0, 10)], [(5, 5)]) == 0.0\n    assert clip_recall([(5, 5)], [(0, 10)]) == 0.0\n\n    # One long clip spanning several highlights credits only one.\n    assert clip_recall([(0, 10), (20, 30), (40, 50)], [(0, 50)]) == 1 / 3\n\n    # Several clips on a single highlight add nothing extra.\n    assert clip_recall([(0, 10)], [(1, 2), (3, 4), (5, 6)]) == 1.0\n    assert clip_recall([(0, 10), (20, 30)], [(1, 2), (3, 4), (5, 6)]) == 0.5\n\n    # Empty clips.\n    assert clip_recall([(0, 10)], []) == 0.0\n\n    # Unsorted input.\n    assert clip_recall([(40, 50), (0, 10), (20, 30)],\n                       [(25.5, 26), (41, 42), (1.0, 2.5)]) == 1.0\n\n    # Duplicates are separate items.\n    assert clip_recall([(0, 10), (0, 10)], [(1, 2)]) == 0.5\n    assert clip_recall([(0, 10), (0, 10)], [(1, 2), (1, 2)]) == 1.0\n\n    # Requires a longer augmenting path.\n    assert clip_recall([(0, 10), (8, 20), (18, 30)],\n                       [(9, 19), (7, 9), (19, 21)]) == 1.0\n\n    # Inputs are not mutated.\n    hs, cs = [(5, 15), (0, 10)], [(11, 14), (6, 9)]\n    hs_copy, cs_copy = list(hs), list(cs)\n    clip_recall(hs, cs)\n    assert hs == hs_copy and cs == cs_copy\n\n    print(\"All tests passed.\")\n```",
+      "symptom": null
+    }
+  ]
+}

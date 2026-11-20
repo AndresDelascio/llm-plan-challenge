@@ -50,6 +50,10 @@ If `challenge` beats `plain` by fewer than 2 of 12 on first-build passes and doe
 
 If `challenge` does not beat `plan` by at least 2 of 12, the README will say that the review step added nothing measurable here beyond writing the plan.
 
+## Change after the run (2026-11-20)
+
+Step 2 above was first built by pasting the model's code and the hidden tests into one file. Answers that carried their own self-tests ran those in place of the hidden tests and were recorded as crashed. The grader now saves the answer as `solution.py` and imports the function. First builds were regraded offline from the saved replies; no model call was repeated, and the tasks, hidden tests, prompts and decision rule are unchanged. Results and the as-recorded counts are in [portfolio-results.md](../../docs/portfolio-results.md#follow-up-does-the-built-code-get-better-2026-11-20).
+
 ## Limits fixed in advance
 
 - Six tasks, two related repeats each. Only a large effect can show.

@@ -1,0 +1,99 @@
+{
+  "arm": "plan",
+  "task": "t4-recall",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 15391,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1048,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1166,
+        "output_tokens_details": {
+          "thinking_tokens": 355
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1048,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1166,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1048,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1048
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.06342400000000001,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `clip_recall(highlights, clips)`, which returns the fraction of highlights found (a float from 0.0 to 1.0), using the assignment of clips to highlights that credits the most highlights.\n\n**Constraints:**\n- Both inputs are lists of `(start_s, end_s)` tuples.\n- A clip finds a highlight only when the overlap is strictly positive: `min(ends) - max(starts) > 0`. Touching endpoints do not count.\n- Each clip credits at most one highlight, and each highlight counts at most once.\n- `highlights` is never empty; `clips` may be.\n\n**Non-goals:** Precision, IoU thresholds, merging or sorting the inputs, file I/O, and input validation beyond what is noted below.\n\n## Plan\n\n1. Write a helper `overlaps(a, b)` that returns `min(a[1], b[1]) - max(a[0], b[0]) > 0`.\n2. Build a bipartite adjacency list: for each highlight index, the indices of the clips that overlap it.\n3. Compute a maximum bipartite matching with augmenting paths (Kuhn's algorithm). For each highlight, try to claim a free clip, or reassign a claimed clip's highlight to another clip.\n4. Return `matched / len(highlights)`.\n5. Test these cases:\n   - no clips returns 0.0;\n   - touching endpoints do not count;\n   - one clip spanning two highlights credits only one;\n   - duplicate highlights are counted separately;\n   - a reassignment case: H1 overlaps C1 and C2, H2 overlaps only C1, expected 1.0;\n   - highlights that overlap each other;\n   - more clips than highlights.\n\n## Risks I already know about\n\n- **Greedy matching undercounts.** First-fit can spend a clip on a highlight that had other options, so true matching is needed.\n- **Boundary semantics.** Using `>=` would wrongly count touching intervals; float timestamps make this comparison sensitive.\n- **Degenerate tuples.** Zero-length or inverted intervals (`start >= end`) never overlap anything under the formula. I will treat them as unfound rather than raise an error.\n- **Recursion depth.** Recursive augmenting can hit Python's limit on very large inputs; I will use an iterative version if scale demands it.\n- **Performance.** Building the edges is O(H\u00d7C), which is fine for match-length data."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 20676,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1818,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2028,
+        "output_tokens_details": {
+          "thinking_tokens": 864
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1818,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2028,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1818,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1818
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.110224,
+      "error": null,
+      "reply": "```python\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by clips.\n\n    A clip finds a highlight when they overlap by strictly more than zero\n    seconds. Each clip credits at most one highlight; the assignment that\n    credits the most highlights is used (maximum bipartite matching).\n    \"\"\"\n\n    def overlaps(a, b):\n        return min(a[1], b[1]) - max(a[0], b[0]) > 0\n\n    # adjacency: highlight index -> indices of clips overlapping it\n    adj = [\n        [ci for ci, c in enumerate(clips) if overlaps(h, c)]\n        for h in highlights\n    ]\n\n    clip_owner = [-1] * len(clips)  # clip index -> highlight index\n    matched = 0\n\n    # Kuhn's algorithm with an iterative augmenting-path search.\n    for h0 in range(len(highlights)):\n        seen = [False] * len(clips)\n        stack = [(h0, iter(adj[h0]))]\n        path_clips = []  # path_clips[i] is the clip taken from stack[i]\n        found = False\n\n        while stack and not found:\n            _, it = stack[-1]\n            for c in it:\n                if seen[c]:\n                    continue\n                seen[c] = True\n                path_clips.append(c)\n                owner = clip_owner[c]\n                if owner == -1:\n                    found = True\n                else:\n                    stack.append((owner, iter(adj[owner])))\n                break\n            else:\n                # dead end: backtrack\n                stack.pop()\n                if path_clips:\n                    path_clips.pop()\n\n        if found:\n            for (h, _), c in zip(stack, path_clips):\n                clip_owner[c] = h\n            matched += 1\n\n    return matched / len(highlights)\n\n\nif __name__ == \"__main__\":\n    # no clips\n    assert clip_recall([(0, 10)], []) == 0.0\n    # touching endpoints do not count\n    assert clip_recall([(0, 10)], [(10, 20)]) == 0.0\n    assert clip_recall([(10, 20)], [(0, 10)]) == 0.0\n    # one clip spanning two highlights credits only one\n    assert clip_recall([(0, 10), (20, 30)], [(5, 25)]) == 0.5\n    # duplicate highlights are counted separately\n    assert clip_recall([(0, 10), (0, 10)], [(1, 2)]) == 0.5\n    assert clip_recall([(0, 10), (0, 10)], [(1, 2), (3, 4)]) == 1.0\n    # reassignment: H1 overlaps C1 and C2, H2 overlaps only C1\n    assert clip_recall([(0, 10), (1, 2)], [(0, 3), (5, 8)]) == 1.0\n    # highlights that overlap each other\n    assert clip_recall([(0, 10), (5, 15)], [(6, 7)]) == 0.5\n    assert clip_recall([(0, 10), (5, 15)], [(6, 7), (12, 13)]) == 1.0\n    # more clips than highlights\n    assert clip_recall([(0, 10)], [(1, 2), (3, 4), (5, 6)]) == 1.0\n    # degenerate intervals are never found / never find anything\n    assert clip_recall([(5, 5)], [(0, 10)]) == 0.0\n    assert clip_recall([(0, 10)], [(7, 3)]) == 0.0\n    print(\"all tests passed\")\n```",
+      "symptom": null
+    }
+  ]
+}

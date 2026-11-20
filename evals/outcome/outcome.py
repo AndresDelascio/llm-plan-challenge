@@ -39,10 +39,17 @@ TEST_TIMEOUT_S = 10
 ARMS = ("plain", "better", "plan", "challenge")
 TASKS = sorted(path.stem for path in (HERE / "tasks").glob("*.txt"))
 
-# Appended after the model's code and the hidden tests. Runs the tests in name order and
-# prints the first failing test's one-line symptom (its docstring), never the expected value.
+# The model's code is saved as solution.py and imported, so a self-test block under
+# `if __name__ == "__main__"` in it does not run and its own test functions cannot collide
+# with the hidden ones. (The first live run pasted code and tests into one file; see outcome.md.)
+HEADER = '''
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from solution import {function}
+'''
+# Runs the hidden tests in name order and prints the first failing test's one-line symptom
+# (its docstring), never the expected value.
 FOOTER = '''
-import sys as _sys
 for _name, _test in sorted((k, v) for k, v in list(globals().items()) if k.startswith("test_")):
     try:
         _test()
@@ -64,7 +71,9 @@ def grade(task, code):
         return "there was no python code block in the reply"
     tests = (HERE / "tasks" / f"{task}_tests.py").read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="outcome-") as cwd:
-        (Path(cwd) / "run.py").write_text(code + "\n\n" + tests + FOOTER, encoding="utf-8")
+        function = (HERE / "tasks" / f"{task}.txt").read_text(encoding="utf-8").split("(")[0].split()[-1]
+        (Path(cwd) / "solution.py").write_text(code, encoding="utf-8")
+        (Path(cwd) / "run.py").write_text(HEADER.format(function=function) + tests + FOOTER, encoding="utf-8")
         try:  # -I: isolated mode, the model's code cannot pick up modules from the user's folders
             done = subprocess.run([sys.executable, "-I", "-B", "run.py"], capture_output=True,
                                   encoding="utf-8", errors="replace", cwd=cwd, timeout=TEST_TIMEOUT_S)
@@ -149,7 +158,11 @@ def summary(folder):
             by_phase[step["phase"]] = by_phase.get(step["phase"], 0) + tokens(step)
     total = sum(by_phase.values())
     return {
-        "runs": len(runs), "first_try": solved.count(0), "solved": len(solved), "reprompts": sum(solved),
+        "runs": len(runs), "first_try_as_run": solved.count(0),
+        # Regraded offline with the fixed grader from the saved first reply. No model call.
+        "first_try_regraded": sum(
+            grade(r["task"], extract_code(s["reply"])) is None
+            for r in runs for s in r["steps"] if s["phase"] == "build" and s["reply"]), "solved": len(solved), "reprompts": sum(solved),
         "unsolved_reprompts": sum(sum(s["phase"] == "reprompt" for s in r["steps"]) for r in runs if r["solved_at"] is None),
         "failed_calls": sum(bool(s["error"]) for r in runs for s in r["steps"]),
         "not_challenged": sum(bool(r["note"]) for r in runs),

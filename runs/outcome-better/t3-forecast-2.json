@@ -1,0 +1,145 @@
+{
+  "arm": "better",
+  "task": "t3-forecast",
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 13433,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 950,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 818,
+        "output_tokens_details": {
+          "thinking_tokens": 279
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 950,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 818,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 950,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 950
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.047936,
+      "error": null,
+      "reply": "Write a Python function `trailing_mean(sales, day, window=7)` for my store sales forecast.\n\n**Inputs**\n- `sales`: list of daily sales numbers, where `sales[0]` is the first day.\n- `day`: 0-based index of the day I want a forecast for.\n- `window`: number of prior days to average (default 7).\n\n**Behavior**\n- Return the mean of the sales for the `window` days immediately before `day`, i.e. indices `day - window` through `day - 1`.\n- Never include `sales[day]` itself or anything after it. The result is used as the forecast for `day`, so using that day's actual value would leak the answer.\n- If fewer than `window` days of history exist before `day`, average whatever days are available.\n- If there is no history (`day` is 0 or `sales` is empty), return `None`.\n- `day == len(sales)` is valid: it is the forecast for the first day not yet recorded.\n\n**Edge cases to handle explicitly**\n- Clamp the start of the window at index 0. Don't let `day - window` go negative, because a negative slice index in Python silently wraps around to the end of the list.\n- Raise `ValueError` if `day` is negative or `window` is less than 1.\n- If `day` is greater than `len(sales)`, the days just before it have no data. Raise `ValueError` rather than silently averaging older days.\n\n**Deliverables**\n- The function, with a short docstring stating that the window excludes `day`.\n- A few tests covering: a full window, a partial window (`day < window`), `day == 0`, an empty list, `day == len(sales)`, and a check that changing `sales[day]` does not change the result."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 15310,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1415,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1261,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1415,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1261,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1415,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1415
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.073096,
+      "error": null,
+      "reply": "```python\nimport unittest\n\n\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Return the mean of the `window` days of sales immediately before `day`.\n\n    The window covers indices `day - window` through `day - 1` and always\n    excludes `sales[day]` itself (and anything after it), so the result is\n    safe to use as a forecast for `day` without leaking that day's actual.\n\n    If fewer than `window` days of history exist, the available days are\n    averaged. Returns None when there is no history (`day` is 0 or `sales`\n    is empty). `day == len(sales)` is valid and forecasts the first day not\n    yet recorded.\n\n    Raises ValueError if `day` is negative, `window` is less than 1, or\n    `day` is greater than `len(sales)`.\n    \"\"\"\n    if day < 0:\n        raise ValueError(\"day must be non-negative\")\n    if window < 1:\n        raise ValueError(\"window must be at least 1\")\n    if day > len(sales):\n        raise ValueError(\"day is beyond the first unrecorded day; no data just before it\")\n\n    if day == 0:\n        return None\n\n    # Clamp at 0 so a negative start can't wrap around to the end of the list.\n    start = max(0, day - window)\n    history = sales[start:day]\n    return sum(history) / len(history)\n\n\nclass TrailingMeanTests(unittest.TestCase):\n    def test_full_window(self):\n        sales = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]\n        # Days 1..7 -> 20..80\n        self.assertEqual(trailing_mean(sales, 8), 50)\n        self.assertEqual(trailing_mean(sales, 5, window=3), 40)\n\n    def test_partial_window(self):\n        sales = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]\n        # Only days 0..2 are available.\n        self.assertEqual(trailing_mean(sales, 3), 20)\n        self.assertEqual(trailing_mean(sales, 1), 10)\n\n    def test_day_zero_returns_none(self):\n        self.assertIsNone(trailing_mean([10, 20, 30], 0))\n\n    def test_empty_list_returns_none(self):\n        self.assertIsNone(trailing_mean([], 0))\n\n    def test_day_equal_to_len(self):\n        sales = [10, 20, 30, 40]\n        self.assertEqual(trailing_mean(sales, 4, window=2), 35)\n        self.assertEqual(trailing_mean(sales, 4), 25)\n\n    def test_does_not_use_day_itself_or_later(self):\n        sales = [10, 20, 30, 40, 50, 60]\n        before = trailing_mean(sales, 3, window=2)\n        changed = list(sales)\n        changed[3] = 10_000\n        changed[4] = -5_000\n        self.assertEqual(trailing_mean(changed, 3, window=2), before)\n        self.assertEqual(before, 25)\n\n    def test_negative_start_does_not_wrap(self):\n        sales = [1, 2, 3, 1000, 2000]\n        # day - window is negative; must not pull values from the end.\n        self.assertEqual(trailing_mean(sales, 2, window=7), 1.5)\n\n    def test_invalid_arguments(self):\n        with self.assertRaises(ValueError):\n            trailing_mean([1, 2, 3], -1)\n        with self.assertRaises(ValueError):\n            trailing_mean([1, 2, 3], 2, window=0)\n        with self.assertRaises(ValueError):\n            trailing_mean([1, 2, 3], 4)\n        with self.assertRaises(ValueError):\n            trailing_mean([], 1)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": "the code crashed when it was loaded"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 22459,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2724,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1846,
+        "output_tokens_details": {
+          "thinking_tokens": 520
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2724,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1846,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2724,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2724
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.11744,
+      "error": null,
+      "reply": "```python\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Return the mean of the `window` days of sales immediately before `day`.\n\n    The window covers indices `day - window` through `day - 1` and always\n    excludes `sales[day]` itself (and anything after it), so the result is\n    safe to use as a forecast for `day` without leaking that day's actual.\n\n    If fewer than `window` days of history exist, the available days are\n    averaged. Returns None when there is no history (`day` is 0 or `sales`\n    is empty). `day == len(sales)` is valid and forecasts the first day not\n    yet recorded.\n\n    Raises ValueError if `day` is negative, `window` is less than 1, or\n    `day` is greater than `len(sales)`.\n    \"\"\"\n    if day < 0:\n        raise ValueError(\"day must be non-negative\")\n    if window < 1:\n        raise ValueError(\"window must be at least 1\")\n    if day > len(sales):\n        raise ValueError(\"day is beyond the first unrecorded day; no data just before it\")\n\n    if day == 0:\n        return None\n\n    # Clamp at 0 so a negative start can't wrap around to the end of the list.\n    start = max(0, day - window)\n    history = sales[start:day]\n    return sum(history) / len(history)\n\n\ndef _raises_value_error(*args, **kwargs):\n    try:\n        trailing_mean(*args, **kwargs)\n    except ValueError:\n        return True\n    return False\n\n\ndef test_full_window():\n    sales = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]\n    # Days 1..7 -> 20..80\n    assert trailing_mean(sales, 8) == 50\n    assert trailing_mean(sales, 5, window=3) == 40\n\n\ndef test_partial_window():\n    sales = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]\n    # Only days 0..2 are available.\n    assert trailing_mean(sales, 3) == 20\n    assert trailing_mean(sales, 1) == 10\n\n\ndef test_day_zero_returns_none():\n    assert trailing_mean([10, 20, 30], 0) is None\n\n\ndef test_empty_list_returns_none():\n    assert trailing_mean([], 0) is None\n\n\ndef test_day_equal_to_len():\n    sales = [10, 20, 30, 40]\n    assert trailing_mean(sales, 4, window=2) == 35\n    assert trailing_mean(sales, 4) == 25\n\n\ndef test_does_not_use_day_itself_or_later():\n    sales = [10, 20, 30, 40, 50, 60]\n    before = trailing_mean(sales, 3, window=2)\n    changed = list(sales)\n    changed[3] = 10_000\n    changed[4] = -5_000\n    assert trailing_mean(changed, 3, window=2) == before\n    assert before == 25\n\n\ndef test_negative_start_does_not_wrap():\n    sales = [1, 2, 3, 1000, 2000]\n    # day - window is negative; must not pull values from the end.\n    assert trailing_mean(sales, 2, window=7) == 1.5\n\n\ndef test_invalid_arguments():\n    assert _raises_value_error([1, 2, 3], -1)\n    assert _raises_value_error([1, 2, 3], 2, window=0)\n    assert _raises_value_error([1, 2, 3], 4)\n    assert _raises_value_error([], 1)\n\n\ndef run_tests():\n    \"\"\"Run all tests; raises AssertionError on the first failure.\"\"\"\n    tests = [\n        test_full_window,\n        test_partial_window,\n        test_day_zero_returns_none,\n        test_empty_list_returns_none,\n        test_day_equal_to_len,\n        test_does_not_use_day_itself_or_later,\n        test_negative_start_does_not_wrap,\n        test_invalid_arguments,\n    ]\n    for test in tests:\n        test()\n    return len(tests)\n\n\nif __name__ == \"__main__\":\n    print(\"%d tests passed\" % run_tests())\n```",
+      "symptom": null
+    }
+  ]
+}

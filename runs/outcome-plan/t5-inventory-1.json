@@ -1,0 +1,99 @@
+{
+  "arm": "plan",
+  "task": "t5-inventory",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 16324,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1037,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1038,
+        "output_tokens_details": {
+          "thinking_tokens": 254
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1037,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1038,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1037,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1037
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.058128,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `available(stock, reservations, now_s)`, returning the number of units still sellable: stock minus the units held by active reservations, floored at 0.\n\n**Constraints:**\n- Each reservation is a dict with `qty`, `created_s` and `paid`.\n- Paid reservations always hold their units.\n- Unpaid reservations hold their units only until they expire, 300 seconds after creation.\n- The result is an integer, never negative.\n- The function is pure: no input mutation, no clock reads (use `now_s` only).\n\n**Non-goals:**\n- Persisting or pruning expired reservations.\n- Concurrency or locking.\n- Input schema validation beyond what is stated.\n- Shop integration.\n\n## Plan\n\n1. Define the expiry constant (300 s) at module level.\n2. Compute each reservation's age as `now_s - created_s`.\n3. Treat a reservation as active if `paid` is truthy, or if its age is under 300 s. At exactly 300 s it counts as expired, which should be documented in the docstring.\n4. Sum `qty` over the active reservations.\n5. Return `max(0, stock - held)`.\n6. Write tests covering:\n   - no reservations;\n   - a paid reservation far in the past, which still holds;\n   - unpaid reservations at ages 299, 300 and 301;\n   - a mix of paid and unpaid;\n   - holds exceeding stock, which returns 0;\n   - zero stock;\n   - an input-not-mutated check.\n\n## Risks I already know about\n\n- **Boundary ambiguity:** \"expires after 300 seconds\" could mean that age 300 is still held. I have chosen expired at 300 or more, which is a one-character change if you intended otherwise.\n- **Double counting paid units:** if `stock` is already decremented when an order is paid, subtracting paid reservations undercounts availability. I assume paid units remain on the shelf until shipped.\n- **Future `created_s`:** clock skew gives a negative age, which I treat as active, since over-holding is safer than overselling.\n- **Bad data:** negative or non-integer `qty`, or missing keys, would give wrong totals or a `KeyError`. I am not handling this unless you ask.\n- **Unit mismatch:** `now_s` and `created_s` must both be in seconds from the same clock; milliseconds would silently break expiry."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 7103,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1771,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 278,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1771,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 278,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1771,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1771
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.039472,
+      "error": null,
+      "reply": "```python\nEXPIRY_S = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return the number of units that can still be sold, never below 0.\n\n    Each reservation is a dict with the keys ``qty``, ``created_s`` and\n    ``paid``. A paid reservation always holds its units. An unpaid\n    reservation holds its units while its age (``now_s - created_s``) is\n    under 300 seconds; at exactly 300 seconds it counts as expired.\n\n    A reservation with ``created_s`` in the future (negative age) is\n    treated as active. The inputs are not mutated.\n    \"\"\"\n    held = 0\n    for reservation in reservations:\n        if reservation[\"paid\"] or now_s - reservation[\"created_s\"] < EXPIRY_S:\n            held += reservation[\"qty\"]\n    return max(0, stock - held)\n```",
+      "symptom": null
+    }
+  ]
+}

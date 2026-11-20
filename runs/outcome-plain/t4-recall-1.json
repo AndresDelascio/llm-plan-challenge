@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t4-recall",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 16670,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 993,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1271,
+        "output_tokens_details": {
+          "thinking_tokens": 679
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 993,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1271,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 993,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 993
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.066744,
+      "error": null,
+      "reply": "```python\nfrom collections import deque\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Fraction of highlights found by clips.\n\n    A clip finds a highlight when they overlap by more than zero seconds.\n    Each clip may be credited to at most one highlight; the assignment is\n    chosen to maximise the number of highlights credited (maximum bipartite\n    matching via augmenting paths).\n    \"\"\"\n    # adj[h] = indices of clips that overlap highlight h by a positive amount\n    adj = [\n        [\n            j\n            for j, (cs, ce) in enumerate(clips)\n            if min(he, ce) - max(hs, cs) > 0\n        ]\n        for hs, he in highlights\n    ]\n\n    match_clip = [-1] * len(clips)        # clip -> highlight credited\n    match_hl = [-1] * len(highlights)     # highlight -> clip credited\n    found = 0\n\n    for h in range(len(highlights)):\n        # BFS for an augmenting path starting at highlight h\n        prev = {}                 # clip -> highlight we reached it from\n        queue = deque([h])\n        free_clip = -1\n        while queue and free_clip < 0:\n            u = queue.popleft()\n            for c in adj[u]:\n                if c in prev:\n                    continue\n                prev[c] = u\n                if match_clip[c] < 0:\n                    free_clip = c\n                    break\n                queue.append(match_clip[c])\n\n        if free_clip < 0:\n            continue\n\n        # Flip the matching along the path back to h\n        found += 1\n        c = free_clip\n        while True:\n            u = prev[c]\n            next_c = match_hl[u]\n            match_clip[c] = u\n            match_hl[u] = c\n            if u == h:\n                break\n            c = next_c\n\n    return found / len(highlights)\n```",
+      "symptom": null
+    }
+  ]
+}

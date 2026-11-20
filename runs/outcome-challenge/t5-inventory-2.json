@@ -1,0 +1,158 @@
+{
+  "arm": "challenge",
+  "task": "t5-inventory",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 15759,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1039,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1112,
+        "output_tokens_details": {
+          "thinking_tokens": 267
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1039,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1112,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1039,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1039
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.06112,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `available(stock, reservations, now_s)`, returning the units still sellable: `stock` minus the quantity held by active reservations, floored at 0.\n\n**Constraints:**\n- A reservation is a dict with `qty`, `created_s` and `paid`.\n- Paid reservations always hold their units.\n- Unpaid reservations hold their units only while `now_s - created_s < 300`.\n- The result is an integer and never negative.\n- The function is pure: no input mutation, no clock reads (time comes only from `now_s`).\n\n**Non-goals:**\n- Removing or persisting expired reservations.\n- Concurrency or locking.\n- Validating input beyond the stated shape.\n- Shop integration, such as endpoints or database access.\n\n## Plan\n\n1. Create a module (e.g. `inventory.py`) with a named constant `RESERVATION_TTL_S = 300`.\n2. Define `available(stock, reservations, now_s)` with a docstring stating the expiry rule and the boundary choice.\n3. Iterate over the reservations and count one as active if `paid` is truthy or `now_s - created_s < RESERVATION_TTL_S`.\n4. Sum `qty` over the active reservations.\n5. Return `max(0, stock - held)`.\n6. Write tests for:\n   - an empty reservation list;\n   - a paid reservation far older than 300 seconds, which still holds;\n   - unpaid reservations at ages 299, 300 and 301;\n   - a mix of paid and unpaid;\n   - holds exceeding stock, which returns 0;\n   - zero stock;\n   - inputs left unmodified.\n7. Run the tests and confirm the boundary behaviour with you.\n\n## Risks I already know about\n\n- **Boundary at exactly 300 seconds:** \"expires after 300 seconds\" is ambiguous. I assume a reservation is expired once its age reaches 300 (held only while age < 300). Tell me if it should still hold at exactly 300.\n- **Paid units and stock:** I assume `stock` still includes units for paid orders that have not shipped, so paid reservations are subtracted. If stock is already decremented on payment, this double-counts.\n- **Future `created_s`:** with clock skew the age is negative. I will treat such a reservation as active.\n- **Malformed data:** missing keys, negative `qty` or non-integer values are not handled. The function will raise an error or miscalculate unless you want validation.\n- **Time units:** `now_s` and `created_s` must both be in seconds on the same clock."
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 8611,
+      "usage": {
+        "input_tokens": 14787,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 183,
+        "reasoning_output_tokens": 76
+      },
+      "error": null,
+      "reply": "VERDICT: PROCEED WITH CHANGES\n### 1. [major] Return type can be fractional\n- Failure: The brief leaves `stock` and `qty` types unspecified. With `stock=5` and an active reservation for `qty=1.5`, the planned expression returns `3.5`, violating the integer result requirement.\n- Fix: Specify integer `stock` and `qty` in the input contract. The planned arithmetic then preserves the integer result without runtime validation."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 15687,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1957,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1424,
+        "output_tokens_details": {
+          "thinking_tokens": 434
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1957,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1424,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1957,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1957
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.088288,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Implement `available(stock, reservations, now_s)`, returning the units still sellable: `stock` minus the quantity held by active reservations, floored at 0.\n\n**Constraints:**\n- A reservation is a dict with `qty`, `created_s` and `paid`.\n- Paid reservations always hold their units.\n- Unpaid reservations hold their units only while `now_s - created_s < 300`.\n- The result is an integer and never negative.\n- The function is pure: no input mutation, no clock reads (time comes only from `now_s`).\n\n**Non-goals:**\n- Removing or persisting expired reservations.\n- Concurrency or locking.\n- Validating input beyond the stated shape.\n- Shop integration, such as endpoints or database access.\n\n## Plan\n\n1. Create a module (e.g. `inventory.py`) with a named constant `RESERVATION_TTL_S = 300`.\n2. Define `available(stock, reservations, now_s)` with a docstring stating:\n   - the expiry rule and the boundary choice;\n   - the input contract: `stock` and each reservation's `qty` are integers, so the result is an integer. This is not validated at runtime.\n3. Iterate over the reservations and count one as active if `paid` is truthy or `now_s - created_s < RESERVATION_TTL_S`.\n4. Sum `qty` over the active reservations.\n5. Return `max(0, stock - held)`.\n6. Write tests for:\n   - an empty reservation list;\n   - a paid reservation far older than 300 seconds, which still holds;\n   - unpaid reservations at ages 299, 300 and 301;\n   - a mix of paid and unpaid;\n   - holds exceeding stock, which returns 0;\n   - zero stock;\n   - inputs left unmodified;\n   - the result being an `int` for integer inputs.\n7. Run the tests and confirm the boundary behaviour with you.\n\n## Risks I already know about\n\n- **Boundary at exactly 300 seconds:** \"expires after 300 seconds\" is ambiguous. I assume a reservation is expired once its age reaches 300 (held only while age < 300). Tell me if it should still hold at exactly 300.\n- **Paid units and stock:** I assume `stock` still includes units for paid orders that have not shipped, so paid reservations are subtracted. If stock is already decremented on payment, this double-counts.\n- **Future `created_s`:** with clock skew the age is negative. I will treat such a reservation as active.\n- **Integer quantities:** the integer result depends on `stock` and `qty` being integers, as the input contract states. A fractional `qty` (e.g. 1.5) would produce a fractional result. Tell me if fractional quantities are possible.\n- **Malformed data:** missing keys, negative `qty` or non-integer values are not handled. The function will raise an error or miscalculate unless you want validation.\n- **Time units:** `now_s` and `created_s` must both be in seconds on the same clock."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8346,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1978,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 411,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1978,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 411,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1978,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1978
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.048104,
+      "error": null,
+      "reply": "```python\nRESERVATION_TTL_S = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return the number of units that can still be sold, never below 0.\n\n    Each reservation is a dict with the keys ``qty``, ``created_s`` and\n    ``paid``. A reservation holds its units while it is active:\n\n    - A paid reservation never expires and always holds its units.\n    - An unpaid reservation holds its units only while\n      ``now_s - created_s < RESERVATION_TTL_S``; it is expired once its age\n      reaches exactly 300 seconds. A reservation with ``created_s`` in the\n      future (negative age, e.g. clock skew) is treated as active.\n\n    Input contract (not validated at runtime): ``stock`` and each\n    reservation's ``qty`` are integers, so the result is an integer.\n    ``now_s`` and ``created_s`` are in seconds on the same clock.\n\n    The function is pure: it does not mutate its inputs or read a clock.\n    \"\"\"\n    held = 0\n    for reservation in reservations:\n        if reservation[\"paid\"] or now_s - reservation[\"created_s\"] < RESERVATION_TTL_S:\n            held += reservation[\"qty\"]\n    return max(0, stock - held)\n```",
+      "symptom": null
+    }
+  ]
+}

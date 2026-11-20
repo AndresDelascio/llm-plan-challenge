@@ -1,0 +1,204 @@
+{
+  "arm": "challenge",
+  "task": "t6-crop",
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 14721,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1038,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1010,
+        "output_tokens_details": {
+          "thinking_tokens": 209
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1038,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1010,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1038,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1038
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.057024000000000005,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Write `to_tracker(x, y)`, which maps a pixel position in the 1920x1080 source video to tracker coordinates and returns `(x, y)`, or `None` if the point is outside the crop.\n\n**Constraints:**\n- The crop is 1440x1080 and centred, so the x offset is (1920 \u2212 1440) / 2 = 240 and the y offset is 0.\n- Downscaling by 2 gives a 720x540 tracker space.\n- Sub-pixel precision is kept: floats out, with no rounding or integer division.\n- Points outside the crop return `None`, not clamped values.\n\n**Non-goals:**\n- The inverse mapping.\n- Configurable resolutions.\n- Lens or aspect-ratio correction.\n- Changes to the tracker itself.\n\n## Plan\n\n1. Define named constants for source size, crop size and scale, and derive the offsets from them (240, 0) rather than hard-coding.\n2. Test bounds in source space before transforming: the point is valid if 240 \u2264 x < 1680 and 0 \u2264 y < 1080. Otherwise return `None`.\n3. Compute `tx = (x - 240) / 2` and `ty = y / 2` using true division, and return `(tx, ty)` as floats.\n4. Add tests:\n   - The centre (960, 540) maps to (360, 270).\n   - The crop's top-left (240, 0) maps to (0, 0).\n   - A sub-pixel input (241, 1) maps to (0.5, 0.5).\n   - x = 239.9 and x = 1680 return `None`.\n   - y = \u22120.1 and y = 1080 return `None`.\n   - Float inputs are accepted.\n\n## Risks I already know about\n\n- **Pixel-centre convention:** If the tracker treats integer coordinates as pixel centres, the correct mapping is `(x - 240) / 2 - 0.25`, and likewise for y. I am assuming continuous (corner-origin) coordinates, which needs confirming against the tracker's resize method.\n- **Edge inclusivity:** I am assuming half-open bounds, so the right and bottom edges are excluded. The tracker may expect x = 1680 to be valid.\n- **Crop placement:** \"Center crop\" is assumed to be exactly centred. Any offset in the real pipeline would shift all results.\n- **Language:** Python is assumed, as no existing code is present."
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 8562,
+      "usage": {
+        "input_tokens": 14781,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 221,
+        "reasoning_output_tokens": 64
+      },
+      "error": null,
+      "reply": "VERDICT: BLOCKED\n\n### 1. [blocker] Tracker coordinate origin is unresolved\n- Failure: If the resize uses the pixel-centre convention described in the plan, the proposed formula shifts every valid result by 0.25 tracker pixels on both axes.\n- Fix: Confirm the tracker\u2019s coordinate convention before choosing the formula and expected test values.\n\n### 2. [minor] The sub-pixel test uses integer inputs\n- Failure: `(241, 1)` checks fractional outputs, but the plan specifies no assertion that fractional source coordinates retain their precision.\n- Fix: Under the proposed corner-origin convention, assert that `(240.5, 0.5)` maps to `(0.25, 0.25)`."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 18854,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2013,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1633,
+        "output_tokens_details": {
+          "thinking_tokens": 686
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2013,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1633,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2013,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2013
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.09754399999999999,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Write `to_tracker(x, y)`, which maps a pixel position in the 1920x1080 source video to tracker coordinates and returns `(x, y)`, or `None` if the point is outside the crop.\n\n**Constraints:**\n- The crop is 1440x1080 and centred, so the x offset is (1920 \u2212 1440) / 2 = 240 and the y offset is 0.\n- Downscaling by 2 gives a 720x540 tracker space.\n- Sub-pixel precision is kept: floats out, with no rounding or integer division.\n- Points outside the crop return `None`, not clamped values.\n\n**Non-goals:**\n- The inverse mapping.\n- Configurable resolutions.\n- Lens or aspect-ratio correction.\n- Changes to the tracker itself.\n\n## Plan\n\n1. Confirm the tracker's coordinate convention against its resize method before writing the formula or the tests.\n   - If coordinates are continuous (corner-origin), steps 3\u20135 apply as written.\n   - If integer coordinates are pixel centres, the mapping becomes `(x - 240) / 2 - 0.25`, and likewise for y. The expected test values in step 5 are then recomputed to match.\n2. Define named constants for source size, crop size and scale, and derive the offsets from them (240, 0) rather than hard-coding.\n3. Test bounds in source space before transforming: the point is valid if 240 \u2264 x < 1680 and 0 \u2264 y < 1080. Otherwise return `None`.\n4. Compute `tx = (x - 240) / 2` and `ty = y / 2` using true division, and return `(tx, ty)` as floats.\n5. Add tests (values shown for the corner-origin convention):\n   - The centre (960, 540) maps to (360, 270).\n   - The crop's top-left (240, 0) maps to (0, 0).\n   - A sub-pixel output: (241, 1) maps to (0.5, 0.5).\n   - A fractional input keeps its precision: (240.5, 0.5) maps to (0.25, 0.25).\n   - x = 239.9 and x = 1680 return `None`.\n   - y = \u22120.1 and y = 1080 return `None`.\n   - Float inputs are accepted.\n\n## Risks I already know about\n\n- **Pixel-centre convention:** This is now resolved by step 1 before any formula or test value is fixed. Until it is confirmed, the corner-origin formula and test values above are provisional.\n- **Edge inclusivity:** I am assuming half-open bounds, so the right and bottom edges are excluded. The tracker may expect x = 1680 to be valid.\n- **Crop placement:** \"Center crop\" is assumed to be exactly centred. Any offset in the real pipeline would shift all results.\n- **Language:** Python is assumed, as no existing code is present."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 15709,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1937,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1189,
+        "output_tokens_details": {
+          "thinking_tokens": 259
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1937,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1189,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1937,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1937
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.078568,
+      "error": null,
+      "reply": "```python\nimport unittest\n\nSRC_W, SRC_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nSCALE = 2\n\n# Centred crop: offsets derived from the sizes (240, 0).\nOFF_X = (SRC_W - CROP_W) / 2\nOFF_Y = (SRC_H - CROP_H) / 2\n\n\ndef to_tracker(x, y):\n    \"\"\"Map a pixel position in the 1920x1080 source video to tracker\n    coordinates (1440x1080 centre crop, downscaled by 2 -> 720x540).\n\n    Returns (x, y) as floats, or None if the point is outside the crop.\n\n    NOTE: this assumes continuous, corner-origin coordinates, which could\n    not be confirmed against the tracker's resize method. If integer\n    coordinates denote pixel centres, subtract 0.25 from each output:\n        tx = (x - OFF_X) / SCALE - 0.25\n        ty = (y - OFF_Y) / SCALE - 0.25\n    Bounds are half-open: the right and bottom edges are excluded.\n    \"\"\"\n    if not (OFF_X <= x < OFF_X + CROP_W and OFF_Y <= y < OFF_Y + CROP_H):\n        return None\n    return ((x - OFF_X) / SCALE, (y - OFF_Y) / SCALE)\n\n\nclass ToTrackerTests(unittest.TestCase):\n    def test_centre(self):\n        self.assertEqual(to_tracker(960, 540), (360.0, 270.0))\n\n    def test_crop_top_left(self):\n        self.assertEqual(to_tracker(240, 0), (0.0, 0.0))\n\n    def test_sub_pixel_output(self):\n        self.assertEqual(to_tracker(241, 1), (0.5, 0.5))\n\n    def test_fractional_input(self):\n        self.assertEqual(to_tracker(240.5, 0.5), (0.25, 0.25))\n\n    def test_x_out_of_bounds(self):\n        self.assertIsNone(to_tracker(239.9, 540))\n        self.assertIsNone(to_tracker(1680, 540))\n\n    def test_y_out_of_bounds(self):\n        self.assertIsNone(to_tracker(960, -0.1))\n        self.assertIsNone(to_tracker(960, 1080))\n\n    def test_returns_floats(self):\n        tx, ty = to_tracker(960, 540)\n        self.assertIsInstance(tx, float)\n        self.assertIsInstance(ty, float)\n\n    def test_last_valid_point(self):\n        self.assertEqual(to_tracker(1679.5, 1079.5), (719.75, 539.75))\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": "the code crashed when it was loaded"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 16014,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2923,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1379,
+        "output_tokens_details": {
+          "thinking_tokens": 392
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2923,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1379,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2923,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2923
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.101944,
+      "error": null,
+      "reply": "```python\nimport unittest\n\nSRC_W, SRC_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nSCALE = 2\n\n# Centred crop: offsets derived from the sizes (240, 0).\nOFF_X = (SRC_W - CROP_W) / 2\nOFF_Y = (SRC_H - CROP_H) / 2\n\n\ndef to_tracker(x, y):\n    \"\"\"Map a pixel position in the 1920x1080 source video to tracker\n    coordinates (1440x1080 centre crop, downscaled by 2 -> 720x540).\n\n    Returns (x, y) as floats, or None if the point is outside the crop.\n\n    NOTE: this assumes continuous, corner-origin coordinates, which could\n    not be confirmed against the tracker's resize method. If integer\n    coordinates denote pixel centres, subtract 0.25 from each output:\n        tx = (x - OFF_X) / SCALE - 0.25\n        ty = (y - OFF_Y) / SCALE - 0.25\n    Bounds are half-open: the right and bottom edges are excluded.\n    \"\"\"\n    if not (OFF_X <= x < OFF_X + CROP_W and OFF_Y <= y < OFF_Y + CROP_H):\n        return None\n    return ((x - OFF_X) / SCALE, (y - OFF_Y) / SCALE)\n\n\n# Tests are not run on load (the previous version called unittest.main()\n# at module level, which exits the interpreter when the file is loaded as\n# __main__ by another program). Run them explicitly with:\n#     python -m unittest <this_module>\nclass ToTrackerTests(unittest.TestCase):\n    def test_centre(self):\n        self.assertEqual(to_tracker(960, 540), (360.0, 270.0))\n\n    def test_crop_top_left(self):\n        self.assertEqual(to_tracker(240, 0), (0.0, 0.0))\n\n    def test_sub_pixel_output(self):\n        self.assertEqual(to_tracker(241, 1), (0.5, 0.5))\n\n    def test_fractional_input(self):\n        self.assertEqual(to_tracker(240.5, 0.5), (0.25, 0.25))\n\n    def test_x_out_of_bounds(self):\n        self.assertIsNone(to_tracker(239.9, 540))\n        self.assertIsNone(to_tracker(1680, 540))\n\n    def test_y_out_of_bounds(self):\n        self.assertIsNone(to_tracker(960, -0.1))\n        self.assertIsNone(to_tracker(960, 1080))\n\n    def test_returns_floats(self):\n        tx, ty = to_tracker(960, 540)\n        self.assertIsInstance(tx, float)\n        self.assertIsInstance(ty, float)\n\n    def test_last_valid_point(self):\n        self.assertEqual(to_tracker(1679.5, 1079.5), (719.75, 539.75))\n```",
+      "symptom": null
+    }
+  ]
+}

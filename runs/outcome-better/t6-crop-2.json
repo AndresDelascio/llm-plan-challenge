@@ -1,0 +1,99 @@
+{
+  "arm": "better",
+  "task": "t6-crop",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 14053,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 969,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1056,
+        "output_tokens_details": {
+          "thinking_tokens": 335
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 969,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1056,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 969,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 969
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.057760000000000006,
+      "error": null,
+      "reply": "Write a Python function `to_tracker(x, y)` for my shot tracker. It converts a pixel position in the original video to the coordinate space the tracker runs in.\n\n**Geometry**\n- The source video is 1920x1080.\n- The tracker runs on a center crop of 1440x1080, so the crop spans x from 240 to 1680 and the full height, y from 0 to 1080.\n- The crop is then downscaled by a factor of 2, so the tracker frame is 720x540.\n\n**Conversion**\n- `tracker_x = (x - 240) / 2`\n- `tracker_y = y / 2`\n- Treat coordinates as continuous positions with the origin at the top-left corner of the frame, with no half-pixel center offset. If you think the tracker's downscale needs a pixel-center convention instead (which would shift results by 0.25), say so in a comment rather than silently applying it.\n\n**Behavior**\n- Accept ints or floats for `x` and `y`.\n- Return a tuple `(tracker_x, tracker_y)` of floats. Keep sub-pixel precision: use true division and do not round, floor, or cast to int.\n- Return `None` when the point falls outside the crop. Treat the crop as half-open: a point is inside when `240 <= x < 1680` and `0 <= y < 1080`.\n- Do the bounds check on the original coordinates, before converting.\n\n**Code style**\n- Define the source size, crop size, and scale factor as named constants, and derive the crop offset from them rather than hardcoding 240.\n- Include type hints and a short docstring stating the coordinate convention and the half-open bounds.\n\n**Tests**\nInclude a few test cases that cover:\n- the frame center: `(960, 540)` \u2192 `(360.0, 270.0)`\n- the crop's top-left corner: `(240, 0)` \u2192 `(0.0, 0.0)`\n- a sub-pixel input: `(241.5, 0.5)` \u2192 `(0.75, 0.25)`\n- points just outside the crop: `(239.9, 100)` \u2192 `None` and `(1680, 100)` \u2192 `None`\n- a point just inside the right edge: `(1679, 1079)` \u2192 `(719.5, 539.5)`"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 13896,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1594,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1193,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1594,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1193,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1594,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1594
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.07324,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert source-video pixel positions to shot-tracker coordinates.\"\"\"\n\nfrom typing import Optional, Tuple, Union\n\nNumber = Union[int, float]\n\n# Source video size, in pixels.\nSOURCE_WIDTH = 1920\nSOURCE_HEIGHT = 1080\n\n# Center crop the tracker runs on, in source pixels.\nCROP_WIDTH = 1440\nCROP_HEIGHT = 1080\n\n# Downscale factor applied to the crop to produce the tracker frame.\nSCALE_FACTOR = 2\n\n# Crop offset within the source frame, derived from the sizes above.\nCROP_OFFSET_X = (SOURCE_WIDTH - CROP_WIDTH) / 2  # 240\nCROP_OFFSET_Y = (SOURCE_HEIGHT - CROP_HEIGHT) / 2  # 0\n\n\ndef to_tracker(x: Number, y: Number) -> Optional[Tuple[float, float]]:\n    \"\"\"Map a source-video position to tracker-frame coordinates.\n\n    Coordinates are continuous positions with the origin at the top-left\n    corner of the frame (no half-pixel center offset).\n\n    The crop is half-open: a point is inside when\n    ``240 <= x < 1680`` and ``0 <= y < 1080``. Points outside return ``None``.\n    The bounds check is done on the original coordinates.\n\n    Returns ``(tracker_x, tracker_y)`` as floats with sub-pixel precision.\n    \"\"\"\n    # NOTE: This uses the corner-origin convention, as specified. If the\n    # tracker instead indexes pixels by their centers (integer coordinate n\n    # meaning the center of pixel n), the correct mapping would be\n    # (x - offset + 0.5) / scale - 0.5, which shifts results by 0.25 for a\n    # scale factor of 2. That shift is deliberately NOT applied here.\n    if not (CROP_OFFSET_X <= x < CROP_OFFSET_X + CROP_WIDTH):\n        return None\n    if not (CROP_OFFSET_Y <= y < CROP_OFFSET_Y + CROP_HEIGHT):\n        return None\n\n    tracker_x = (x - CROP_OFFSET_X) / SCALE_FACTOR\n    tracker_y = (y - CROP_OFFSET_Y) / SCALE_FACTOR\n    return (float(tracker_x), float(tracker_y))\n\n\ndef _run_tests() -> None:\n    # Frame center.\n    assert to_tracker(960, 540) == (360.0, 270.0)\n\n    # Crop's top-left corner.\n    assert to_tracker(240, 0) == (0.0, 0.0)\n\n    # Sub-pixel input.\n    assert to_tracker(241.5, 0.5) == (0.75, 0.25)\n\n    # Just outside the crop.\n    assert to_tracker(239.9, 100) is None\n    assert to_tracker(1680, 100) is None\n\n    # Just inside the right/bottom edge.\n    assert to_tracker(1679, 1079) == (719.5, 539.5)\n\n    # Vertical bounds are half-open too.\n    assert to_tracker(960, -0.1) is None\n    assert to_tracker(960, 1080) is None\n\n    # Results are floats, even for int inputs.\n    result = to_tracker(960, 540)\n    assert result is not None\n    assert all(isinstance(v, float) for v in result)\n\n    print(\"All tests passed.\")\n\n\nif __name__ == \"__main__\":\n    _run_tests()\n```",
+      "symptom": null
+    }
+  ]
+}

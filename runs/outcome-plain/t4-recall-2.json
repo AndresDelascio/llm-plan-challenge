@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t4-recall",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 15429,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 995,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1191,
+        "output_tokens_details": {
+          "thinking_tokens": 634
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 995,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1191,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 995,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 995
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.06357600000000001,
+      "error": null,
+      "reply": "```python\ndef clip_recall(highlights, clips):\n    \"\"\"Fraction of highlights found, using a maximum bipartite matching so\n    that each clip is credited to at most one highlight and the number of\n    credited highlights is as large as possible.\"\"\"\n    # adjacency: for each highlight, the clips overlapping it by > 0 seconds\n    adj = []\n    for hs, he in highlights:\n        adj.append([\n            ci for ci, (cs, ce) in enumerate(clips)\n            if min(he, ce) - max(hs, cs) > 0\n        ])\n\n    match_clip = [None] * len(clips)  # clip index -> highlight index\n\n    def try_augment(root):\n        # Iterative augmenting-path search (Kuhn's algorithm).\n        visited = set()\n        stack = [(root, iter(adj[root]))]  # highlights on the current path\n        path = []                          # path[i]: clip linking stack[i] -> stack[i+1]\n        while stack:\n            _, it = stack[-1]\n            advanced = False\n            for c in it:\n                if c in visited:\n                    continue\n                visited.add(c)\n                path.append(c)\n                owner = match_clip[c]\n                if owner is None:\n                    # Free clip found: flip assignments along the path.\n                    for (h, _), pc in zip(stack, path):\n                        match_clip[pc] = h\n                    return True\n                stack.append((owner, iter(adj[owner])))\n                advanced = True\n                break\n            if not advanced:\n                stack.pop()\n                if path:\n                    path.pop()\n        return False\n\n    found = sum(1 for h in range(len(highlights)) if try_augment(h))\n    return found / len(highlights)\n```",
+      "symptom": null
+    }
+  ]
+}

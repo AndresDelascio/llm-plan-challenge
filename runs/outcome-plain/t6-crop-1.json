@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t6-crop",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8383,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 990,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 467,
+        "output_tokens_details": {
+          "thinking_tokens": 163
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 990,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 467,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 990,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 990
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.034536,
+      "error": null,
+      "reply": "```python\nVIDEO_W, VIDEO_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nSCALE = 2\n\nCROP_X0 = (VIDEO_W - CROP_W) / 2  # 240\nCROP_Y0 = (VIDEO_H - CROP_H) / 2  # 0\n\n\ndef to_tracker(x, y):\n    \"\"\"Convert a pixel position in the original 1920x1080 video to tracker\n    coordinates (center crop 1440x1080, downscaled by 2 -> 720x540).\n\n    Returns (x, y) as floats, or None if the point lies outside the crop.\n    \"\"\"\n    cx = x - CROP_X0\n    cy = y - CROP_Y0\n    if not (0 <= cx < CROP_W and 0 <= cy < CROP_H):\n        return None\n    return (cx / SCALE, cy / SCALE)\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t1-gate",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8778,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 975,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 503,
+        "output_tokens_details": {
+          "thinking_tokens": 66
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 975,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 503,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 975,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 975
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.035736,
+      "error": null,
+      "reply": "```python\nTICKS_PER_SECOND = 10_000\nCOUNTER_MODULUS = 1 << 16  # 16-bit counter wraps every 65536 ticks (6.5536 s)\n\n\ndef gate_time_s(start_tick, stop_tick):\n    \"\"\"Return the sprint time in seconds from two latched 16-bit tick counts.\n\n    The counter runs at 10,000 ticks per second and wraps at 65536. Because\n    a sprint lasts less than 6 seconds (shorter than the 6.5536 s wrap\n    period), the counter can wrap at most once between the gates, so modular\n    subtraction recovers the true elapsed tick count.\n    \"\"\"\n    for name, value in ((\"start_tick\", start_tick), (\"stop_tick\", stop_tick)):\n        if isinstance(value, bool) or not isinstance(value, int):\n            raise TypeError(f\"{name} must be an int, got {type(value).__name__}\")\n        if not 0 <= value < COUNTER_MODULUS:\n            raise ValueError(f\"{name} must be in 0..{COUNTER_MODULUS - 1}, got {value}\")\n\n    elapsed_ticks = (stop_tick - start_tick) % COUNTER_MODULUS\n    return elapsed_ticks / TICKS_PER_SECOND\n```",
+      "symptom": null
+    }
+  ]
+}

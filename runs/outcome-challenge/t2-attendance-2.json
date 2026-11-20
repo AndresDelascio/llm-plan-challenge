@@ -1,0 +1,204 @@
+{
+  "arm": "challenge",
+  "task": "t2-attendance",
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 13988,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1064,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 899,
+        "output_tokens_details": {
+          "thinking_tokens": 175
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1064,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 899,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1064,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1064
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.053000000000000005,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** `merge_attendance(records)` returns one record per (player, date): the one with the latest `updated_at`.\n\n**Constraints:**\n- Compare `updated_at` as actual instants, not as text, because offsets differ: `18:05-05:00` is later than `20:00+00:00`.\n- Group on `player` and `date` exactly as given. `date` is the attendance date and is never derived from `updated_at`.\n- Do not mutate the input list or its dicts; return the original winning dicts in a new list.\n- Use the standard library only.\n\n**Non-goals:**\n- Normalising player names (case, whitespace) or date formats.\n- Validating `status` values.\n- Reading or writing the sheet itself.\n\n## Plan\n\n1. Write a helper that parses `updated_at` with `datetime.fromisoformat` into a timezone-aware datetime. It raises `ValueError` naming the offending record if the text is unparseable or has no offset.\n2. Iterate over the records once, keeping a dict keyed by `(player, date)` that holds the current winner and its parsed timestamp.\n3. Replace the winner when the new record's timestamp is greater than or equal to the stored one. On an exact tie the later list entry wins, since it is the later upload.\n4. Return the dict's values as a list, which gives the order in which each player/date first appeared. An empty input returns `[]`.\n5. Write tests covering:\n   - exact duplicates\n   - a correction with a later timestamp\n   - a stale retry arriving after the correction\n   - mixed offsets where text order and time order disagree\n   - an exact tie\n   - the same player on different dates\n   - empty input\n   - a malformed timestamp\n   - the input left unmodified\n\n## Risks I already know about\n\n- A naive timestamp with no offset cannot be compared with aware ones. I plan to raise an error rather than guess UTC; tell me if you prefer skipping such records.\n- A `Z` suffix only parses on Python 3.11 or later; older versions need a small shim.\n- Identical timestamps with different statuses are resolved by list order, which assumes the list is in upload order.\n- If the app sends inconsistent player spellings, they will stay as separate records."
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 9529,
+      "usage": {
+        "input_tokens": 14732,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 227,
+        "reasoning_output_tokens": 65
+      },
+      "error": null,
+      "reply": "VERDICT: BLOCKED\n### 1. [blocker] Return value contains timestamp pairs\n- Failure: For any nonempty input, returning the dictionary\u2019s values returns `(record, parsed_timestamp)` pairs instead of the original winning dictionaries.\n- Fix: Return `[record for record, _ in winners.values()]`.\n\n### 2. [major] Sub-microsecond timestamps can select a stale record\n- Failure: `datetime.fromisoformat` truncates fractional seconds beyond six digits. If `.1234567` arrives before `.1234566` with the same date, time, and offset, the tie rule selects the older record.\n- Fix: Preserve fractional digits beyond microseconds and compare them when the parsed timestamps tie, before applying the list-order tie rule."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 23121,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1944,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1845,
+        "output_tokens_details": {
+          "thinking_tokens": 859
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1944,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1845,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1944,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1944
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.10492000000000001,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** `merge_attendance(records)` returns one record per (player, date): the one with the latest `updated_at`.\n\n**Constraints:**\n- Compare `updated_at` as actual instants, not as text, because offsets differ: `18:05-05:00` is later than `20:00+00:00`.\n- Group on `player` and `date` exactly as given. `date` is the attendance date and is never derived from `updated_at`.\n- Do not mutate the input list or its dicts; return the original winning dicts in a new list.\n- Use the standard library only.\n\n**Non-goals:**\n- Normalising player names (case, whitespace) or date formats.\n- Validating `status` values.\n- Reading or writing the sheet itself.\n\n## Plan\n\n1. Write a helper that turns `updated_at` into a comparison key `(instant, extra_digits)`.\n   - It splits off any fractional-second digits beyond the sixth before parsing, because `datetime.fromisoformat` truncates them on Python 3.11 or later and rejects them on older versions.\n   - It parses the remaining text with `datetime.fromisoformat` into a timezone-aware datetime, which is `instant`.\n   - `extra_digits` is the split-off digits with trailing zeros stripped, so that comparing them as text orders them as fractions. It is an empty string when there are none.\n   - It raises `ValueError` naming the offending record if the text is unparseable or has no offset.\n2. Iterate over the records once, keeping a dict keyed by `(player, date)` that holds the current winner and its comparison key.\n3. Replace the winner when the new record's key is greater than or equal to the stored one. Keys compare by instant first, then by the extra digits. On an exact tie of both, the later list entry wins, since it is the later upload.\n4. Return only the winning records, not the stored pairs: `[record for record, _ in winners.values()]`. This gives the order in which each player/date first appeared. An empty input returns `[]`.\n5. Write tests covering:\n   - exact duplicates\n   - a correction with a later timestamp\n   - a stale retry arriving after the correction\n   - mixed offsets where text order and time order disagree\n   - an exact tie\n   - timestamps differing only beyond the sixth fractional digit, with the newer one arriving first (`.1234567` then `.1234566`)\n   - the same player on different dates\n   - empty input\n   - a malformed timestamp\n   - the input left unmodified\n   - the returned items being the original dict objects, not pairs\n\n## Risks I already know about\n\n- A naive timestamp with no offset cannot be compared with aware ones. I plan to raise an error rather than guess UTC; tell me if you prefer skipping such records.\n- A `Z` suffix only parses on Python 3.11 or later; older versions need a small shim.\n- Identical timestamps with different statuses are resolved by list order, which assumes the list is in upload order.\n- If the app sends inconsistent player spellings, they will stay as separate records."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 39280,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2003,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 4287,
+        "output_tokens_details": {
+          "thinking_tokens": 1442
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2003,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 4287,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2003,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2003
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.20354399999999997,
+      "error": null,
+      "reply": "```python\nimport copy\nimport re\nimport unittest\nfrom datetime import datetime\n\n_FRACTION = re.compile(r\"[.,](\\d+)\")\n\n\ndef _updated_key(record, index):\n    \"\"\"Return (instant, extra_digits) for a record's updated_at.\n\n    instant is a timezone-aware datetime (microsecond precision);\n    extra_digits holds any fractional-second digits beyond the sixth, with\n    trailing zeros stripped so that text comparison orders them as fractions.\n    \"\"\"\n    try:\n        text = record[\"updated_at\"]\n    except (KeyError, TypeError):\n        raise ValueError(\n            f\"record {index} has no 'updated_at': {record!r}\"\n        ) from None\n    if not isinstance(text, str):\n        raise ValueError(\n            f\"record {index} has a non-text 'updated_at': {record!r}\"\n        )\n\n    parse_text = text\n    # 'Z' suffix only parses natively on Python 3.11+.\n    if parse_text[-1:] in (\"Z\", \"z\"):\n        parse_text = parse_text[:-1] + \"+00:00\"\n\n    # Normalise the fraction to exactly six digits; keep the rest separately.\n    extra_digits = \"\"\n    match = _FRACTION.search(parse_text)\n    if match:\n        digits = match.group(1)\n        extra_digits = digits[6:].rstrip(\"0\")\n        parse_text = (\n            parse_text[: match.start()]\n            + \".\"\n            + digits[:6].ljust(6, \"0\")\n            + parse_text[match.end():]\n        )\n\n    try:\n        instant = datetime.fromisoformat(parse_text)\n    except ValueError:\n        raise ValueError(\n            f\"record {index} has an unparseable 'updated_at' {text!r}: {record!r}\"\n        ) from None\n\n    if instant.utcoffset() is None:\n        raise ValueError(\n            f\"record {index} has an 'updated_at' with no UTC offset {text!r}: \"\n            f\"{record!r}\"\n        )\n\n    return (instant, extra_digits)\n\n\ndef merge_attendance(records):\n    \"\"\"Keep one record per (player, date): the most recently updated one.\n\n    updated_at values are compared as instants, not text. On an exact tie the\n    later list entry wins. The input is not mutated; the returned list holds\n    the original winning dicts, ordered by first appearance of each\n    player/date. Raises ValueError for a missing, unparseable or offset-less\n    updated_at.\n    \"\"\"\n    winners = {}\n    for index, record in enumerate(records):\n        key = _updated_key(record, index)\n        group = (record[\"player\"], record[\"date\"])\n        current = winners.get(group)\n        if current is None or key >= current[1]:\n            winners[group] = (record, key)\n    return [record for record, _ in winners.values()]\n\n\nclass MergeAttendanceTests(unittest.TestCase):\n    @staticmethod\n    def rec(player, date, status, updated_at):\n        return {\n            \"player\": player,\n            \"date\": date,\n            \"status\": status,\n            \"updated_at\": updated_at,\n        }\n\n    def test_exact_duplicates(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = dict(a)\n        result = merge_attendance([a, b])\n        self.assertEqual(result, [a])\n        self.assertEqual(len(result), 1)\n\n    def test_correction_with_later_timestamp(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], b)\n\n    def test_stale_retry_after_correction(self):\n        old = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        new = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\")\n        retry = dict(old)\n        result = merge_attendance([old, new, retry])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], new)\n\n    def test_mixed_offsets(self):\n        # 18:05-05:00 is 23:05 UTC, later than 20:00+00:00 despite text order.\n        later = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        earlier = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T20:00:00+00:00\")\n        self.assertIs(merge_attendance([later, earlier])[0], later)\n        self.assertIs(merge_attendance([earlier, later])[0], later)\n\n    def test_exact_tie_later_entry_wins(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T23:05:00+00:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], b)\n\n    def test_digits_beyond_sixth(self):\n        newer = self.rec(\n            \"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00.1234567-05:00\"\n        )\n        older = self.rec(\n            \"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00.1234566-05:00\"\n        )\n        result = merge_attendance([newer, older])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], newer)\n\n    def test_same_player_different_dates(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-02\", \"absent\", \"2026-03-02T18:05:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 2)\n        self.assertIs(result[0], a)\n        self.assertIs(result[1], b)\n\n    def test_empty_input(self):\n        self.assertEqual(merge_attendance([]), [])\n\n    def test_malformed_timestamp(self):\n        bad = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"not a timestamp\")\n        with self.assertRaises(ValueError):\n            merge_attendance([bad])\n\n    def test_missing_offset(self):\n        naive = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00\")\n        with self.assertRaises(ValueError):\n            merge_attendance([naive])\n\n    def test_z_suffix(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T20:00:00Z\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        self.assertIs(merge_attendance([b, a])[0], b)\n\n    def test_input_not_modified(self):\n        records = [\n            self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\"),\n            self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\"),\n            self.rec(\"Bob\", \"2026-03-01\", \"present\", \"2026-03-01T18:06:00-05:00\"),\n        ]\n        snapshot = copy.deepcopy(records)\n        originals = list(records)\n        merge_attendance(records)\n        self.assertEqual(records, snapshot)\n        for before, after in zip(originals, records):\n            self.assertIs(before, after)\n\n    def test_returns_original_dicts_not_pairs(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Bob\", \"2026-03-01\", \"absent\", \"2026-03-01T18:06:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertIsInstance(result, list)\n        self.assertIs(result[0], a)\n        self.assertIs(result[1], b)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": "the code crashed when it was loaded"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 34217,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 4897,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 3982,
+        "output_tokens_details": {
+          "thinking_tokens": 966
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 4897,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 3982,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 4897,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 4897
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.237648,
+      "error": null,
+      "reply": "```python\nimport copy\nimport re\nimport unittest\nfrom datetime import datetime\n\n_FRACTION = re.compile(r\"[.,](\\d+)\")\n\n\ndef _updated_key(record, index):\n    \"\"\"Return (instant, extra_digits) for a record's updated_at.\n\n    instant is a timezone-aware datetime (microsecond precision);\n    extra_digits holds any fractional-second digits beyond the sixth, with\n    trailing zeros stripped so that text comparison orders them as fractions.\n    \"\"\"\n    try:\n        text = record[\"updated_at\"]\n    except (KeyError, TypeError):\n        raise ValueError(\n            f\"record {index} has no 'updated_at': {record!r}\"\n        ) from None\n    if not isinstance(text, str):\n        raise ValueError(\n            f\"record {index} has a non-text 'updated_at': {record!r}\"\n        )\n\n    parse_text = text\n    # 'Z' suffix only parses natively on Python 3.11+.\n    if parse_text[-1:] in (\"Z\", \"z\"):\n        parse_text = parse_text[:-1] + \"+00:00\"\n\n    # Normalise the fraction to exactly six digits; keep the rest separately.\n    extra_digits = \"\"\n    match = _FRACTION.search(parse_text)\n    if match:\n        digits = match.group(1)\n        extra_digits = digits[6:].rstrip(\"0\")\n        parse_text = (\n            parse_text[: match.start()]\n            + \".\"\n            + digits[:6].ljust(6, \"0\")\n            + parse_text[match.end():]\n        )\n\n    try:\n        instant = datetime.fromisoformat(parse_text)\n    except ValueError:\n        raise ValueError(\n            f\"record {index} has an unparseable 'updated_at' {text!r}: {record!r}\"\n        ) from None\n\n    if instant.utcoffset() is None:\n        raise ValueError(\n            f\"record {index} has an 'updated_at' with no UTC offset {text!r}: \"\n            f\"{record!r}\"\n        )\n\n    return (instant, extra_digits)\n\n\ndef merge_attendance(records):\n    \"\"\"Keep one record per (player, date): the most recently updated one.\n\n    updated_at values are compared as instants, not text. On an exact tie the\n    later list entry wins. The input is not mutated; the returned list holds\n    the original winning dicts, ordered by first appearance of each\n    player/date. Raises ValueError for a missing, unparseable or offset-less\n    updated_at.\n    \"\"\"\n    winners = {}\n    for index, record in enumerate(records):\n        key = _updated_key(record, index)\n        group = (record[\"player\"], record[\"date\"])\n        current = winners.get(group)\n        if current is None or key >= current[1]:\n            winners[group] = (record, key)\n    return [record for record, _ in winners.values()]\n\n\nclass MergeAttendanceTests(unittest.TestCase):\n    @staticmethod\n    def rec(player, date, status, updated_at):\n        return {\n            \"player\": player,\n            \"date\": date,\n            \"status\": status,\n            \"updated_at\": updated_at,\n        }\n\n    def test_exact_duplicates(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = dict(a)\n        result = merge_attendance([a, b])\n        self.assertEqual(result, [a])\n        self.assertEqual(len(result), 1)\n\n    def test_correction_with_later_timestamp(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], b)\n\n    def test_stale_retry_after_correction(self):\n        old = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        new = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\")\n        retry = dict(old)\n        result = merge_attendance([old, new, retry])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], new)\n\n    def test_mixed_offsets(self):\n        # 18:05-05:00 is 23:05 UTC, later than 20:00+00:00 despite text order.\n        later = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        earlier = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T20:00:00+00:00\")\n        self.assertIs(merge_attendance([later, earlier])[0], later)\n        self.assertIs(merge_attendance([earlier, later])[0], later)\n\n    def test_exact_tie_later_entry_wins(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T23:05:00+00:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], b)\n\n    def test_digits_beyond_sixth(self):\n        newer = self.rec(\n            \"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00.1234567-05:00\"\n        )\n        older = self.rec(\n            \"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00.1234566-05:00\"\n        )\n        result = merge_attendance([newer, older])\n        self.assertEqual(len(result), 1)\n        self.assertIs(result[0], newer)\n\n    def test_same_player_different_dates(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Ann\", \"2026-03-02\", \"absent\", \"2026-03-02T18:05:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertEqual(len(result), 2)\n        self.assertIs(result[0], a)\n        self.assertIs(result[1], b)\n\n    def test_empty_input(self):\n        self.assertEqual(merge_attendance([]), [])\n\n    def test_malformed_timestamp(self):\n        bad = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"not a timestamp\")\n        with self.assertRaises(ValueError):\n            merge_attendance([bad])\n\n    def test_missing_offset(self):\n        naive = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00\")\n        with self.assertRaises(ValueError):\n            merge_attendance([naive])\n\n    def test_z_suffix(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T20:00:00Z\")\n        b = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        self.assertIs(merge_attendance([b, a])[0], b)\n\n    def test_input_not_modified(self):\n        records = [\n            self.rec(\"Ann\", \"2026-03-01\", \"absent\", \"2026-03-01T18:05:00-05:00\"),\n            self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:10:00-05:00\"),\n            self.rec(\"Bob\", \"2026-03-01\", \"present\", \"2026-03-01T18:06:00-05:00\"),\n        ]\n        snapshot = copy.deepcopy(records)\n        originals = list(records)\n        merge_attendance(records)\n        self.assertEqual(records, snapshot)\n        for before, after in zip(originals, records):\n            self.assertIs(before, after)\n\n    def test_returns_original_dicts_not_pairs(self):\n        a = self.rec(\"Ann\", \"2026-03-01\", \"present\", \"2026-03-01T18:05:00-05:00\")\n        b = self.rec(\"Bob\", \"2026-03-01\", \"absent\", \"2026-03-01T18:06:00-05:00\")\n        result = merge_attendance([a, b])\n        self.assertIsInstance(result, list)\n        self.assertIs(result[0], a)\n        self.assertIs(result[1], b)\n\n\ndef run_tests():\n    \"\"\"Run the test suite and return True if every test passed.\n\n    Nothing runs the tests automatically when this file is loaded: the\n    previous unittest.main() call at load time read the host's command line\n    and raised SystemExit. Call run_tests() explicitly, or use\n    `python -m unittest <this_module>`.\n    \"\"\"\n    suite = unittest.TestLoader().loadTestsFromTestCase(MergeAttendanceTests)\n    result = unittest.TextTestRunner(verbosity=2).run(suite)\n    return result.wasSuccessful()\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -94,6 +94,11 @@ class HiddenTests(unittest.TestCase):
         self.assertEqual(outcome.extract_code("x\n```python\na = 1\n```\ny\n```python\nb = 2\n```"), "b = 2\n")
         self.assertEqual(outcome.grade("t1-gate", outcome.extract_code("no code here")), "there was no python code block in the reply")
 
+    def test_a_self_test_block_in_the_answer_does_not_replace_the_hidden_tests(self):
+        noisy = "\ndef test_mine():\n    assert False\nif __name__ == '__main__':\n    raise SystemExit(0)\n"
+        self.assertIsNone(outcome.grade("t1-gate", CORRECT["t1-gate"] + noisy))
+        self.assertIsNotNone(outcome.grade("t1-gate", NAIVE["t1-gate"] + noisy))
+
     def test_a_hang_or_a_crash_counts_as_a_failure(self):
         self.assertEqual(outcome.grade("t1-gate", "import nothing_like_this"), "the code crashed when it was loaded")
 

@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t5-inventory",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 7931,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 982,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 331,
+        "output_tokens_details": {
+          "thinking_tokens": 144
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 982,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 331,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 982,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 982
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.028968,
+      "error": null,
+      "reply": "```python\nHOLD_SECONDS = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return how many units can still be sold, never below 0.\n\n    Paid reservations hold their units forever. Unpaid reservations hold\n    their units until they are 300 seconds old; at exactly 300 seconds\n    they count as expired.\n    \"\"\"\n    held = 0\n    for r in reservations:\n        if r[\"paid\"] or (now_s - r[\"created_s\"]) < HOLD_SECONDS:\n            held += r[\"qty\"]\n    return max(0, stock - held)\n```",
+      "symptom": null
+    }
+  ]
+}

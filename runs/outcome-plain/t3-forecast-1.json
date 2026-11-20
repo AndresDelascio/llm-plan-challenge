@@ -1,0 +1,54 @@
+{
+  "arm": "plain",
+  "task": "t3-forecast",
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8214,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 970,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 366,
+        "output_tokens_details": {
+          "thinking_tokens": 157
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 970,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 366,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 970,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 970
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-fable-5-2"
+      ],
+      "reported_cost_usd": 0.030176,
+      "error": null,
+      "reply": "```python\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Average of the sales in the `window` days before `day` (exclusive).\n\n    sales  -- list of daily sales, index 0 is the first day\n    day    -- index of the day being forecast (not included in the average)\n    window -- number of prior days to average over\n\n    Uses whatever history is available if it is shorter than the window.\n    Returns None if there is no history to average.\n    \"\"\"\n    if day <= 0 or window <= 0:\n        return None\n\n    start = max(0, day - window)\n    history = sales[start:day]\n\n    if not history:\n        return None\n\n    return sum(history) / len(history)\n```",
+      "symptom": null
+    }
+  ]
+}
