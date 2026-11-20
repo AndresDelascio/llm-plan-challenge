@@ -44,12 +44,16 @@
   td:first-child { font-family:Consolas, "Cascadia Mono", monospace; font-size:8.2pt; white-space:nowrap; width:52mm; }
   .foot { margin-top:auto; font-size:7.8pt; color:var(--ink2); display:flex; justify-content:space-between; }
   .cols { display:grid; grid-template-columns:1.55fr 1fr; gap:5mm; }
+  /* README images: open this file with #p1 or #pipeline to show that part alone */
+  html:has(#p1:target) #p2, html:has(#pipeline:target) #p1, html:has(:target) .foot,
+  html:has(#pipeline:target) #p2 > :not(#pipeline) { display:none; }
+  html:has(:target) .page { height:auto; padding-bottom:11mm; }
 </style>
 </head>
 <body>
 
 <!-- ============ PAGE 1 ============ -->
-<div class="page">
+<div class="page" id="p1">
   <div>
     <h1>How Plan Challenge works</h1>
     <div class="sub">One idea in. A fresh AI reviewer attacks the plan. Every issue gets a logged decision. A revised plan comes out. Nothing is built.</div>
@@ -119,12 +123,13 @@
 </div>
 
 <!-- ============ PAGE 2 ============ -->
-<div class="page">
+<div class="page" id="p2">
   <div>
     <h1>How it was tested, and where things live</h1>
     <div class="sub">A benchmark with planted flaws, run live on both reviewers and graded blind. Every raw reply is in the repo.</div>
   </div>
 
+  <div id="pipeline" style="display:flex; flex-direction:column; gap:4.5mm">
   <h2>The benchmark pipeline</h2>
   <div class="row">
     <div class="card"><b class="t"><span class="n">A</span>12 plans, frozen</b>
@@ -146,6 +151,8 @@
     <div class="card"><b class="t"><span class="n">E</span>Count</b>
       <span class="file">score.py report</span>
       Flaws found, false alarms on repaired plans, tokens, time, and a replay of four routing policies on the same reviews.</div>
+  </div>
+
   </div>
 
   <h2>What came out <span style="text-transform:none; letter-spacing:0; font-weight:400">&nbsp; <span class="dot" style="background:var(--codex)"></span>Codex &nbsp; <span class="dot" style="background:var(--claude)"></span>Claude &nbsp; (measured, full runs, 2026-11-19)</span></h2>

@@ -6,6 +6,15 @@ AI coding assistants write confident plans, and the model that wrote a plan tend
 
 This repo holds the skill, the benchmark I built to test it, and every raw reply behind the numbers below.
 
+**Short answer: yes, on my own plans.** One review pass on three real project plans raised 20 issues, and I accepted all 20 before writing any code. A review takes about 7 seconds with Codex.
+
+## Why download it
+
+- **A second opinion in one command.** Type `/challenge <idea>` in Claude Code or `$challenge <idea>` in Codex. You get a revised plan and a log of every issue with the reason it was accepted or rejected.
+- **Nothing to install beyond the CLIs.** The skill is one folder with two small Python files that use only the standard library. Copy the folder into a project and it works.
+- **It tells you when it failed.** If the reviewer times out or breaks the format, the plan is marked `NOT CHALLENGED` and the raw reply is kept. It never writes a review on the reviewer's behalf.
+- **You can check every number.** The 48 benchmark replies, their usage files and the grading rows are in [runs/](runs/), and the commands to rerun the benchmark are under [Reproduce](#reproduce).
+
 ## Results at a glance
 
 ![Codex and Claude compared on four measures: planted blockers found, usable reviews returned, extra valid findings per review, and median time per review](docs/results.svg)
@@ -18,6 +27,8 @@ This repo holds the skill, the benchmark I built to test it, and every raw reply
 **What I do with this:** Codex reviews every plan by default because it is fast and reliable. When a mistake would be expensive (money, safety, a public release, something hard to undo), the skill recommends Claude and asks me first.
 
 ## How it was tested
+
+![The benchmark in five steps: freeze 12 plans, run both reviewers, hide the reviewer names, grade each finding, count](docs/how-it-works-benchmark.png)
 
 - **12 synthetic plans in six matched pairs.** One plan in each pair has two planted flaws (9 blockers and 3 major issues in total). The other is the same plan with the flaws repaired. The repaired plan checks whether a reviewer drops a claim once the problem is fixed.
 - **Frozen before the first call.** Plans, answer key, [scoring rules](evals/plan-review/scoring.md) and stakes labels were committed before any reviewer ran.
@@ -72,21 +83,9 @@ Copy the [entire skill folder](.claude/skills/challenge/) into the appropriate l
 
 ## How it works
 
-A two-page visual of the whole repo: [how-it-works.pdf](docs/how-it-works.pdf).
+![One run in nine steps: you ask, the writer drafts a plan, a reviewer is picked, a fresh review runs with tools off, the reply is format-checked, every issue gets a decision, the plan is revised, one recheck runs if there was a blocker, and the skill stops and reports](docs/how-it-works-run.png)
 
-```mermaid
-flowchart TD
-  Draft["Draft plan"]
-  Route{"Reviewer choice"}
-  Ask["Confirm consequential review"]
-  Review["Fresh reviewer calls"]
-  Record["Revise and log decisions"]
-  Draft --> Route
-  Route -->|Routine or explicit| Review
-  Route -->|Consequential and automatic| Ask
-  Ask --> Review
-  Review --> Record
-```
+The same visual with the benchmark and the folder map, as a two-page PDF: [how-it-works.pdf](docs/how-it-works.pdf).
 
 - **Fixed call budget.** The regular route uses one reviewer call. A blocker can trigger one recheck. `both` makes two independent calls on the same draft, and `measure` makes four.
 - **Isolated review.** Each reviewer starts in a temporary directory and receives the frozen plan and rubric. The runner disables shell tools in Codex and tools in Claude, validates the reply format and keeps per-run usage fields. Remove secrets before sending plan text to a provider.
