@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 236" width="880" height="236" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">Codex and Claude on the same 12 plans, reviewed twice each</title>
+  <desc id="d">Planted blockers found: Codex 18 of 18, Claude 18 of 18. Reviews that passed the format check: Codex 24 of 24, Claude 21 of 24. Extra valid findings per completed review: Codex 0.7, Claude 1.8. Median time per review: Codex 7.1 seconds, Claude 17.9 seconds.</desc>
+  <rect x="0.5" y="0.5" width="879" height="235" rx="8" fill="#fcfcfb" stroke="#e3e2de"/>
+
+  <text x="24" y="34" font-size="15" font-weight="600" fill="#0b0b0b">Codex and Claude on the same 12 plans, reviewed twice each</text>
+  <text x="24" y="54" font-size="12" fill="#52514e">Full benchmark runs, 2026-11-19. Findings graded blind by an AI grader, not a person.</text>
+
+  <!-- legend -->
+  <rect x="716" y="24" width="10" height="10" rx="2" fill="#2a78d6"/>
+  <text x="732" y="33" font-size="12" fill="#0b0b0b">Codex</text>
+  <rect x="790" y="24" width="10" height="10" rx="2" fill="#eb6834"/>
+  <text x="806" y="33" font-size="12" fill="#0b0b0b">Claude</text>
+
+  <line x1="24" y1="72" x2="856" y2="72" stroke="#e3e2de"/>
+
+  <!-- panel 1: planted blockers found (scale 0-18 = 100 px) -->
+  <g transform="translate(24,0)">
+    <text y="100" font-size="13" font-weight="600" fill="#0b0b0b">Planted blockers found</text>
+    <text y="117" font-size="11" fill="#52514e">higher is better</text>
+    <text y="151" font-size="12" fill="#52514e">Codex</text>
+    <path d="M50,139 h96 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-96 z" fill="#2a78d6"/>
+    <text x="156" y="151" font-size="12" font-weight="600" fill="#0b0b0b">18/18</text>
+    <text y="181" font-size="12" fill="#52514e">Claude</text>
+    <path d="M50,169 h96 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-96 z" fill="#eb6834"/>
+    <text x="156" y="181" font-size="12" font-weight="600" fill="#0b0b0b">18/18</text>
+    <line x1="50" y1="133" x2="50" y2="191" stroke="#b9b8b3"/>
+    <text y="214" font-size="11" fill="#52514e">A tie: the test is too easy here</text>
+  </g>
+
+  <!-- panel 2: reviews that passed the format check (scale 0-24 = 100 px) -->
+  <g transform="translate(236,0)">
+    <text y="100" font-size="13" font-weight="600" fill="#0b0b0b">Usable reviews returned</text>
+    <text y="117" font-size="11" fill="#52514e">higher is better</text>
+    <text y="151" font-size="12" fill="#52514e">Codex</text>
+    <path d="M50,139 h96 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-96 z" fill="#2a78d6"/>
+    <text x="156" y="151" font-size="12" font-weight="600" fill="#0b0b0b">24/24</text>
+    <text y="181" font-size="12" fill="#52514e">Claude</text>
+    <path d="M50,169 h83.5 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-83.5 z" fill="#eb6834"/>
+    <text x="143.500" y="181" font-size="12" font-weight="600" fill="#0b0b0b">21/24</text>
+    <line x1="50" y1="133" x2="50" y2="191" stroke="#b9b8b3"/>
+    <text y="214" font-size="11" fill="#52514e">3 Claude replies broke the format</text>
+  </g>
+
+  <!-- panel 3: extra valid findings per completed review (scale 0-1.76 = 100 px) -->
+  <g transform="translate(448,0)">
+    <text y="100" font-size="13" font-weight="600" fill="#0b0b0b">Extra valid findings per review</text>
+    <text y="117" font-size="11" fill="#52514e">higher is better</text>
+    <text y="151" font-size="12" fill="#52514e">Codex</text>
+    <path d="M50,139 h36.200 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-36.200 z" fill="#2a78d6"/>
+    <text x="96.200" y="151" font-size="12" font-weight="600" fill="#0b0b0b">0.7</text>
+    <text y="181" font-size="12" fill="#52514e">Claude</text>
+    <path d="M50,169 h96 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-96 z" fill="#eb6834"/>
+    <text x="156" y="181" font-size="12" font-weight="600" fill="#0b0b0b">1.8</text>
+    <line x1="50" y1="133" x2="50" y2="191" stroke="#b9b8b3"/>
+    <text y="214" font-size="11" fill="#52514e">17 in 24 reviews, 37 in 21 reviews</text>
+  </g>
+
+  <!-- panel 4: median wall time per review (scale 0-17.9 s = 100 px) -->
+  <g transform="translate(660,0)">
+    <text y="100" font-size="13" font-weight="600" fill="#0b0b0b">Median time per review</text>
+    <text y="117" font-size="11" fill="#52514e">lower is better</text>
+    <text y="151" font-size="12" fill="#52514e">Codex</text>
+    <path d="M50,139 h35.700 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-35.700 z" fill="#2a78d6"/>
+    <text x="95.700" y="151" font-size="12" font-weight="600" fill="#0b0b0b">7.1 s</text>
+    <text y="181" font-size="12" fill="#52514e">Claude</text>
+    <path d="M50,169 h96 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-96 z" fill="#eb6834"/>
+    <text x="156" y="181" font-size="12" font-weight="600" fill="#0b0b0b">17.9 s</text>
+    <line x1="50" y1="133" x2="50" y2="191" stroke="#b9b8b3"/>
+    <text y="214" font-size="11" fill="#52514e">Codex low effort, Claude medium</text>
+  </g>
+</svg>

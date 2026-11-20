@@ -76,6 +76,13 @@ The replay assumes the user accepts the Claude recommendation every time. It lea
 - Effort settings differ (Codex low, Claude medium), as the skill ships them. An equal-effort run was not done.
 - The Codex model is unknown because the CLI did not report it.
 
+## What I would do next
+
+- Write harder plans, where a flaw only shows when two steps are read together, so the blocker test stops hitting its ceiling.
+- Have a person grade a sample of the findings and compare with the AI grader.
+- Run both reviewers at the same effort setting.
+- Rerun Claude with the validator that keeps a review with a closing remark, and report the completion rate again.
+
 ## Reproduce
 
 ```text
