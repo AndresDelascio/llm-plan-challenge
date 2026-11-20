@@ -107,3 +107,7 @@ The live commands and the scoring steps are in the [benchmark folder](evals/plan
 ## How this was built
 
 I set the question, the constraints and the stop rules, and I judged the issues on my own plans. Claude Code and ChatGPT (through Codex CLI) did most of the implementation and wrote the synthetic plans. Every number on this page comes from a saved run in this repo.
+
+## License
+
+[MIT](LICENSE)
