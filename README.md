@@ -72,6 +72,8 @@ Copy the [entire skill folder](.claude/skills/challenge/) into the appropriate l
 
 ## How it works
 
+A two-page visual of the whole repo: [how-it-works.pdf](docs/how-it-works.pdf).
+
 ```mermaid
 flowchart TD
   Draft["Draft plan"]

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plan Challenge: how the repo works</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  :root { --ink:#0b0b0b; --ink2:#52514e; --line:#c9c8c3; --soft:#f1f0ec; --surface:#fcfcfb;
+          --codex:#2a78d6; --claude:#eb6834; --bad:#b3261e; --badbg:#fbeceb; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin:0; font-family:"Segoe UI", system-ui, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--surface); }
+  .page { width:297mm; height:210mm; padding:11mm 13mm 9mm; page-break-after:always; display:flex; flex-direction:column; gap:4.5mm; overflow:hidden; }
+  .page:last-child { page-break-after:auto; }
+  h1 { font-size:21pt; margin:0; letter-spacing:-0.2px; }
+  .sub { font-size:10.5pt; color:var(--ink2); margin-top:1mm; }
+  h2 { font-size:9pt; text-transform:uppercase; letter-spacing:1.2px; color:var(--ink2); margin:0; font-weight:600; }
+  .row { display:flex; align-items:stretch; gap:0; }
+  .row.rev { flex-direction:row-reverse; }
+  .card { flex:1 1 0; background:#fff; border:1px solid var(--line); border-radius:3mm; padding:3mm 3.2mm; font-size:8.6pt; line-height:1.38; min-width:0; }
+  .card b.t { display:block; font-size:10.5pt; margin-bottom:1mm; line-height:1.2; }
+  .n { display:inline-block; width:5.2mm; height:5.2mm; border-radius:50%; background:var(--ink); color:#fff; font-size:8pt; font-weight:700; text-align:center; line-height:5.2mm; margin-right:1.4mm; vertical-align:1px; }
+  .file { font-family:Consolas, "Cascadia Mono", monospace; font-size:8pt; color:var(--ink2); display:block; margin-bottom:1.2mm; }
+  code { font-family:Consolas, "Cascadia Mono", monospace; font-size:8.2pt; background:var(--soft); padding:0 1mm; border-radius:1mm; }
+  ul { margin:0; padding-left:3.6mm; } li { margin:0.4mm 0; }
+  .arrow { flex:0 0 7mm; display:flex; align-items:center; justify-content:center; font-size:15pt; color:var(--ink2); }
+  .down { display:flex; justify-content:flex-end; padding-right:calc((100% - 28mm) / 10 - 9mm); font-size:9pt; color:var(--ink2); margin:-2.5mm 0; }
+  .down span { font-size:14pt; margin-left:1.5mm; line-height:1; }
+  .fail { margin-top:1.6mm; background:var(--badbg); border-left:2px solid var(--bad); padding:1.2mm 1.8mm; border-radius:1mm; }
+  .fail b { color:var(--bad); }
+  .soft { background:var(--soft); border-style:dashed; }
+  .codex { color:var(--codex); font-weight:700; } .claude { color:var(--claude); font-weight:700; }
+  .dot { display:inline-block; width:2.6mm; height:2.6mm; border-radius:50%; margin-right:1mm; }
+  .three { display:grid; grid-template-columns:repeat(3,1fr); gap:4mm; }
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr) 1.5fr; gap:4mm; }
+  .tile { background:#fff; border:1px solid var(--line); border-radius:3mm; padding:2.6mm 3.2mm; font-size:8.6pt; }
+  .tile .k { color:var(--ink2); font-size:8.4pt; }
+  .tile .v { display:flex; gap:5mm; margin-top:1mm; font-size:15pt; font-weight:700; line-height:1.15; }
+  .tile .v small { display:block; font-size:7.6pt; font-weight:600; color:var(--ink2); }
+  .tile .note { font-size:7.8pt; color:var(--ink2); margin-top:0.8mm; }
+  .bar { width:2.2mm; border-radius:1mm; margin-right:1.4mm; }
+  .v > div { display:flex; }
+  table { border-collapse:collapse; width:100%; font-size:8.6pt; }
+  td { padding:1.25mm 2mm; border-top:1px solid #e3e2de; vertical-align:top; }
+  td:first-child { font-family:Consolas, "Cascadia Mono", monospace; font-size:8.2pt; white-space:nowrap; width:52mm; }
+  .foot { margin-top:auto; font-size:7.8pt; color:var(--ink2); display:flex; justify-content:space-between; }
+  .cols { display:grid; grid-template-columns:1.55fr 1fr; gap:5mm; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<div class="page">
+  <div>
+    <h1>How Plan Challenge works</h1>
+    <div class="sub">One idea in. A fresh AI reviewer attacks the plan. Every issue gets a logged decision. A revised plan comes out. Nothing is built.</div>
+  </div>
+
+  <h2>One run, step by step</h2>
+  <div class="row">
+    <div class="card"><b class="t"><span class="n">1</span>You ask</b>
+      <span class="file">Claude Code or Codex chat</span>
+      <code>/challenge &lt;idea&gt;</code> in Claude Code, <code>$challenge &lt;idea&gt;</code> in Codex. An existing plan file or the current discussion also works.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">2</span>The writer drafts</b>
+      <span class="file">plan-v1.md</span>
+      Goal, constraints, non-goals, steps and success checks. At most 500 words. Secrets are removed. This draft is kept untouched.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">3</span>Pick the reviewer</b>
+      <span class="file">routing.py (no model call)</span>
+      <ul><li>Routine plan: <span class="codex">Codex</span></li>
+      <li>Money, safety, public or hard to undo: it asks you. <span class="claude">Claude</span>, both, or stay with Codex</li>
+      <li>A reviewer you name is always used</li></ul></div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">4</span>Fresh review</b>
+      <span class="file">review.py + critic-prompt.md</span>
+      <ul><li>Starts in a new empty folder</li><li>Tools switched off</li><li>Sees only the plan and the rubric, never the chat</li><li>180 s time limit</li></ul></div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">5</span>Format check</b>
+      <span class="file">validate() in review.py</span>
+      A verdict line, at most 5 issues, each with severity, failure and fix. At most 400 words.
+      <div class="fail"><b>Fails:</b> marked NOT CHALLENGED. Raw reply kept. A review is never invented.</div></div>
+  </div>
+
+  <div class="down">passes <span>↓</span></div>
+
+  <div class="row rev">
+    <div class="card"><b class="t"><span class="n">6</span>Decide on every issue</b>
+      <span class="file">decisions.md</span>
+      One row per issue: accept or reject, with one reason. No issue is skipped. Fixes outside the brief are rejected.</div>
+    <div class="arrow">←</div>
+    <div class="card"><b class="t"><span class="n">7</span>Revise the plan</b>
+      <span class="file">plan.md</span>
+      The accepted fixes are applied. The first draft stays next to it, so before and after can be compared.</div>
+    <div class="arrow">←</div>
+    <div class="card"><b class="t"><span class="n">8</span>One recheck, if needed</b>
+      <span class="file">critique-&lt;reviewer&gt;-2.md</span>
+      Only when round one raised a blocker. Same reviewer, revised plan, once. A blocker still open is reported, not hidden.</div>
+    <div class="arrow">←</div>
+    <div class="card"><b class="t"><span class="n">9</span>Stop and report</b>
+      <span class="file">three short lines</span>
+      The run folder, the verdict and the main changes. The skill stops here and waits for you before any code is written.</div>
+    <div class="arrow"></div>
+    <div class="card soft"><b class="t">What is left on disk</b>
+      <span class="file">challenge/&lt;name&gt;/</span>
+      plan-v1.md, each critique with its usage file, decisions.md and plan.md. A full record of what was raised and why it was accepted or not.</div>
+  </div>
+
+  <h2>Three ways to run it</h2>
+  <div class="three">
+    <div class="card"><b class="t">Default: one reviewer</b>
+      One call, plus one recheck if there was a blocker. <span class="codex">Codex</span> at low effort unless you choose <span class="claude">Claude</span> (medium effort).</div>
+    <div class="card"><b class="t"><code>both</code>: two opinions</b>
+      Codex then Claude, once each, on the same untouched draft. Neither sees the other's review. If one fails the result is marked PARTIALLY CHALLENGED.</div>
+    <div class="card"><b class="t"><code>measure</code>: compare them</b>
+      Each reviewer runs twice. Issues are merged and shown shuffled with no names. You accept or reject each one, then the names are revealed and counted.</div>
+  </div>
+
+  <div class="foot"><span>github.com/AndresDelascio/llm-plan-challenge</span><span>1 / 2</span></div>
+</div>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page">
+  <div>
+    <h1>How it was tested, and where things live</h1>
+    <div class="sub">A benchmark with planted flaws, run live on both reviewers and graded blind. Every raw reply is in the repo.</div>
+  </div>
+
+  <h2>The benchmark pipeline</h2>
+  <div class="row">
+    <div class="card"><b class="t"><span class="n">A</span>12 plans, frozen</b>
+      <span class="file">evals/plan-review/</span>
+      Six pairs: one plan with 2 planted flaws, and its twin with the flaws repaired. Plans, answer key and scoring rules were committed before the first call.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">B</span>Run both reviewers</b>
+      <span class="file">run_benchmark.py → runs/</span>
+      Each reviewer reads each plan twice: 48 live calls through the same review.py. Saves the reply, tokens, time, file hashes and CLI versions. Failures are kept, not rerun.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">C</span>Hide the names</b>
+      <span class="file">score.py blind</span>
+      Reviews are copied under random names and shuffled. The key that maps them back stays out of the grader's view.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">D</span>Grade each finding</b>
+      <span class="file">judgments.jsonl</span>
+      An AI grader writes one row per finding with a reason: planted flaw found, old flaw wrongly repeated, valid extra, or unsupported.</div>
+    <div class="arrow">→</div>
+    <div class="card"><b class="t"><span class="n">E</span>Count</b>
+      <span class="file">score.py report</span>
+      Flaws found, false alarms on repaired plans, tokens, time, and a replay of four routing policies on the same reviews.</div>
+  </div>
+
+  <h2>What came out <span style="text-transform:none; letter-spacing:0; font-weight:400">&nbsp; <span class="dot" style="background:var(--codex)"></span>Codex &nbsp; <span class="dot" style="background:var(--claude)"></span>Claude &nbsp; (measured, full runs, 2026-11-19)</span></h2>
+  <div class="tiles">
+    <div class="tile"><div class="k">Planted blockers found</div>
+      <div class="v"><div><span class="bar" style="background:var(--codex)"></span><span>18/18<small>Codex</small></span></div><div><span class="bar" style="background:var(--claude)"></span><span>18/18<small>Claude</small></span></div></div>
+      <div class="note">A tie. The test is too easy here.</div></div>
+    <div class="tile"><div class="k">Usable reviews returned</div>
+      <div class="v"><div><span class="bar" style="background:var(--codex)"></span><span>24/24<small>Codex</small></span></div><div><span class="bar" style="background:var(--claude)"></span><span>21/24<small>Claude</small></span></div></div>
+      <div class="note">3 Claude replies broke the format.</div></div>
+    <div class="tile"><div class="k">Extra valid findings per review</div>
+      <div class="v"><div><span class="bar" style="background:var(--codex)"></span><span>0.7<small>Codex</small></span></div><div><span class="bar" style="background:var(--claude)"></span><span>1.8<small>Claude</small></span></div></div>
+      <div class="note">17 in 24 reviews, 37 in 21 reviews.</div></div>
+    <div class="tile"><div class="k">Median time per review</div>
+      <div class="v"><div><span class="bar" style="background:var(--codex)"></span><span>7.1 s<small>Codex</small></span></div><div><span class="bar" style="background:var(--claude)"></span><span>17.9 s<small>Claude</small></span></div></div>
+      <div class="note">Codex low effort, Claude medium.</div></div>
+    <div class="tile" style="background:var(--soft)"><div class="k">The decision this led to</div>
+      <div style="font-size:10pt; font-weight:600; margin-top:1mm; line-height:1.3">Codex reviews every plan: fast and reliable. Claude is offered when a mistake would be expensive: about twice the extra findings that held up.</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <h2 style="margin-bottom:1.5mm">Where things live</h2>
+      <table>
+        <tr><td>.claude/skills/challenge/</td><td><b>The skill.</b> SKILL.md (the steps), critic-prompt.md (the rubric), review.py (calls a reviewer and checks the reply), routing.py, measure.md</td></tr>
+        <tr><td>.agents/skills/challenge/</td><td>The same skill's entry point for Codex</td></tr>
+        <tr><td>evals/plan-review/</td><td>The 12 plans, answer key, scoring rules, benchmark runner and scorer</td></tr>
+        <tr><td>runs/</td><td>Raw benchmark replies, usage files, rejected replies and every grading row</td></tr>
+        <tr><td>challenge/</td><td>Real runs on my own project plans, and the earlier pilot</td></tr>
+        <tr><td>docs/</td><td>Full results with failures and limits, the pilot write-up, a verification guide</td></tr>
+        <tr><td>tests/</td><td>23 offline tests of the runner, routing and benchmark code. No model calls</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2 style="margin-bottom:1.5mm">Read the numbers with these limits</h2>
+      <div class="card" style="font-size:8.8pt">
+        <ul>
+          <li>The plans are synthetic and were written with AI help. Twelve is a small set.</li>
+          <li>The grader is an AI and no person checked its rows. Two blind passes agreed on 47 of 55 findings.</li>
+          <li>Both reviewers hit the ceiling on planted flaws, so the test does not say which one catches more blockers.</li>
+          <li>Dollar cost is unknown for Codex. Its CLI does not report it.</li>
+          <li>The format check was loosened after the benchmark. The numbers were not recomputed.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><span>github.com/AndresDelascio/llm-plan-challenge</span><span>2 / 2</span></div>
+</div>
+
+</body>
+</html>
