@@ -1,0 +1,1 @@
+Write clip_recall(highlights, clips) to score my soccer highlight finder. Both arguments are lists of (start_s, end_s) tuples. A highlight is found when a clip overlaps it by more than zero seconds. One clip can be credited to only one highlight. Return the fraction of highlights found, crediting as many highlights as possible. There is always at least one highlight.

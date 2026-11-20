@@ -1,0 +1,1 @@
+Write gate_time_s(start_tick, stop_tick) for my sprint photogates. The timer is a 16-bit counter that counts 10,000 ticks per second. It latches the count at the start gate and at the stop gate. Sprints take under 6 seconds. Return the sprint time in seconds.

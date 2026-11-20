@@ -1,0 +1,1 @@
+Write available(stock, reservations, now_s) for my web shop. stock is the number of units on the shelf. Each reservation is a dict with the keys qty, created_s and paid. A reservation holds its units. An unpaid reservation expires after 300 seconds; a paid one never expires. Return how many units can still be sold, never below 0.

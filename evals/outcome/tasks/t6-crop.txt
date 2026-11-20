@@ -1,0 +1,1 @@
+Write to_tracker(x, y) for my shot tracker. The video is 1920x1080. The tracker runs on a center crop of 1440x1080 that is then downscaled by 2. Convert a pixel position in the original video to tracker coordinates and return (x, y). Return None when the point is outside the crop. Keep sub-pixel precision.
