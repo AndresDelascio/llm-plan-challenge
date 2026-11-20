@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import secrets
 from statistics import median
 import subprocess
 import sys
@@ -42,9 +43,13 @@ TASKS = sorted(path.stem for path in (HERE / "tasks").glob("*.txt"))
 # The model's code is saved as solution.py and imported, so a self-test block under
 # `if __name__ == "__main__"` in it does not run and its own test functions cannot collide
 # with the hidden ones. (The first live run pasted code and tests into one file; see outcome.md.)
+# The hidden tests are fed to Python on stdin, so there is no test file for the answer to open,
+# and a pass only counts with a random token that is set after the answer has been imported.
+# ponytail: same process, so code that walks the caller's stack frames could still find the
+# token; run the tests in a container if the builder is ever treated as hostile.
 HEADER = '''
 import os as _os, sys as _sys
-_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+_sys.path.insert(0, _os.getcwd())
 from solution import {function}
 '''
 # Runs the hidden tests in name order and prints the first failing test's one-line symptom
@@ -56,7 +61,7 @@ for _name, _test in sorted((k, v) for k, v in list(globals().items()) if k.start
     except BaseException:
         print("FAIL " + _test.__doc__)
         _sys.exit(1)
-print("PASS")
+print("PASS TOKEN")
 '''
 
 
@@ -73,14 +78,15 @@ def grade(task, code):
     with tempfile.TemporaryDirectory(prefix="outcome-") as cwd:
         function = (HERE / "tasks" / f"{task}.txt").read_text(encoding="utf-8").split("(")[0].split()[-1]
         (Path(cwd) / "solution.py").write_text(code, encoding="utf-8")
-        (Path(cwd) / "run.py").write_text(HEADER.format(function=function) + tests + FOOTER, encoding="utf-8")
+        token = secrets.token_hex(8)
+        script = HEADER.format(function=function) + tests + FOOTER.replace("TOKEN", token)
         try:  # -I: isolated mode, the model's code cannot pick up modules from the user's folders
-            done = subprocess.run([sys.executable, "-I", "-B", "run.py"], capture_output=True,
+            done = subprocess.run([sys.executable, "-I", "-B", "-"], input=script, capture_output=True,
                                   encoding="utf-8", errors="replace", cwd=cwd, timeout=TEST_TIMEOUT_S)
         except subprocess.TimeoutExpired:
             return f"the code did not finish in {TEST_TIMEOUT_S} seconds"
     last = (done.stdout.strip().splitlines() or [""])[-1]
-    if last == "PASS":
+    if last == "PASS " + token:
         return None
     return last[5:] if last.startswith("FAIL ") else "the code crashed when it was loaded"
 

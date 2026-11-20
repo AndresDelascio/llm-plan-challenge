@@ -118,7 +118,7 @@ For a real example, read the [camera-swap decision log](challenge/shot-tracker-n
 
 ## Reproduce
 
-30 offline tests cover both CLI adapters with no model calls. The dry run prints the benchmark plan without calling a reviewer.
+31 offline tests cover both CLI adapters with no model calls. The dry run prints the benchmark plan without calling a reviewer.
 
 ```sh
 python -B -m unittest discover -s tests -v

@@ -99,6 +99,12 @@ class HiddenTests(unittest.TestCase):
         self.assertIsNone(outcome.grade("t1-gate", CORRECT["t1-gate"] + noisy))
         self.assertIsNotNone(outcome.grade("t1-gate", NAIVE["t1-gate"] + noisy))
 
+    def test_an_answer_cannot_fake_a_pass_or_read_the_hidden_tests(self):
+        fake = "import os\nprint('PASS', flush=True)\nos._exit(0)\n"
+        self.assertIsNotNone(outcome.grade("t1-gate", fake))
+        peek = "import glob\nassert not any('def test_' in open(p).read() for p in glob.glob('*') if p != 'solution.py')\n"
+        self.assertIsNone(outcome.grade("t1-gate", peek + CORRECT["t1-gate"]))
+
     def test_a_hang_or_a_crash_counts_as_a_failure(self):
         self.assertEqual(outcome.grade("t1-gate", "import nothing_like_this"), "the code crashed when it was loaded")
 

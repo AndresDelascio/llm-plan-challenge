@@ -54,6 +54,8 @@ If `challenge` does not beat `plan` by at least 2 of 12, the README will say tha
 
 Step 2 above was first built by pasting the model's code and the hidden tests into one file. Answers that carried their own self-tests ran those in place of the hidden tests and were recorded as crashed. The grader now saves the answer as `solution.py` and imports the function. First builds were regraded offline from the saved replies; no model call was repeated, and the tasks, hidden tests, prompts and decision rule are unchanged. Results and the as-recorded counts are in [portfolio-results.md](../../docs/portfolio-results.md#follow-up-does-the-built-code-get-better-2026-11-20).
 
+A later code review found a second fault: an answer could print `PASS` and exit, or open the hidden tests in its folder. The grader now passes the tests to Python on stdin (no test file) and counts a pass only with a random token. The 48 first builds and 47 final accepted answers were regraded offline and all still pass. No model call was repeated.
+
 ## Limits fixed in advance
 
 - Six tasks, two related repeats each. Only a large effect can show.
