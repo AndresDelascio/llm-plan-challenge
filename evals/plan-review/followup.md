@@ -43,6 +43,15 @@ Measure, per plan, on plans where all four reviews completed: distinct valid fin
 
 Each model classifies each of the 12 plans once as `routine` or `consequential` (24 calls), using the wording of the skill. Compared with [stakes.jsonl](stakes.jsonl), which was frozen with the main benchmark. Any other reply counts as wrong.
 
+## Test 5: a reworded stakes rule (frozen 2026-11-20, before any call)
+
+Test 4 missed the store forecast pair (p03, p10) with both models: the money risk is indirect, because stores act on the forecast. The new wording (`STAKES_V2` in [followup.py](followup.py)) names that case. Each model classifies the 12 plans and four new held-out plans once (32 calls). Labels: [stakes.jsonl](stakes.jsonl) and [holdout-stakes.jsonl](holdout-stakes.jsonl), both frozen before the run. Any reply other than one of the two words counts as wrong. Test 4's prompt and results are not changed.
+
+- **Pass:** at least 11 of 12 on the main plans and 4 of 4 on the held-out plans, for each model, with no routine plan called consequential.
+- **Why the held-out plans:** the new wording was written after seeing which plans Test 4 missed, so a pass on p03 and p10 alone could be fitting the test. h01 and h02 carry indirect money risk in new settings; h03 and h04 are routine.
+- **Ship rule:** the skill's wording changes to match only if both models pass.
+- **Limit:** I wrote the held-out plans and their labels, so they are not an independent sample. Four plans is a smoke check, not a measure.
+
 ## Limits fixed in advance
 
 - Arm A is a fresh chat with a one-line prompt. A long chat that already holds the reasoning is not tested.

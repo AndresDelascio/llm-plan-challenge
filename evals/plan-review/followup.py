@@ -27,11 +27,19 @@ STAKES = (
     "release under the user's name or a hard-to-reverse change. Otherwise answer routine. "
     "Reply with that one word only."
 )
+STAKES_V2 = (  # Test 5: names indirect money risk, which STAKES missed on the forecast pair
+    "Classify the plan below. Answer consequential when a mistake in the plan or in what it produces "
+    "could cost material money, now or later (for example, when people set prices, stock, orders or pay "
+    "from its output), affect safety, go out publicly under the user's name, or be hard to reverse. "
+    "Otherwise answer routine. Reply with that one word only."
+)
 CASES = [f"p{n:02d}" for n in range(1, 13)]
+HOLDOUT = [f"h{n:02d}" for n in range(1, 5)]  # written for Test 5, never seen by a model before it
 
 
 def plan(case):
-    return (HERE / "plans" / f"{case}.md").read_text(encoding="utf-8-sig").strip()
+    folder = "holdout" if case.startswith("h") else "plans"
+    return (HERE / folder / f"{case}.md").read_text(encoding="utf-8-sig").strip()
 
 
 def jobs(mode, provider=None, critiques=None):
@@ -40,6 +48,8 @@ def jobs(mode, provider=None, critiques=None):
         return [(f"{c}-better-{provider}-{r}", provider, BETTER, plan(c)) for r in (1, 2) for c in CASES]
     if mode == "stakes":
         return [(f"{c}-stakes-{p}", p, STAKES, plan(c)) for c in CASES for p in ("codex", "claude")]
+    if mode == "stakes2":
+        return [(f"{c}-stakes2-{p}", p, STAKES_V2, plan(c)) for c in CASES + HOLDOUT for p in ("codex", "claude")]
     found = []  # revise: one call per saved critique, the writer is always a fresh Claude
     for path in sorted(critiques.glob("p??-*-?.md")):
         case, reviewer, repeat = path.stem.split("-")
@@ -86,7 +96,7 @@ def blind(folders, out):
 
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
-    cli.add_argument("mode", choices=("better", "revise", "stakes", "blind"))
+    cli.add_argument("mode", choices=("better", "revise", "stakes", "stakes2", "blind"))
     cli.add_argument("folders", nargs="*", type=Path, help="revise: one folder of saved critiques. blind: run folders")
     cli.add_argument("--provider", choices=("codex", "claude"), help="better: which model rewrites the plan")
     cli.add_argument("--out", type=Path)

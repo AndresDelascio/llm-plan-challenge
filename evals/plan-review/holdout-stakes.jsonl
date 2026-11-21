@@ -1,0 +1,4 @@
+{"case":"h01","stakes":"consequential","reason":"The owner sets real prices from the output; a wrong price costs money later."}
+{"case":"h02","stakes":"consequential","reason":"Staff are paid from the file; a wrong hour count is a payroll error."}
+{"case":"h03","stakes":"routine","reason":"Personal chart; a mistake is visible and harmless."}
+{"case":"h04","stakes":"routine","reason":"Personal display; a wrong split is seen on the next row."}
