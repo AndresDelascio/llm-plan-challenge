@@ -1,0 +1,1 @@
+Write trailing_mean(sales, day, window=7) for my store forecast. sales is a list of daily sales. Return the average of the sales in the window days before day; I use it as the forecast for that day.

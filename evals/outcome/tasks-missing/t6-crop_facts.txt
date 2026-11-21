@@ -1,0 +1,1 @@
+The video is 1920x1080. The tracker uses a center crop of 1440x1080 that is then downscaled by 2. Return None when the point is outside the crop. Keep sub-pixel precision.

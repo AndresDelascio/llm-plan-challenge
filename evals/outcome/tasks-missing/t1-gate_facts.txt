@@ -1,0 +1,1 @@
+The timer is a 16-bit counter that counts 10,000 ticks per second. Sprints take under 6 seconds.

@@ -1,0 +1,1 @@
+Write to_tracker(x, y) for my shot tracker. The tracker runs on a crop of the video. Convert a pixel position in the original video to tracker coordinates and return (x, y).

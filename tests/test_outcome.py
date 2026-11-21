@@ -115,5 +115,48 @@ class HiddenTests(unittest.TestCase):
         self.assertEqual(outcome.grade("t1-gate", "import nothing_like_this"), "the code crashed when it was loaded")
 
 
+class MissingFactSuite(unittest.TestCase):
+    FOLDER = ROOT / "evals/outcome/tasks-missing"
+
+    def test_each_short_prompt_names_the_same_function_and_hides_facts(self):
+        for task in outcome.TASKS:
+            with self.subTest(task=task):
+                short = (self.FOLDER / f"{task}.txt").read_text(encoding="utf-8")
+                full = (ROOT / "evals/outcome/tasks" / f"{task}.txt").read_text(encoding="utf-8")
+                self.assertEqual(short.split("(")[0], full.split("(")[0])
+                self.assertLess(len(short), len(full))
+                self.assertTrue((self.FOLDER / f"{task}_facts.txt").read_text(encoding="utf-8").strip())
+
+    def test_what_counts_as_asking(self):
+        plan = "## Plan\n1. x\n## Questions for the user\n- What is the tick rate?\n"
+        self.assertTrue(outcome.asks(plan, plan=True))
+        self.assertFalse(outcome.asks("## Plan\n1. Why? x\n## Questions for the user\nNone\n", plan=True))
+        self.assertFalse(outcome.asks("## Plan\n1. What rate?\n", plan=True))
+        self.assertTrue(outcome.asks("What is the tick rate?", plan=False))
+        self.assertFalse(outcome.asks("Is this right?\n```python\nx = 1\n```", plan=False))
+
+    def run_ask_arm(self, first_reply):
+        replies = [first_reply, "```python\n" + CORRECT["t1-gate"] + "```"]
+        seen = []
+        def fake(provider, payload, instruction):
+            seen.append(payload)
+            return replies[len(seen) - 1], {}, {}
+        with patch.object(outcome.review, "review", fake):
+            return outcome.one_run("ask", "t1-gate", "missing"), seen
+
+    def test_a_question_gets_the_facts_before_the_build(self):
+        result, seen = self.run_ask_arm("What is the tick rate?")
+        self.assertTrue(result["asked_and_answered"])
+        self.assertIn("10,000 ticks per second", seen[1])
+        self.assertEqual(result["solved_at"], 0)
+
+    def test_code_without_a_question_is_the_first_build(self):
+        result, seen = self.run_ask_arm("```python\n" + NAIVE["t1-gate"] + "```")
+        self.assertFalse(result["asked_and_answered"])
+        self.assertEqual([s["phase"] for s in result["steps"]], ["build", "reprompt"])
+        self.assertNotIn("10,000", seen[1])
+        self.assertEqual(result["solved_at"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

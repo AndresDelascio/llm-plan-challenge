@@ -1,0 +1,1 @@
+Index 0 is the first day. If there are fewer days of history than the window, use what there is. With no history return None.

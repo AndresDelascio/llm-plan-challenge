@@ -1,0 +1,1 @@
+Write merge_attendance(records) for my team attendance sheet. Each record is a dict with the keys player, date, status and updated_at. The phone app retries uploads, so the list has duplicates and corrections. Keep one record per player per date: the most recently updated one. Return the kept records as a list.

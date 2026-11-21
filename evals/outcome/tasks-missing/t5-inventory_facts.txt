@@ -1,0 +1,1 @@
+An unpaid reservation expires after 300 seconds; a paid one never expires. Never return less than 0.

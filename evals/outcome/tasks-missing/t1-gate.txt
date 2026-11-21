@@ -1,0 +1,1 @@
+Write gate_time_s(start_tick, stop_tick) for my sprint photogates. The timer latches its count at the start gate and at the stop gate. Return the sprint time in seconds.

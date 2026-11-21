@@ -41,6 +41,35 @@ TEST_TIMEOUT_S = 10
 ARMS = ("plain", "better", "plan", "challenge")
 TASKS = sorted(path.stem for path in (HERE / "tasks").glob("*.txt"))
 
+# Missing-fact suite (rules in missing.md), frozen before its first call. The prompts in
+# tasks-missing/ leave out facts that are in *_facts.txt; the hidden tests are the same as above.
+# A plan, or a chat reply with no code, that asks the user a question gets the whole facts sheet.
+PLAN_ASK = (
+    "Write a plan for the task below. Do not write the code. Use exactly these four headings: "
+    "'## Brief' (Goal, Constraints, Non-goals), '## Plan' (numbered steps), "
+    "'## Risks I already know about' and '## Questions for the user' (facts you need from the user "
+    "before building, or None). Stay under 300 words. Return only the plan."
+)
+BUILD_ASK = (
+    "Write the Python code the user asks for. Use only the standard library. If a fact you need is "
+    "missing from the request, do not guess: reply only with your questions for the user. "
+    "Otherwise reply with one ```python code block and nothing else."
+)
+ANSWERS = "\n\n=== THE USER'S ANSWERS TO YOUR QUESTIONS ===\n{facts}"
+SUITES = {"full": (HERE / "tasks", ARMS, MAX_REPROMPTS),
+          "missing": (HERE / "tasks-missing", ("plain", "ask", "plan", "challenge"), 3)}
+
+
+def asks(text, plan):
+    """Did the model ask the user something? A plan asks under its questions heading; a chat reply
+    asks when it holds a question and no code."""
+    if not text:
+        return False
+    if not plan:
+        return extract_code(text) is None and "?" in text
+    part = re.split(r"^#+\s*Questions for the user\s*$", text, flags=re.M | re.I)
+    return len(part) > 1 and "?" in re.split(r"^#", part[1], flags=re.M)[0]
+
 # The model's code is saved as solution.py and imported, so a self-test block under
 # `if __name__ == "__main__"` in it does not run and its own test functions cannot collide
 # with the hidden ones. (The first live run pasted code and tests into one file; see outcome.md.)
@@ -108,13 +137,25 @@ def call(steps, phase, provider, instruction, payload):
     return answer
 
 
-def one_run(arm, task):
-    prompt = (HERE / "tasks" / f"{task}.txt").read_text(encoding="utf-8").strip()
-    steps, note, payload = [], None, prompt
+def one_run(arm, task, suite="full"):
+    folder, _, max_reprompts = SUITES[suite]
+    prompt = (folder / f"{task}.txt").read_text(encoding="utf-8").strip()
+    facts = suite == "missing" and (folder / f"{task}_facts.txt").read_text(encoding="utf-8").strip()
+    steps, note, payload, answered, built = [], None, prompt, False, None
     if arm == "better":
         payload = call(steps, "prepare", "claude", BETTER, prompt)
+    elif arm == "ask":
+        reply = call(steps, "ask", "claude", BUILD_ASK, prompt)
+        if asks(reply, plan=False):
+            answered = True
+            payload = prompt + "\n\n=== YOUR QUESTIONS ===\n" + reply.strip() + ANSWERS.format(facts=facts)
+        elif reply is None:
+            payload = None
+        else:
+            built = reply  # it wrote code without asking: that reply is its first build
+            steps[-1]["phase"] = "build"
     elif arm in ("plan", "challenge"):
-        plan = call(steps, "prepare", "claude", PLAN, prompt)
+        plan = call(steps, "prepare", "claude", PLAN_ASK if facts else PLAN, prompt)
         if plan and arm == "challenge":
             critique = call(steps, "review", "codex", review.RUBRIC.read_text(encoding="utf-8"), plan)
             try:
@@ -123,10 +164,15 @@ def one_run(arm, task):
             except review.ReviewError as problem:
                 note = f"NOT CHALLENGED ({problem}); built from the unrevised plan"
         payload = plan and prompt + "\n\n=== PLAN ===\n" + plan
+        if facts and asks(plan, plan=True):
+            answered, payload = True, payload + ANSWERS.format(facts=facts)
     solved_at, code, symptom = None, None, None
-    for attempt in range(MAX_REPROMPTS + 1) if payload else ():
+    for attempt in range(max_reprompts + 1) if payload else ():
         ask = payload if attempt == 0 else payload + RETRY.format(code=code or "(none)", symptom=symptom)
-        reply = call(steps, "reprompt" if attempt else "build", "claude", BUILD, ask)
+        if attempt == 0 and built:
+            reply = built
+        else:
+            reply = call(steps, "reprompt" if attempt else "build", "claude", BUILD, ask)
         if reply is None:
             break
         code = extract_code(reply)
@@ -135,14 +181,15 @@ def one_run(arm, task):
         if symptom is None:
             solved_at = attempt  # 0 means the first build passed
             break
-    return {"arm": arm, "task": task, "solved_at": solved_at, "note": note, "steps": steps}
+    return {"arm": arm, "task": task, "suite": suite, "asked_and_answered": answered,
+            "solved_at": solved_at, "note": note, "steps": steps}
 
 
-def run(arm, out):
+def run(arm, out, suite="full"):
     out.mkdir(parents=True, exist_ok=False)
     for repeat in (1, 2):
         for task in TASKS:
-            result = one_run(arm, task)
+            result = one_run(arm, task, suite)
             (out / f"{task}-{repeat}.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
             print(f"{arm} {task}-{repeat}: solved_at={result['solved_at']}", flush=True)
 
@@ -175,6 +222,7 @@ def summary(folder):
         "unsolved_reprompts": sum(sum(s["phase"] == "reprompt" for s in r["steps"]) for r in runs if r["solved_at"] is None),
         "failed_calls": sum(bool(s["error"]) for r in runs for s in r["steps"]),
         "not_challenged": sum(bool(r["note"]) for r in runs),
+        "asked_and_answered": sum(bool(r.get("asked_and_answered")) for r in runs),
         "tokens_total": total, "tokens_by_phase": by_phase,
         "tokens_per_solved": round(total / len(solved)) if solved else None,
         "median_tokens": median(sum(tokens(s) for s in r["steps"]) for r in runs),
@@ -186,17 +234,21 @@ def summary(folder):
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("mode", choices=("run", "report"))
-    cli.add_argument("--arm", choices=ARMS)
+    cli.add_argument("--arm", choices=ARMS + ("ask",))
+    cli.add_argument("--suite", choices=tuple(SUITES), default="full")
     cli.add_argument("--out", type=Path, help="run: new folder for this arm. report: folder that holds outcome-<arm>/")
     cli.add_argument("--dry-run", action="store_true")
     args = cli.parse_args()
     if args.mode == "report":
-        for arm in ARMS:
-            print(arm, json.dumps(summary((args.out or ROOT / "runs") / f"outcome-{arm}")))
+        prefix = "outcome-" if args.suite == "full" else "outcome-missing-"
+        for arm in SUITES[args.suite][1]:
+            print(arm, json.dumps(summary((args.out or ROOT / "runs") / f"{prefix}{arm}")))
+    elif args.arm not in SUITES[args.suite][1]:
+        cli.error(f"arm {args.arm} is not part of suite {args.suite}")
     elif args.dry_run:
-        print(f"{2 * len(TASKS)} runs of arm {args.arm}. No model calls made.")
+        print(f"{2 * len(TASKS)} runs of arm {args.arm}, suite {args.suite}. No model calls made.")
     else:
-        run(args.arm, args.out)
+        run(args.arm, args.out, args.suite)
 
 
 if __name__ == "__main__":

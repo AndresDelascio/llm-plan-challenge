@@ -1,0 +1,1 @@
+A clip must overlap a highlight by more than zero seconds; touching ends do not count. One clip can be credited to only one highlight, and the score should credit as many highlights as possible. There is always at least one highlight.
