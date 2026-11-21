@@ -33,7 +33,7 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 
 1. **A fresh reviewer finds real problems.** On three of my own project plans, the two reviewers raised 20 distinct issues and I accepted all 20. Claude raised 18 of them and Codex 6. Only 4 were raised by both. ([pilot](docs/benchmarks.md))
 2. **On planted flaws the two reviewers tied.** Both found all 18 planted blockers in every completed review. The test is too easy to separate them on this measure.
-3. **They differ in speed, reliability and depth.** Codex took 7.1 s per review and always returned a usable reply. Claude took 17.9 s and 3 of its 24 replies broke the required format (24 of 24 passed in a later rerun, after the format check was changed to drop a closing remark). Claude wrote about twice as many extra findings that held up (1.8 per review against 0.7).
+3. **They differ in speed, reliability and depth.** Codex took 7.1 s per review and always returned a usable reply. Claude took 17.9 s and 3 of its 24 replies broke the required format (24 of 24 passed in a later rerun, after the format check was changed to drop a closing remark). Under the Claude grader, Claude wrote about twice as many extra findings that held up (1.8 per review against 0.7). A Codex grader reversed that on a sample of 30, so this one depends on who grades.
 4. **The token gap I had measured came from the setup, not the model.** In the pilot, Claude used 7.6 times the tokens of Codex. That was Claude Code loading its own startup context into every subagent. Run as a standalone process, Claude used about one sixth of Codex's tokens (2,417 against 14,184 median).
 
 5. **A plain "make it better" tied the review on planted flaws.** In a follow-up, one fresh call with that prompt fixed 24 of 24 planted flaws, the same as a review followed by a revision. The rewrite made plans three to four times longer (472 and 381 words against 183 and 212 median). The review route keeps the plan short and leaves a decision log.
@@ -73,7 +73,7 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 
 - **"All passed" is not 100%.** 12 of 12 is consistent with a true pass rate as low as 73.5% (exact 95% interval, [all intervals](docs/portfolio-results.md#how-sure-are-the-counts)). Ties at the ceiling cannot rank two methods.
 - **It is not independent validation.** The plans are synthetic and were written with AI help. Twelve plans is a small set, and two reads of the same plan are related.
-- **No person checked the grading.** The grader is Claude, which is also one of the two reviewers. Two blind grading passes over the Codex findings agreed on 47 of 55.
+- **No person checked the grading, and the two AI graders disagree.** The grader is Claude, which is also one of the two reviewers. On 30 extra findings, a Codex grader agreed with it only 16 times. Codex rejected 8 of 11 Claude-written findings that Claude had accepted, and none of Codex's. Each grader favoured its own family, so the extra-finding counts (and the "second read" result) are one grader's view. A blind sheet for a person is ready. ([details](docs/portfolio-results.md#follow-up-a-second-grader-from-the-other-family-2026-11-20))
 - **It does not say which reviewer catches more blockers.** Both hit the ceiling. The case for Claude on important plans rests on the extra findings, not on recall.
 - **Dollar cost is unknown for Codex.** Its CLI does not report cost, and tokens are not dollars.
 - **Effort settings differ** (Codex low, Claude medium), as the skill ships them. I reran Codex at medium to check: it took twice as long (13.9 s), found the same 18 of 18 blockers, and did not add valid findings (12 against 17 at low, within grading noise). Claude's lead in extra findings is not explained by the effort setting. ([follow-up](docs/portfolio-results.md#follow-up-codex-at-medium-effort)) The Codex CLI did not report which model it used.
@@ -97,7 +97,15 @@ You can also enter just the skill name to use the current discussion, or supply 
 
 ### Use it in another project
 
-Copy the [entire skill folder](.claude/skills/challenge/) into the appropriate location. Keep `SKILL.md` and its supporting files together, then start a fresh session.
+**Claude Code, one command** (Claude Code 2.1.292 or later). The repository is also a plugin, so this installs the skill for all your projects:
+
+```powershell
+claude plugin install challenge --marketplace AndresDelascio/llm-plan-challenge
+```
+
+Start a new session and call it as `/challenge:challenge <idea>` (plugin skills carry the plugin name). It still needs the Codex or Claude CLI signed in, as above.
+
+**By hand, for any client:** copy the [entire skill folder](.claude/skills/challenge/) into the appropriate location. Keep `SKILL.md` and its supporting files together, then start a fresh session.
 
 | Client | One project | All your projects |
 | --- | --- | --- |
@@ -119,7 +127,7 @@ For a real example, read the [camera-swap decision log](challenge/shot-tracker-n
 
 ## Reproduce
 
-36 offline tests cover both CLI adapters, the outcome grader and the intervals, with no model calls. The dry run prints the benchmark plan without calling a reviewer. CI runs these on Linux, Windows and macOS with Python 3.9 and 3.13.
+42 offline tests cover both CLI adapters, the outcome grader, the missing-fact suite, the regrade sample and the intervals, with no model calls. The dry run prints the benchmark plan without calling a reviewer. CI runs these on Linux, Windows and macOS with Python 3.9 and 3.13.
 
 ```sh
 python -B -m unittest discover -s tests -v

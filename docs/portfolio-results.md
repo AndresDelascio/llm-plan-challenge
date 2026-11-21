@@ -52,7 +52,7 @@ The replay assumes the user accepts the Claude recommendation every time. It lea
 
 1. **Both reviewers found every planted flaw in every completed run.** The seeded test is too easy to separate them. It shows the pipeline works. It does not show one reviewer is better at catching blockers.
 2. **Codex was faster and never failed the format check.** 7.1 s against 17.9 s median, 24/24 against 21/24 completed.
-3. **Claude wrote more findings beyond the seeds.** 37 judged valid in 21 runs (1.8 per run) against 17 in 24 runs (0.7 per run). It also wrote more unsupported ones (0.9 against 0.5 per run). About two in three of Claude's extra findings and three in five of Codex's were judged valid.
+3. **Claude wrote more findings beyond the seeds.** 37 judged valid in 21 runs (1.8 per run) against 17 in 24 runs (0.7 per run). It also wrote more unsupported ones (0.9 against 0.5 per run). About two in three of Claude's extra findings and three in five of Codex's were judged valid. A second grader from the Codex family reversed this on a sample of 30 ([follow-up](#follow-up-a-second-grader-from-the-other-family-2026-11-20)), so it is one grader's view.
 4. **Claude never repeated a repaired flaw on a control. Codex did in 2 of 12 control runs**, both on the inventory control (p05). The grader marked both as borderline.
 5. **The routing rule did not improve blocker recall here.** All four policies found 18/18. The case for sending consequential plans to Claude rests on finding 3, not on recall.
 
@@ -198,6 +198,23 @@ Reprint the numbers with `python evals/outcome/outcome.py report`.
 
 The first column is measured here. The second is supported only by the pilot on three real plans (20 issues, all accepted) and is otherwise my reasoning.
 
+## Follow-up: a second grader from the other family (2026-11-20)
+
+Every extra finding in this study was judged by one Claude grader, and Claude also wrote half the reviews. To check that grader, Codex regraded 30 extra findings blind: 15 from Codex reviews and 15 from Claude reviews, drawn with a fixed seed from those the Claude grader had called valid or unsupported. Codex saw the plan, one finding and the same three definitions, with no reviewer name and no earlier judgment. Rules were committed before the first call ([regrade.md](../evals/plan-review/regrade.md)). 30 calls, none failed ([runs/regrade](../runs/regrade/)).
+
+| Measured | Findings Codex wrote | Findings Claude wrote |
+| --- | ---: | ---: |
+| Called valid by the Claude grader | 11 / 15 | 11 / 15 |
+| Called valid by Codex | 14 / 15 | 5 / 15 |
+| Codex agrees with the Claude grader | 11 / 15 | 5 / 15 |
+
+- **The two graders agreed on 16 of 30 (34% to 72%).** That is below the 20 of 30 fixed in advance, so the extra-finding counts in this study are one grader's view, not a settled fact.
+- **Codex rejected 8 of the 11 Claude-written findings the Claude grader had accepted, and none of the 11 Codex-written ones.** Its stated reasons were mostly that the finding needs a fact the plan does not give, or that the plan already handles it.
+- **Each grader favoured its own family's findings.** I cannot tell from this which one is right. Either the Claude grader is lenient with Claude reviews, or Codex is strict with them, or both.
+- **My pre-written check pointed the wrong way.** I wrote that self-preference by the Claude grader would show as *higher* agreement on Claude-written findings. It would show as lower agreement, which is what happened (5 against 11). Read literally the check did not fire. I report the gap here instead of changing the rule after the fact.
+- **What it changes:** "Claude wrote more extra findings that held up" holds under the Claude grader only. Under Codex, this sample reverses it. The "second read" result in follow-up 2 used the same Claude grader and carries the same caveat. Planted-blocker recall and format failures are not affected: they were matched against a fixed key.
+- **Next:** a person grades the same 30 findings on [runs/regrade/sheet.md](../runs/regrade/sheet.md), which shows no reviewer and no AI judgment. `python evals/plan-review/regrade.py report` then compares both graders with the person.
+
 ## Failures
 
 - **Outcome test, grader fault.** 19 correct first builds were recorded as failures because the answers' own self-tests ran in place of the hidden tests. Fixed and regraded offline; details in the outcome section above.
@@ -220,13 +237,16 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 | Stakes rule correct (each model) | 10 / 12 | 51.6% to 97.9% |
 | Reworded stakes rule correct (each model) | 16 / 16 | 79.4% to 100% |
 | Two blind graders agreed on a Codex finding | 47 / 55 | 73.3% to 93.5% |
+| Codex grader agreed with the Claude grader (both families) | 16 / 30 | 34.3% to 71.7% |
+| Same, findings Codex wrote | 11 / 15 | 44.9% to 92.2% |
+| Same, findings Claude wrote | 5 / 15 | 11.8% to 61.6% |
 
 "All passed" here means the true rate is probably above three quarters, not that it is 100%. A tie such as 12/12 against 12/12 cannot separate two methods whose real pass rates are 80% and 100%.
 
 ## Limits
 
 - The plans are synthetic and were written with AI help. Both splits are development data. This is not independent validation.
-- The grader is an AI (Claude), which is one of the two reviewer families. It graded blind: random file names, no reviewer names, no usage files. No person has checked the judgments.
+- The grader is an AI (Claude), which is one of the two reviewer families. It graded blind: random file names, no reviewer names, no usage files. A Codex grader agreed with it on only 16 of 30 extra findings, and each favoured its own family (see the second-grader follow-up). No person has checked the judgments yet.
 - Grading is not fully repeatable. The 55 Codex findings were graded twice by separate blind graders. They agreed on 47 (85%). All disagreements were between valid, unsupported and unclear. None changed a seed match or a false alarm. The earlier pass is kept in [runs/portfolio-score-codex](../runs/portfolio-score-codex/).
 - Two repeats of the same plan are related, not independent. Twelve plans is a small set.
 - Effort settings differ in the main comparison (Codex low, Claude medium), as the skill ships them. The follow-up above reruns Codex at medium.
@@ -235,7 +255,7 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 ## What I would do next
 
 - Write harder plans, where a flaw only shows when two steps are read together, so the blocker test stops hitting its ceiling.
-- Have a person grade a sample of the findings and compare with the AI grader.
+- Have a person grade the 30 findings on [runs/regrade/sheet.md](../runs/regrade/sheet.md), to settle which AI grader to trust.
 - Test the reworded stakes rule on plans someone else writes and labels.
 - Repeat the "make it better" comparison on real plans, where the writer's chat holds context the plan text does not.
 - Rerun the outcome test on tasks where the prompt leaves out a needed fact, so plain chat no longer passes everything on the first build.

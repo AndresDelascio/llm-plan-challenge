@@ -1,0 +1,12 @@
+{
+  "name": "challenge",
+  "version": "1.0.0",
+  "description": "Draft or revise a project plan after a fresh Codex or Claude critique.",
+  "author": {
+    "name": "Andres Delascio"
+  },
+  "license": "MIT",
+  "skills": [
+    "./.claude/skills/"
+  ]
+}

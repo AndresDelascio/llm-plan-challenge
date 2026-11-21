@@ -13,6 +13,7 @@ Every model reply behind the numbers in [docs/portfolio-results.md](../docs/port
 | `followup-stakes/` | Stakes rule: each model labels each plan routine or consequential |
 | `followup-score/` | Grading for the follow-up tests |
 | `outcome-plain/`, `outcome-better/`, `outcome-plan/`, `outcome-challenge/` | Outcome test: one JSON per run with every prompt, reply, token count and test result |
+| `regrade/` | Second grader: the 30 sampled findings (`key.jsonl`), Codex's judgments (`codex.jsonl`), and a blind sheet for a person (`sheet.md`, `human.csv`) |
 | `sandbox-check-windows/` | Does Codex's read-only sandbox refuse a write on Windows? |
 
 Each `*.usage.json` holds the CLI's reported tokens, time and (for Claude) cost. Tokens are reported by the CLI, not counted by me.

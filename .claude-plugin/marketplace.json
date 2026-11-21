@@ -1,0 +1,14 @@
+{
+  "name": "llm-plan-challenge",
+  "description": "The challenge skill: a fresh-reviewer critique for project plans.",
+  "owner": {
+    "name": "Andres Delascio"
+  },
+  "plugins": [
+    {
+      "name": "challenge",
+      "source": "./",
+      "description": "Draft or revise a project plan after a fresh Codex or Claude critique."
+    }
+  ]
+}

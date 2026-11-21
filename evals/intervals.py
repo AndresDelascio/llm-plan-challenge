@@ -17,6 +17,9 @@ COUNTS = [
     ("Stakes rule correct (each model)", 10, 12),
     ("Reworded stakes rule correct (each model)", 16, 16),
     ("Two blind graders agreed on a Codex finding", 47, 55),
+    ("Codex grader agreed with the Claude grader (both families)", 16, 30),
+    ("Same, findings Codex wrote", 11, 15),
+    ("Same, findings Claude wrote", 5, 15),
 ]
 
 
