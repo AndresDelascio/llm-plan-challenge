@@ -1,0 +1,194 @@
+{
+  "arm": "plain",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": null,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 12768,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 972,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1197,
+        "output_tokens_details": {
+          "thinking_tokens": 118
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 972,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1197,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 972,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 972
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.031724,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert pixel positions in the original video to shot-tracker coordinates.\n\nThe tracker sees only a crop of the original frame, so a point is mapped by:\n  1. subtracting the crop's top-left offset, and\n  2. scaling it if the crop is resized before it reaches the tracker.\n\nSet the constants below to match your pipeline. The defaults are placeholders.\n\"\"\"\n\n# Crop rectangle in ORIGINAL video pixel coordinates.\nCROP_X = 0        # left edge of the crop\nCROP_Y = 0        # top edge of the crop\nCROP_W = 1920     # crop width\nCROP_H = 1080     # crop height\n\n# Size of the frame the tracker receives. Set these to None if the crop\n# is passed to the tracker without resizing.\nTRACKER_W = None\nTRACKER_H = None\n\n# If True, points outside the crop are clamped to its edge.\n# If False, a ValueError is raised for those points.\nCLAMP = False\n\n\ndef to_tracker(x, y, *,\n               crop_x=None, crop_y=None, crop_w=None, crop_h=None,\n               tracker_w=None, tracker_h=None, clamp=None):\n    \"\"\"Map an (x, y) pixel position in the original video to tracker coordinates.\n\n    Any keyword argument left as None uses the module-level constant.\n    Returns a tuple (tx, ty) of floats.\n    \"\"\"\n    cx = CROP_X if crop_x is None else crop_x\n    cy = CROP_Y if crop_y is None else crop_y\n    cw = CROP_W if crop_w is None else crop_w\n    ch = CROP_H if crop_h is None else crop_h\n    tw = TRACKER_W if tracker_w is None else tracker_w\n    th = TRACKER_H if tracker_h is None else tracker_h\n    do_clamp = CLAMP if clamp is None else clamp\n\n    if cw <= 0 or ch <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n\n    # Translate into the crop's coordinate space.\n    lx = float(x) - cx\n    ly = float(y) - cy\n\n    # Check that the point lies inside the crop.\n    if not (0 <= lx <= cw and 0 <= ly <= ch):\n        if do_clamp:\n            lx = min(max(lx, 0.0), float(cw))\n            ly = min(max(ly, 0.0), float(ch))\n        else:\n            raise ValueError(\n                f\"Point ({x}, {y}) is outside the crop \"\n                f\"[{cx}, {cy}, {cx + cw}, {cy + ch}].\"\n            )\n\n    # Scale if the crop is resized before it reaches the tracker.\n    sx = (tw / cw) if tw else 1.0\n    sy = (th / ch) if th else 1.0\n\n    return (lx * sx, ly * sy)\n\n\nif __name__ == \"__main__\":\n    # Example: a 1280x720 crop starting at (320, 180), resized to 640x360.\n    print(to_tracker(960, 540,\n                     crop_x=320, crop_y=180, crop_w=1280, crop_h=720,\n                     tracker_w=640, tracker_h=360))  # -> (320.0, 180.0)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 25653,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2109,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2698,
+        "output_tokens_details": {
+          "thinking_tokens": 721
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2109,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2698,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2109,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2109
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.07084,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert pixel positions in the original video to shot-tracker coordinates.\n\nNOTE: I couldn't pin down the cause of the failed check. The plan doesn't give\nthe crop rectangle or the tracker's input size. With the placeholder defaults\n(a full 1920x1080 \"crop\", no resize) the old code returned (960.0, 540.0) for\n(960, 540), which is the identity mapping. So the check almost certainly expects\ncrop and resize values that I wasn't given. Please fill in CROP_* and TRACKER_*\nbelow, or tell me the expected output for (960, 540) and the crop or resize\nsettings.\n\nWhat I did change, since it was a real defect:\n  * Points outside the crop no longer raise by default. The map from video\n    coordinates to tracker coordinates is a plain offset plus scale, so a point\n    outside the crop gets a negative or out-of-range coordinate instead of an\n    error. Set OUT_OF_CROP = \"raise\" or \"clamp\" if you want the old behavior.\n  * Scaling no longer treats a size of 0 as \"no resize\". Only None means that.\n  * An optional pixel-center convention (PIXEL_CENTERS) and an optional\n    normalized [0, 1] output (NORMALIZED) are available in case your tracker\n    uses either one.\n\nThe mapping:\n  1. Subtract the crop's top-left offset.\n  2. Scale it if the crop is resized before it reaches the tracker.\n\"\"\"\n\n# ---------------------------------------------------------------------------\n# Configuration. These are placeholders. Set them to match your pipeline.\n# ---------------------------------------------------------------------------\n\n# Crop rectangle in ORIGINAL video pixel coordinates.\nCROP_X = 0        # left edge of the crop\nCROP_Y = 0        # top edge of the crop\nCROP_W = 1920     # crop width\nCROP_H = 1080     # crop height\n\n# Size of the frame the tracker receives. Use None if the crop is passed\n# to the tracker without resizing.\nTRACKER_W = None\nTRACKER_H = None\n\n# What to do with points outside the crop: \"extrapolate\", \"clamp\", or \"raise\".\nOUT_OF_CROP = \"extrapolate\"\n\n# If True, treat integer pixel coordinates as pixel centers when resizing,\n# which matches the OpenCV cv2.resize convention: t = (p + 0.5) * s - 0.5.\nPIXEL_CENTERS = False\n\n# If True, return coordinates normalized to [0, 1] across the tracker frame.\nNORMALIZED = False\n\n\ndef to_tracker(x, y, *,\n               crop_x=None, crop_y=None, crop_w=None, crop_h=None,\n               tracker_w=None, tracker_h=None,\n               out_of_crop=None, pixel_centers=None, normalized=None):\n    \"\"\"Map an (x, y) pixel position in the original video to tracker coordinates.\n\n    Any keyword argument left as None uses the module-level constant.\n    Returns a tuple (tx, ty) of floats.\n    \"\"\"\n    cx = CROP_X if crop_x is None else crop_x\n    cy = CROP_Y if crop_y is None else crop_y\n    cw = CROP_W if crop_w is None else crop_w\n    ch = CROP_H if crop_h is None else crop_h\n    tw = TRACKER_W if tracker_w is None else tracker_w\n    th = TRACKER_H if tracker_h is None else tracker_h\n    mode = OUT_OF_CROP if out_of_crop is None else out_of_crop\n    centers = PIXEL_CENTERS if pixel_centers is None else pixel_centers\n    norm = NORMALIZED if normalized is None else normalized\n\n    if cw <= 0 or ch <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    if tw is not None and tw <= 0:\n        raise ValueError(\"Tracker width must be positive.\")\n    if th is not None and th <= 0:\n        raise ValueError(\"Tracker height must be positive.\")\n    if mode not in (\"extrapolate\", \"clamp\", \"raise\"):\n        raise ValueError(\"out_of_crop must be 'extrapolate', 'clamp' or 'raise'.\")\n\n    # 1. Translate into the crop's coordinate space.\n    lx = float(x) - cx\n    ly = float(y) - cy\n\n    inside = 0.0 <= lx <= cw and 0.0 <= ly <= ch\n    if not inside:\n        if mode == \"raise\":\n            raise ValueError(\n                f\"Point ({x}, {y}) is outside the crop \"\n                f\"[{cx}, {cy}, {cx + cw}, {cy + ch}].\"\n            )\n        if mode == \"clamp\":\n            lx = min(max(lx, 0.0), float(cw))\n            ly = min(max(ly, 0.0), float(ch))\n\n    # 2. Scale if the crop is resized before it reaches the tracker.\n    out_w = float(cw if tw is None else tw)\n    out_h = float(ch if th is None else th)\n    sx = out_w / cw\n    sy = out_h / ch\n\n    if centers:\n        tx = (lx + 0.5) * sx - 0.5\n        ty = (ly + 0.5) * sy - 0.5\n    else:\n        tx = lx * sx\n        ty = ly * sy\n\n    if norm:\n        tx /= out_w\n        ty /= out_h\n\n    return (tx, ty)\n\n\nif __name__ == \"__main__\":\n    # Example: a 1280x720 crop starting at (320, 180), resized to 640x360.\n    print(to_tracker(960, 540,\n                     crop_x=320, crop_y=180, crop_w=1280, crop_h=720,\n                     tracker_w=640, tracker_h=360))  # -> (320.0, 180.0)\n\n    # Frame center with the current module settings.\n    print(to_tracker(960, 540))\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 21792,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2998,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2347,
+        "output_tokens_details": {
+          "thinking_tokens": 304
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2998,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2347,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2998,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2998
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.070932,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert pixel positions in the original video to shot-tracker coordinates.\n\nNOTE: I can't fix the frame-center check without more information.\nThe plan doesn't say where the crop is or what size the tracker's input is.\nThe previous version silently used a full-frame 1920x1080 crop with no resize.\nThat is an identity mapping, so (960, 540) came back unchanged, and the check\nrejected it. Any other default I picked would just be a different guess.\n\nThis version has no made-up defaults. If the crop isn't configured, it raises\nan error that says exactly what's missing, so it won't return a plausible but\nwrong number. To finish it, I need one of these:\n  * the crop rectangle (x, y, width, height) in original-video pixels, and the\n    tracker's input size if the crop is resized, or\n  * the expected tracker coordinates for (960, 540), plus the video resolution.\n\nSet the values below with configure(...) or pass them as keyword arguments.\n\nThe mapping:\n  1. Subtract the crop's top-left corner.\n  2. Scale by (tracker size / crop size) if the crop is resized.\n\"\"\"\n\n# ---------------------------------------------------------------------------\n# Configuration. These must be set to match your pipeline. None means unknown.\n# ---------------------------------------------------------------------------\nCROP_X = None      # left edge of the crop, in original-video pixels\nCROP_Y = None      # top edge of the crop\nCROP_W = None      # crop width\nCROP_H = None      # crop height\n\n# Size of the frame the tracker receives. Leave as None if the crop is passed\n# to the tracker without resizing.\nTRACKER_W = None\nTRACKER_H = None\n\n# What to do with points outside the crop: \"extrapolate\", \"clamp\", or \"raise\".\nOUT_OF_CROP = \"extrapolate\"\n\n# If True, return coordinates normalized to [0, 1] across the tracker frame.\nNORMALIZED = False\n\n\ndef configure(crop_x, crop_y, crop_w, crop_h, tracker_w=None, tracker_h=None,\n              out_of_crop=\"extrapolate\", normalized=False):\n    \"\"\"Set the module-level crop and resize settings in one call.\"\"\"\n    global CROP_X, CROP_Y, CROP_W, CROP_H, TRACKER_W, TRACKER_H\n    global OUT_OF_CROP, NORMALIZED\n    CROP_X, CROP_Y, CROP_W, CROP_H = crop_x, crop_y, crop_w, crop_h\n    TRACKER_W, TRACKER_H = tracker_w, tracker_h\n    OUT_OF_CROP, NORMALIZED = out_of_crop, normalized\n\n\ndef _pick(value, default):\n    return default if value is None else value\n\n\ndef to_tracker(x, y, *,\n               crop_x=None, crop_y=None, crop_w=None, crop_h=None,\n               tracker_w=None, tracker_h=None,\n               out_of_crop=None, normalized=None):\n    \"\"\"Map an (x, y) pixel in the original video to tracker coordinates.\n\n    Any keyword argument left as None uses the module-level setting.\n    Returns a tuple (tx, ty) of floats.\n    \"\"\"\n    cx = _pick(crop_x, CROP_X)\n    cy = _pick(crop_y, CROP_Y)\n    cw = _pick(crop_w, CROP_W)\n    ch = _pick(crop_h, CROP_H)\n    tw = _pick(tracker_w, TRACKER_W)\n    th = _pick(tracker_h, TRACKER_H)\n    mode = _pick(out_of_crop, OUT_OF_CROP)\n    norm = _pick(normalized, NORMALIZED)\n\n    missing = [name for name, v in\n               ((\"crop_x\", cx), (\"crop_y\", cy), (\"crop_w\", cw), (\"crop_h\", ch))\n               if v is None]\n    if missing:\n        raise ValueError(\n            \"Crop is not configured (missing: \" + \", \".join(missing) + \"). \"\n            \"Call configure(crop_x, crop_y, crop_w, crop_h[, tracker_w, \"\n            \"tracker_h]) with your tracker's actual crop settings.\"\n        )\n    if (tw is None) != (th is None):\n        raise ValueError(\"Set both tracker_w and tracker_h, or neither.\")\n    if cw <= 0 or ch <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    if tw is not None and (tw <= 0 or th <= 0):\n        raise ValueError(\"Tracker width and height must be positive.\")\n    if mode not in (\"extrapolate\", \"clamp\", \"raise\"):\n        raise ValueError(\"out_of_crop must be 'extrapolate', 'clamp' or 'raise'.\")\n\n    # 1. Translate into the crop's coordinate space.\n    lx = float(x) - cx\n    ly = float(y) - cy\n\n    if not (0.0 <= lx <= cw and 0.0 <= ly <= ch):\n        if mode == \"raise\":\n            raise ValueError(\n                f\"Point ({x}, {y}) is outside the crop \"\n                f\"[{cx}, {cy}, {cx + cw}, {cy + ch}].\"\n            )\n        if mode == \"clamp\":\n            lx = min(max(lx, 0.0), float(cw))\n            ly = min(max(ly, 0.0), float(ch))\n\n    # 2. Scale if the crop is resized before it reaches the tracker.\n    out_w = float(cw if tw is None else tw)\n    out_h = float(ch if th is None else th)\n    tx = lx * out_w / cw\n    ty = ly * out_h / ch\n\n    if norm:\n        tx /= out_w\n        ty /= out_h\n\n    return (tx, ty)\n\n\nif __name__ == \"__main__\":\n    # Example only. Replace with your real crop and resize settings.\n    print(to_tracker(960, 540,\n                     crop_x=320, crop_y=180, crop_w=1280, crop_h=720,\n                     tracker_w=640, tracker_h=360))  # -> (320.0, 180.0)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 26859,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 3067,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2930,
+        "output_tokens_details": {
+          "thinking_tokens": 768
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 3067,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2930,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 3067,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 3067
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.083144,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert pixel positions in the original video to shot-tracker coordinates.\n\nSTATUS: still blocked on missing information, so the frame-center check will\nkeep failing.\n\nThis failure report has no new details. The plan still doesn't say where the\ncrop is or what size the tracker's input is. The answer for (960, 540)\ndepends entirely on those values:\n  * A full-frame crop with no resize returns (960, 540). That was the earlier\n    version, and the check rejected it.\n  * A centered 1280x720 crop returns (640, 360).\n  * That crop resized to 640x360 returns (320, 180).\n  * Normalized output returns (0.5, 0.5).\nEach of these is a valid answer for some pipeline. Choosing one to pass the\ncheck would be a guess, not a fix, and a wrong guess would quietly shift every\nshot position the tracker reports. So this version still refuses to run until\nthe crop is configured.\n\nTo finish it, fill in the CONFIG block below or call configure(...) with one\nof these:\n  * the crop rectangle (x, y, width, height) in original-video pixels, and\n    the tracker's input size if the crop is resized, or\n  * the expected tracker output for (960, 540) and the video resolution.\n    I can work out the crop from those.\n\nThe mapping:\n  1. Subtract the crop's top-left corner.\n  2. Scale by (tracker size / crop size) if the crop is resized.\n\"\"\"\n\n# ---------------------------------------------------------------------------\n# CONFIG. Set these to match your pipeline. None means unknown.\n# ---------------------------------------------------------------------------\nCROP_X = None      # left edge of the crop, in original-video pixels\nCROP_Y = None      # top edge of the crop\nCROP_W = None      # crop width\nCROP_H = None      # crop height\n\n# Size of the frame the tracker receives. Leave as None if the crop is passed\n# to the tracker without resizing.\nTRACKER_W = None\nTRACKER_H = None\n\n# What to do with points outside the crop: \"extrapolate\", \"clamp\", or \"raise\".\nOUT_OF_CROP = \"extrapolate\"\n\n# If True, return coordinates normalized to [0, 1] across the tracker frame.\nNORMALIZED = False\n\n\ndef configure(crop_x, crop_y, crop_w, crop_h, tracker_w=None, tracker_h=None,\n              out_of_crop=\"extrapolate\", normalized=False):\n    \"\"\"Set the module-level crop and resize settings in one call.\"\"\"\n    global CROP_X, CROP_Y, CROP_W, CROP_H, TRACKER_W, TRACKER_H\n    global OUT_OF_CROP, NORMALIZED\n    CROP_X, CROP_Y, CROP_W, CROP_H = crop_x, crop_y, crop_w, crop_h\n    TRACKER_W, TRACKER_H = tracker_w, tracker_h\n    OUT_OF_CROP, NORMALIZED = out_of_crop, normalized\n\n\ndef _pick(value, default):\n    return default if value is None else value\n\n\ndef to_tracker(x, y, *,\n               crop_x=None, crop_y=None, crop_w=None, crop_h=None,\n               tracker_w=None, tracker_h=None,\n               out_of_crop=None, normalized=None):\n    \"\"\"Map an (x, y) pixel in the original video to tracker coordinates.\n\n    Any keyword argument left as None uses the module-level setting.\n    Returns a tuple (tx, ty) of floats.\n    \"\"\"\n    cx = _pick(crop_x, CROP_X)\n    cy = _pick(crop_y, CROP_Y)\n    cw = _pick(crop_w, CROP_W)\n    ch = _pick(crop_h, CROP_H)\n    tw = _pick(tracker_w, TRACKER_W)\n    th = _pick(tracker_h, TRACKER_H)\n    mode = _pick(out_of_crop, OUT_OF_CROP)\n    norm = _pick(normalized, NORMALIZED)\n\n    missing = [name for name, v in\n               ((\"crop_x\", cx), (\"crop_y\", cy), (\"crop_w\", cw), (\"crop_h\", ch))\n               if v is None]\n    if missing:\n        raise ValueError(\n            \"Crop is not configured (missing: \" + \", \".join(missing) + \"). \"\n            \"Set the CONFIG values or call configure(crop_x, crop_y, crop_w, \"\n            \"crop_h[, tracker_w, tracker_h]) with your tracker's actual crop.\"\n        )\n    if (tw is None) != (th is None):\n        raise ValueError(\"Set both tracker_w and tracker_h, or neither.\")\n    if cw <= 0 or ch <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    if tw is not None and (tw <= 0 or th <= 0):\n        raise ValueError(\"Tracker width and height must be positive.\")\n    if mode not in (\"extrapolate\", \"clamp\", \"raise\"):\n        raise ValueError(\"out_of_crop must be 'extrapolate', 'clamp' or 'raise'.\")\n\n    # 1. Translate into the crop's coordinate space.\n    lx = float(x) - cx\n    ly = float(y) - cy\n\n    if not (0.0 <= lx <= cw and 0.0 <= ly <= ch):\n        if mode == \"raise\":\n            raise ValueError(\n                f\"Point ({x}, {y}) is outside the crop \"\n                f\"[{cx}, {cy}, {cx + cw}, {cy + ch}].\"\n            )\n        if mode == \"clamp\":\n            lx = min(max(lx, 0.0), float(cw))\n            ly = min(max(ly, 0.0), float(ch))\n\n    # 2. Scale if the crop is resized before it reaches the tracker.\n    out_w = float(cw if tw is None else tw)\n    out_h = float(ch if th is None else th)\n    tx = lx * out_w / cw\n    ty = ly * out_h / ch\n\n    if norm:\n        tx /= out_w\n        ty /= out_h\n\n    return (tx, ty)\n\n\nif __name__ == \"__main__\":\n    # Example only, using made-up numbers. Replace them with your real crop\n    # and resize settings.\n    print(to_tracker(960, 540,\n                     crop_x=320, crop_y=180, crop_w=1280, crop_h=720,\n                     tracker_w=640, tracker_h=360))  # -> (320.0, 180.0)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    }
+  ]
+}

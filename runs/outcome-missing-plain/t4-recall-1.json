@@ -1,0 +1,102 @@
+{
+  "arm": "plain",
+  "task": "t4-recall",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 14624,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 987,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1252,
+        "output_tokens_details": {
+          "thinking_tokens": 267
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 987,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1252,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 987,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 987
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.032944,
+      "error": null,
+      "reply": "```python\nfrom bisect import bisect_left\nfrom typing import Iterable, Sequence, Tuple\n\nInterval = Tuple[float, float]\n\n\ndef clip_recall(highlights: Sequence[Interval], clips: Iterable[Interval]) -> float:\n    \"\"\"Return the fraction of highlights that at least one clip overlaps.\n\n    Both arguments are lists of (start_s, end_s) tuples in seconds.\n\n    Overlap rule: a clip (cs, ce) overlaps a highlight (hs, he) when\n    cs < he and ce > hs. The intervals must share some positive span of\n    time, so a clip that only touches a highlight's boundary\n    (for example ce == hs) does not count. A zero-length highlight\n    (hs == he) counts as found if it falls strictly inside a clip.\n\n    Edge cases:\n      * No highlights: returns 1.0, since there was nothing to miss.\n      * No clips: returns 0.0 when highlights exist.\n      * Each highlight is counted at most once, however many clips\n        overlap it.\n\n    Runs in O((H + C) log C) time. Clips are sorted once, and each\n    highlight is then checked with a binary search.\n    \"\"\"\n    highlights = list(highlights)\n    if not highlights:\n        return 1.0\n\n    def _check(iv, kind):\n        if len(iv) != 2:\n            raise ValueError(f\"{kind} {iv!r} must be a (start_s, end_s) pair\")\n        s, e = iv\n        if e < s:\n            raise ValueError(f\"{kind} {iv!r} has end before start\")\n        return float(s), float(e)\n\n    hl = [_check(h, \"highlight\") for h in highlights]\n    cl = sorted(_check(c, \"clip\") for c in clips)\n    if not cl:\n        return 0.0\n\n    starts = [s for s, _ in cl]\n    # prefix_max_end[i] is the largest end among clips[0..i].\n    prefix_max_end = []\n    best = float(\"-inf\")\n    for _, e in cl:\n        best = max(best, e)\n        prefix_max_end.append(best)\n\n    found = 0\n    for hs, he in hl:\n        # Clips with start < he are candidates. Bisect_left gives that count.\n        k = bisect_left(starts, he)\n        if k > 0 and prefix_max_end[k - 1] > hs:\n            found += 1\n\n    return found / len(hl)\n\n\nif __name__ == \"__main__\":\n    hs = [(10, 20), (30, 40), (50, 60), (70, 70)]\n    cs = [(15, 25), (40, 45), (65, 75)]\n    # (10,20) is found. (30,40) only touches at 40, so it is missed.\n    # (50,60) is missed. The point (70,70) is inside (65,75), so it is found.\n    assert clip_recall(hs, cs) == 0.5\n    assert clip_recall([], cs) == 1.0\n    assert clip_recall(hs, []) == 0.0\n    print(\"ok\")\n```",
+      "symptom": "wrong recall for highlights [(0,10),(20,30)] and one clip (5,25)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 26035,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2040,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2593,
+        "output_tokens_details": {
+          "thinking_tokens": 1109
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2040,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2593,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2040,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2040
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.068188,
+      "error": null,
+      "reply": "```python\nfrom typing import Iterable, List, Sequence, Tuple\n\nInterval = Tuple[float, float]\n\n\ndef clip_recall(highlights: Sequence[Interval], clips: Iterable[Interval]) -> float:\n    \"\"\"Return the fraction of highlights found by the clips.\n\n    Both arguments are lists of (start_s, end_s) tuples in seconds.\n\n    Overlap rule: a clip (cs, ce) overlaps a highlight (hs, he) when\n    cs < he and ce > hs. The two must share some positive span of time,\n    so a clip that only touches a highlight's boundary (for example\n    ce == hs) does not count. A zero-length highlight (hs == he) counts\n    as overlapped if it falls strictly inside a clip.\n\n    Matching rule: each clip can find at most one highlight, and each\n    highlight is found at most once. One long clip that spans several\n    highlights gets credit for only one of them. The function finds the\n    largest possible set of highlight-to-clip pairs (maximum bipartite\n    matching), so the recall is never understated by a poor assignment.\n\n    Edge cases:\n      * No highlights: returns 1.0, since there was nothing to miss.\n      * No clips: returns 0.0 when highlights exist.\n    \"\"\"\n    highlights = list(highlights)\n    if not highlights:\n        return 1.0\n\n    def _check(iv, kind):\n        if len(iv) != 2:\n            raise ValueError(f\"{kind} {iv!r} must be a (start_s, end_s) pair\")\n        s, e = iv\n        s, e = float(s), float(e)\n        if e < s:\n            raise ValueError(f\"{kind} {iv!r} has end before start\")\n        return s, e\n\n    hl = [_check(h, \"highlight\") for h in highlights]\n    cl = [_check(c, \"clip\") for c in clips]\n    if not cl:\n        return 0.0\n\n    # Build the overlap graph from each highlight to the clips that overlap it.\n    adj: List[List[int]] = [\n        [ci for ci, (cs, ce) in enumerate(cl) if cs < he and ce > hs]\n        for hs, he in hl\n    ]\n\n    # Kuhn's augmenting-path algorithm, done iteratively to avoid deep recursion.\n    match_clip = [-1] * len(cl)  # match_clip[c] is the highlight matched to clip c\n    found = 0\n    for h in range(len(hl)):\n        if not adj[h]:\n            continue\n        visited = [False] * len(cl)\n        stack = [[h, 0]]  # highlights on the current path, with the next edge index\n        via: List[int] = []  # via[k] is the clip that links stack[k] to stack[k + 1]\n        while stack:\n            top = stack[-1]\n            u, i = top\n            if i < len(adj[u]):\n                top[1] += 1\n                c = adj[u][i]\n                if visited[c]:\n                    continue\n                visited[c] = True\n                via.append(c)\n                if match_clip[c] == -1:\n                    # Augment along the path.\n                    for k, (hu, _) in enumerate(stack):\n                        match_clip[via[k]] = hu\n                    found += 1\n                    break\n                stack.append([match_clip[c], 0])\n            else:\n                stack.pop()\n                if via:\n                    via.pop()\n\n    return found / len(hl)\n\n\nif __name__ == \"__main__\":\n    hs = [(10, 20), (30, 40), (50, 60), (70, 70)]\n    cs = [(15, 25), (40, 45), (65, 75)]\n    # (10,20) is found. (30,40) only touches at 40, so it is missed.\n    # (50,60) is missed. The point (70,70) is inside (65,75), so it is found.\n    assert clip_recall(hs, cs) == 0.5\n    assert clip_recall([], cs) == 1.0\n    assert clip_recall(hs, []) == 0.0\n    # One clip that spans two highlights finds only one of them.\n    assert clip_recall([(0, 10), (20, 30)], [(5, 25)]) == 0.5\n    # Two clips can cover both highlights. The matching must pick the\n    # assignment that finds both.\n    assert clip_recall([(0, 10), (20, 30)], [(5, 25), (25, 28)]) == 1.0\n    assert clip_recall([(0, 10), (20, 30)], [(5, 25), (8, 9)]) == 1.0\n    print(\"ok\")\n```",
+      "symptom": null
+    }
+  ]
+}

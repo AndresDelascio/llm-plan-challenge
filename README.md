@@ -8,7 +8,7 @@ This repo holds the skill, the benchmark I built to test it, and every raw reply
 
 **Short answer: yes, on my own plans, but the second model is not the reason.** One review pass on three real project plans raised 20 issues, and I accepted all 20 before writing any code. A review takes about 7 seconds with Codex. When I tested the idea itself, a fresh read was what helped: a second Claude review added more than a Codex review did, and a plain "make this plan better" fixed the planted flaws just as well. ([four follow-up tests](docs/portfolio-results.md#follow-up-four-tests-of-the-idea-itself-2026-11-20))
 
-**And not for small coding tasks.** On six small functions checked by hidden tests, plain chat passed 12 of 12 on the first build. So did a plan with a `/challenge` review, at 15 times the tokens. ([outcome test](docs/portfolio-results.md#follow-up-does-the-built-code-get-better-2026-11-20))
+**And not for small coding tasks.** On six small functions checked by hidden tests, plain chat passed 12 of 12 on the first build. So did a plan with a `/challenge` review, at 15 times the tokens. When the prompt left out the facts, plain chat that was allowed to ask passed 12 of 12, against 11 for a plan and 10 for a reviewed plan, at a fraction of the tokens. ([outcome tests](docs/portfolio-results.md#follow-up-does-the-built-code-get-better-2026-11-20))
 
 ## When to use it
 
@@ -39,11 +39,11 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 5. **A plain "make it better" tied the review on planted flaws.** In a follow-up, one fresh call with that prompt fixed 24 of 24 planted flaws, the same as a review followed by a revision. The rewrite made plans three to four times longer (472 and 381 words against 183 and 212 median). The review route keeps the plan short and leaves a decision log.
 6. **A second read helped more than a second model.** On 9 plans, two Claude reviews found 19 distinct valid issues, one Codex plus one Claude found 17, and two Codex reviews found 6.
 
-7. **For small coding tasks, plain chat was enough.** Four ways to get six small functions built, 12 runs each, hidden tests as the judge. All 48 first builds passed. The extra steps bought nothing and cost 3 to 15 times the tokens.
+7. **For small coding tasks, plain chat was enough.** Four ways to get six small functions built, 12 runs each, hidden tests as the judge. All 48 first builds passed. The extra steps bought nothing and cost 3 to 15 times the tokens. In a second run the prompts left out key facts (a tick rate, a crop size). Plain chat that could not ask passed 2 of 12. Told it may ask, it passed 12 of 12, against 11 for a plan with a questions step and 10 for a reviewed plan, using 0.57 and 0.13 times their tokens. Asking was what helped, not planning. ([details](docs/portfolio-results.md#second-outcome-test-the-prompt-leaves-out-a-fact))
 
 ![Mean tokens per run up to the first build: plain chat 1,575, make this prompt better 5,398, plan without review 5,222, plan with a challenge review 23,533. All 48 first builds passed.](docs/outcome-tokens.svg)
 
-**What I do with this:** Small, checkable tasks go straight to chat with no plan. Codex reviews every plan by default because it is fast and reliable. When a mistake would be expensive (money, safety, a public release, something hard to undo), the skill recommends Claude and asks me first.
+**What I do with this:** Small, checkable tasks go straight to chat with no plan, with "ask me if a fact is missing". Codex reviews every plan by default because it is fast and reliable. When a mistake would be expensive (money, safety, a public release, something hard to undo), the skill recommends Claude and asks me first.
 
 ## How it was tested
 
@@ -78,7 +78,7 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 - **Dollar cost is unknown for Codex.** Its CLI does not report cost, and tokens are not dollars.
 - **Effort settings differ** (Codex low, Claude medium), as the skill ships them. I reran Codex at medium to check: it took twice as long (13.9 s), found the same 18 of 18 blockers, and did not add valid findings (12 against 17 at low, within grading noise). Claude's lead in extra findings is not explained by the effort setting. ([follow-up](docs/portfolio-results.md#follow-up-codex-at-medium-effort)) The Codex CLI did not report which model it used.
 - **It does not show that the review beats a simple rewrite.** On the planted flaws both fixed everything, so that test hit its ceiling. Real plans with context outside the plan text are not tested.
-- **The outcome test hit its ceiling.** Plain chat passed everything, so the test shows that planning costs more on small tasks. It cannot show whether planning helps on large or hard-to-check work, which is where I use the tool. My first grader also miscounted 19 correct builds as failures; it was fixed and the saved replies regraded, with the details in the results page.
+- **The outcome tests are small.** With every fact in the prompt, plain chat passed everything. With facts left out, chat that may ask matched planning, but the simulated user handed over every fact for any question, and six small functions need only one round of questions. Neither test shows whether planning helps on large or hard-to-check work, which is where I use the tool. My first grader also miscounted 19 correct builds as failures; it was fixed and the saved replies regraded, with the details in the results page.
 - **The stakes rule was fixed after seeing its miss.** The first wording called the store forecast plan routine with both models. A reworded rule scored 16 of 16 with both, including four new held-out plans, but I wrote those plans and their labels. ([details](docs/portfolio-results.md#5-a-reworded-stakes-rule-16-of-16-for-both-models))
 - **In the pilot I accepted every issue**, so it shows which reviewer raised more, not which was more often right.
 

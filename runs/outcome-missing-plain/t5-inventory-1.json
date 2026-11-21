@@ -1,0 +1,102 @@
+{
+  "arm": "plain",
+  "task": "t5-inventory",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 13960,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 979,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1139,
+        "output_tokens_details": {
+          "thinking_tokens": 136
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 979,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1139,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 979,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 979
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.03062,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for a web shop.\n\nAssumptions (adjust if your shop's rules differ):\n  * Paid reservations always hold their units. The units are sold but not yet\n    removed from `stock`. If you decrement `stock` when an order is paid,\n    pass count_paid=False so those units are not subtracted twice.\n  * Unpaid reservations hold their units only for `hold_s` seconds after\n    `created_s`. After that the hold has expired and the units go back on sale.\n    The default is 15 minutes.\n  * A reservation created \"in the future\" (clock skew) counts as active.\n  * The result is never negative. Over-reservation returns 0.\n\"\"\"\n\nDEFAULT_HOLD_S = 15 * 60\n\n\ndef _is_paid(value):\n    \"\"\"Interpret the `paid` field strictly so a string like \"false\" is not truthy.\"\"\"\n    if isinstance(value, str):\n        return value.strip().lower() in (\"1\", \"true\", \"yes\", \"y\", \"paid\")\n    return bool(value)\n\n\ndef available(stock, reservations, now_s, hold_s=DEFAULT_HOLD_S, count_paid=True):\n    \"\"\"Return how many units can still be sold.\n\n    stock        -- number of units physically on the shelf\n    reservations -- iterable of dicts with keys 'qty', 'created_s', 'paid'\n    now_s        -- current time in seconds, on the same clock as created_s\n    hold_s       -- how long an unpaid reservation holds its units\n    count_paid   -- whether paid reservations still need subtracting from stock\n    \"\"\"\n    if stock is None:\n        raise ValueError(\"stock must be a number\")\n    if hold_s < 0:\n        raise ValueError(\"hold_s must be >= 0\")\n\n    held = 0\n    for i, r in enumerate(reservations or ()):\n        try:\n            qty = int(r[\"qty\"])\n            created_s = float(r[\"created_s\"])\n            paid = _is_paid(r.get(\"paid\", False))\n        except (KeyError, TypeError, ValueError) as exc:\n            raise ValueError(f\"invalid reservation at index {i}: {r!r}\") from exc\n\n        if qty <= 0:\n            continue  # ignore empty or negative reservations\n\n        if paid:\n            if count_paid:\n                held += qty\n        elif now_s - created_s < hold_s:\n            held += qty  # unpaid hold that has not expired yet\n\n    return max(0, int(stock) - held)\n\n\nif __name__ == \"__main__\":\n    now = 10_000\n    res = [\n        {\"qty\": 2, \"created_s\": now - 60, \"paid\": False},     # active hold\n        {\"qty\": 3, \"created_s\": now - 3600, \"paid\": False},   # expired hold\n        {\"qty\": 1, \"created_s\": now - 7200, \"paid\": True},    # paid, still held\n    ]\n    assert available(10, res, now) == 7\n    assert available(10, res, now, count_paid=False) == 8\n    assert available(2, res, now) == 0\n    assert available(5, [], now) == 5\n    print(\"ok\")\n```",
+      "symptom": "wrong count with one unpaid reservation made 301 seconds ago"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 14127,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2049,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1345,
+        "output_tokens_details": {
+          "thinking_tokens": 134
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2049,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1345,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2049,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2049
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.043300000000000005,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for a web shop.\n\nAssumptions (adjust if your shop's rules differ):\n  * Paid reservations always hold their units. The units are sold but not yet\n    removed from `stock`. If you decrement `stock` when an order is paid,\n    pass count_paid=False so those units are not subtracted twice.\n  * Unpaid reservations hold their units only for `hold_s` seconds after\n    `created_s`. After that the hold has expired and the units go back on sale.\n    The default is 5 minutes (300 seconds). A hold that is exactly 300 seconds\n    old has expired.\n  * A reservation created \"in the future\" (clock skew) counts as active.\n  * The result is never negative. Over-reservation returns 0.\n\"\"\"\n\nDEFAULT_HOLD_S = 5 * 60\n\n\ndef _is_paid(value):\n    \"\"\"Interpret the `paid` field strictly so a string like \"false\" is not truthy.\"\"\"\n    if isinstance(value, str):\n        return value.strip().lower() in (\"1\", \"true\", \"yes\", \"y\", \"paid\")\n    return bool(value)\n\n\ndef available(stock, reservations, now_s, hold_s=DEFAULT_HOLD_S, count_paid=True):\n    \"\"\"Return how many units can still be sold.\n\n    stock        -- number of units physically on the shelf\n    reservations -- iterable of dicts with keys 'qty', 'created_s', 'paid'\n    now_s        -- current time in seconds, on the same clock as created_s\n    hold_s       -- how long an unpaid reservation holds its units\n    count_paid   -- whether paid reservations still need subtracting from stock\n    \"\"\"\n    if stock is None:\n        raise ValueError(\"stock must be a number\")\n    if hold_s < 0:\n        raise ValueError(\"hold_s must be >= 0\")\n\n    held = 0\n    for i, r in enumerate(reservations or ()):\n        try:\n            qty = int(r[\"qty\"])\n            created_s = float(r[\"created_s\"])\n            paid = _is_paid(r.get(\"paid\", False))\n        except (KeyError, TypeError, ValueError) as exc:\n            raise ValueError(f\"invalid reservation at index {i}: {r!r}\") from exc\n\n        if qty <= 0:\n            continue  # ignore empty or negative reservations\n\n        if paid:\n            if count_paid:\n                held += qty\n        elif now_s - created_s < hold_s:\n            held += qty  # unpaid hold that has not expired yet\n\n    return max(0, int(stock) - held)\n\n\nif __name__ == \"__main__\":\n    now = 10_000\n    res = [\n        {\"qty\": 2, \"created_s\": now - 60, \"paid\": False},     # active hold\n        {\"qty\": 3, \"created_s\": now - 3600, \"paid\": False},   # expired hold\n        {\"qty\": 1, \"created_s\": now - 7200, \"paid\": True},    # paid, still held\n    ]\n    assert available(10, res, now) == 7\n    assert available(10, res, now, count_paid=False) == 8\n    assert available(2, res, now) == 0\n    assert available(5, [], now) == 5\n\n    # Unpaid hold made 301 seconds ago has expired.\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 301, \"paid\": False}], now) == 10\n    # Unpaid hold made 299 seconds ago is still active.\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 299, \"paid\": False}], now) == 6\n    # Exactly 300 seconds old: expired.\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 300, \"paid\": False}], now) == 10\n    print(\"ok\")\n```",
+      "symptom": null
+    }
+  ]
+}

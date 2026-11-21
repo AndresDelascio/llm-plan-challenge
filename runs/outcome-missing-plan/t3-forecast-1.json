@@ -1,0 +1,101 @@
+{
+  "arm": "plan",
+  "task": "t3-forecast",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 11981,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1043,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1005,
+        "output_tokens_details": {
+          "thinking_tokens": 109
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1043,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1005,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1043,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1043
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.028452,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `trailing_mean(sales, day, window=7)`. It returns the mean of `sales[day-window : day]`, the `window` days strictly before `day`, as the forecast for `day`.\n\n**Constraints:**\n- Exclude `sales[day]` itself. Including it would leak the actual value into its own forecast.\n- `day` is a 0-based index into `sales`.\n- Pure function: no mutation of `sales`, no external dependencies.\n- Handle the start of the series explicitly. If `day - window` goes negative, a naive slice wraps around in Python and silently gives wrong numbers.\n\n**Non-goals:** Seasonality, weighting, handling missing dates or calendar gaps, and producing forecasts for a whole series at once.\n\n## Plan\n1. Validate inputs. `window` must be an int \u2265 1. `day` must be an int with 0 \u2264 day \u2264 len(sales), so the day right after the data can still be forecast.\n2. Compute `start = max(0, day - window)` and slice `sales[start:day]`.\n3. If `day < window`, apply the early-days policy (see Questions). The default is to raise `ValueError`.\n4. Return `sum(slice) / len(slice)` as a float.\n5. Write tests:\n   - a normal case\n   - `day` equal to `window` (exact fit)\n   - `day = len(sales)` (forecasting the next day)\n   - `day = 0`\n   - `day < window`\n   - `window = 1`\n   - a negative or too-large `day`\n   - a check that `sales[day]` is never read, e.g. set it to a huge value and confirm the result doesn't change\n6. Add a docstring that states the window is exclusive of `day`.\n\n## Risks I already know about\n- **Negative-index wraparound.** A slice like `sales[-3:2]` returns wrong or empty data with no error. The clamp in step 2 and the tests in step 5 guard against this.\n- **Off-by-one on \"before.\"** Including `day` in the window would make the forecasts look much better than they really are.\n- **Gaps and closed days.** If the store has closed days stored as 0 or simply missing, positional days are not calendar days, and the mean will be biased.\n- **Non-numeric values.** `None` or NaN entries would break the mean or spread through it.\n\n## Questions for the user\n1. When fewer than `window` prior days exist, what should happen? Options are to raise an error, return `None`, or average whatever days are available. On `day = 0` there is no data at all, so that case needs an answer too.\n2. Does `sales` contain closed or missing days? If so, how are they represented (0, `None`, or left out of the list)?\n3. Is `day` 0-based?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 18102,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1942,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2018,
+        "output_tokens_details": {
+          "thinking_tokens": 107
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1942,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2018,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1942,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1942
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.055903999999999995,
+      "error": null,
+      "reply": "```python\n\"\"\"Trailing-mean forecast for daily store sales.\"\"\"\n\nimport math\nimport unittest\nfrom numbers import Real\n\n\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Forecast sales for ``day`` as the mean of the days strictly before it.\n\n    The window covers ``sales[max(0, day - window) : day]``. It never includes\n    ``sales[day]``, so the actual value can't leak into its own forecast.\n\n    Args:\n        sales: Sequence of daily sales figures. Index 0 is the first day.\n        day: 0-based index of the day to forecast. ``day == len(sales)`` is\n            allowed, which forecasts the day right after the data ends.\n        window: Number of prior days to average. Must be an int >= 1.\n\n    Returns:\n        The mean of the prior days as a float. When fewer than ``window``\n        prior days exist, it averages the days that are available. When\n        there is no history (``day == 0``), it returns ``None``.\n\n    Raises:\n        TypeError: If ``day`` or ``window`` is not an int, or a sales value\n            in the window is not a real number.\n        ValueError: If ``window < 1``, ``day`` is outside\n            ``0..len(sales)``, or a sales value in the window is NaN.\n\n    Note:\n        Positions are treated as consecutive days. Closed or missing days\n        that are stored as 0 or left out of the list will bias the mean.\n    \"\"\"\n    if isinstance(window, bool) or not isinstance(window, int):\n        raise TypeError(f\"window must be an int, got {type(window).__name__}\")\n    if window < 1:\n        raise ValueError(f\"window must be >= 1, got {window}\")\n    if isinstance(day, bool) or not isinstance(day, int):\n        raise TypeError(f\"day must be an int, got {type(day).__name__}\")\n    if not 0 <= day <= len(sales):\n        raise ValueError(f\"day must be in 0..{len(sales)}, got {day}\")\n\n    # Clamp the start so the slice can't wrap around to the end of the list.\n    start = max(0, day - window)\n    history = sales[start:day]\n    if not history:\n        return None\n\n    for i, value in enumerate(history, start=start):\n        if isinstance(value, bool) or not isinstance(value, Real):\n            raise TypeError(f\"sales[{i}] is not a number: {value!r}\")\n        if math.isnan(value):\n            raise ValueError(f\"sales[{i}] is NaN\")\n\n    return sum(history) / len(history)\n\n\nclass TrailingMeanTests(unittest.TestCase):\n    def setUp(self):\n        self.sales = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]\n\n    def test_normal_case(self):\n        # Days 2..8 -> 30..90\n        self.assertAlmostEqual(trailing_mean(self.sales, 9), 60.0)\n\n    def test_day_equals_window(self):\n        # Days 0..6 -> 10..70\n        self.assertAlmostEqual(trailing_mean(self.sales, 7), 40.0)\n\n    def test_forecast_next_day(self):\n        # Days 3..9 -> 40..100\n        self.assertAlmostEqual(trailing_mean(self.sales, len(self.sales)), 70.0)\n\n    def test_day_zero_returns_none(self):\n        self.assertIsNone(trailing_mean(self.sales, 0))\n        self.assertIsNone(trailing_mean([], 0))\n\n    def test_partial_history_uses_available_days(self):\n        self.assertAlmostEqual(trailing_mean(self.sales, 1), 10.0)\n        self.assertAlmostEqual(trailing_mean(self.sales, 3), 20.0)\n\n    def test_window_one(self):\n        self.assertAlmostEqual(trailing_mean(self.sales, 5, window=1), 50.0)\n\n    def test_returns_float(self):\n        self.assertIsInstance(trailing_mean([1, 2], 2), float)\n\n    def test_day_out_of_range(self):\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, -1)\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, len(self.sales) + 1)\n\n    def test_bad_window(self):\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, 5, window=0)\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, 5, window=2.5)\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, 5, window=True)\n\n    def test_bad_day_type(self):\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, 3.0)\n\n    def test_target_day_never_read(self):\n        poisoned = list(self.sales)\n        poisoned[8] = 10**12\n        self.assertEqual(trailing_mean(poisoned, 8), trailing_mean(self.sales, 8))\n        poisoned[8] = None  # Would raise if it were read.\n        self.assertEqual(trailing_mean(poisoned, 8), trailing_mean(self.sales, 8))\n\n    def test_bad_values_in_window(self):\n        with self.assertRaises(TypeError):\n            trailing_mean([1, None, 3], 3)\n        with self.assertRaises(ValueError):\n            trailing_mean([1, float(\"nan\"), 3], 3)\n\n    def test_input_not_mutated(self):\n        original = list(self.sales)\n        trailing_mean(self.sales, 9)\n        self.assertEqual(self.sales, original)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}

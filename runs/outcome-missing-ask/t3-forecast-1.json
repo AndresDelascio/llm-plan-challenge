@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t3-forecast",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 7287,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1009,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 369,
+        "output_tokens_details": {
+          "thinking_tokens": 169
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1009,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 369,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1009,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1009
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01546,
+      "error": null,
+      "reply": "Before I write this, I need two details:\n\n1. **How is `day` indexed?** Is it a 0-based list index, so `sales[day]` is that day's sales and the window is `sales[day-window:day]`? Or is it 1-based, or something else?\n\n2. **What should happen when there are fewer than `window` days before `day`?** For example, `day=3` with `window=7`, or `day=0` with no prior data. Options:\n   - Average whatever days are available, and return something specific (`None`, `0`, or raise) when there are none.\n   - Return `None` until a full window exists.\n   - Raise a `ValueError`."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 6017,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1253,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 261,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1253,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 261,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1253,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1253
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.015252,
+      "error": null,
+      "reply": "```python\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Return the mean of sales over the `window` days before `day`.\n\n    `day` is a 0-based index into `sales` (index 0 is the first day).\n    The window is sales[day - window : day], so day itself is excluded.\n    If fewer than `window` days of history exist, the available days are\n    averaged. If there is no history (day == 0), None is returned.\n\n    `day` may equal len(sales), which forecasts the next day after the data.\n    \"\"\"\n    if window < 1:\n        raise ValueError(\"window must be at least 1\")\n    if day < 0 or day > len(sales):\n        raise IndexError(\"day out of range\")\n\n    history = sales[max(0, day - window):day]\n    if not history:\n        return None\n    return sum(history) / len(history)\n```",
+      "symptom": null
+    }
+  ]
+}

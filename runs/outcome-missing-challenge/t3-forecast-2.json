@@ -1,0 +1,160 @@
+{
+  "arm": "challenge",
+  "task": "t3-forecast",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 10775,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1044,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 933,
+        "output_tokens_details": {
+          "thinking_tokens": 100
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1044,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 933,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1044,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1044
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.027020000000000002,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `trailing_mean(sales, day, window=7)`. It returns the mean of the `window` days before `day`, which is `sales[day-window : day]`, and serves as that day's forecast.\n\n**Constraints:**\n- Exclude `day` itself. Including it would leak the value being forecast.\n- Use plain Python with no new dependencies.\n- Don't mutate `sales`.\n\n**Non-goals:**\n- Weighting, seasonality, or handling for holidays and promotions.\n- Vectorized or rolling computation over every day.\n- Date parsing (`day` is an integer index).\n\n## Plan\n1. Validate the inputs. `window` must be an integer \u2265 1 and `day` an integer \u2265 0. Clarify whether `day` may equal `len(sales)`, meaning a forecast for tomorrow.\n2. Compute `start = max(0, day - window)`. Clamping stops a negative start from wrapping around to the end of the list.\n3. Take `sales[start:day]`.\n4. Apply the agreed policy for short or empty windows (see Questions).\n5. Apply the agreed policy for missing values such as `None` or NaN.\n6. Return `sum / count` as a float.\n7. Write tests:\n   - A normal case, such as day 10 with window 7.\n   - A check that `sales[day]` is excluded.\n   - `day < window`.\n   - `day = 0`.\n   - `day = len(sales)`.\n   - A missing value inside the window.\n   - Invalid inputs.\n\n## Risks I already know about\n- **Negative-index wraparound.** For `day < window`, `sales[day-7:day]` silently returns wrong data or an empty list. The clamp in step 2 handles this.\n- **Off-by-one or leakage.** Including `sales[day]` would make backtests look better than the forecast really is.\n- **Bias from closures.** Days the store was closed, recorded as zeros, would pull the mean down.\n- **Partial windows.** Early-day forecasts based on 1\u20136 days are noisy.\n- **Integer-only sales.** The result must still be a float.\n\n## Questions for the user\n1. Is `day` a 0-based index into `sales`?\n2. When fewer than `window` prior days exist, what should happen? Options are averaging what's available, returning `None`, or raising an error.\n3. How are missing or closed days represented, and should they be skipped or counted as 0?\n4. Should `day == len(sales)` be allowed, so you can forecast the next unseen day?"
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 6455,
+      "usage": {
+        "input_tokens": 14844,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 165,
+        "reasoning_output_tokens": 0
+      },
+      "error": null,
+      "reply": "VERDICT: PROCEED WITH CHANGES\n\n### 1. [major] Forecasts beyond the end use the wrong days\n\n- Failure: When `day > len(sales)`, Python silently truncates the slice. The function can average older observations even though some of the requested days have no data.\n- Fix: Reject `day > len(sales)` and explicitly decide whether to allow equality. Test both boundaries.\n\n### 2. [major] Missing values can leave a zero denominator\n\n- Failure: If the chosen policy skips missing values, a window containing only `None` or NaN becomes empty after step 4. Step 6 then divides by zero.\n- Fix: Apply the agreed empty-window behavior after missing-value handling too. Test a window whose values are all skipped."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 12961,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2069,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1224,
+        "output_tokens_details": {
+          "thinking_tokens": 133
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2069,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1224,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2069,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2069
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.04104000000000001,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `trailing_mean(sales, day, window=7)`. It returns the mean of the `window` days before `day`, which is `sales[day-window : day]`, and serves as that day's forecast.\n\n**Constraints:**\n- Exclude `day` itself. Including it would leak the value being forecast.\n- Use plain Python with no new dependencies.\n- Don't mutate `sales`.\n\n**Non-goals:**\n- Weighting, seasonality, or handling for holidays and promotions.\n- Vectorized or rolling computation over every day.\n- Date parsing (`day` is an integer index).\n\n## Plan\n1. Validate the inputs:\n   - `window` must be an integer \u2265 1.\n   - `day` must be an integer \u2265 0.\n   - Reject `day > len(sales)`. Python would otherwise truncate the slice and silently average older days.\n   - Decide explicitly whether `day == len(sales)` is allowed, which means a forecast for tomorrow (see Questions).\n2. Compute `start = max(0, day - window)`. Clamping stops a negative start from wrapping around to the end of the list.\n3. Take `sales[start:day]`.\n4. Apply the agreed policy for missing values such as `None` or NaN.\n5. Apply the agreed policy for short or empty windows (see Questions). Base it on the count of values left after step 4, so that a window where every value was skipped never reaches a division by zero.\n6. Return `sum / count` as a float.\n7. Write tests:\n   - A normal case, such as day 10 with window 7.\n   - A check that `sales[day]` is excluded.\n   - `day < window`.\n   - `day = 0`.\n   - `day = len(sales)`, following the agreed policy.\n   - `day = len(sales) + 1`, which should be rejected.\n   - A missing value inside the window.\n   - A window where every value is missing or skipped.\n   - Invalid inputs.\n\n## Risks I already know about\n- **Negative-index wraparound.** For `day < window`, `sales[day-7:day]` silently returns wrong data or an empty list. The clamp in step 2 handles this.\n- **Out-of-range `day`.** For `day > len(sales)`, the slice is silently truncated and averages the wrong days. Step 1 rejects this.\n- **Off-by-one or leakage.** Including `sales[day]` would make backtests look better than the forecast really is.\n- **Bias from closures.** Days the store was closed, recorded as zeros, would pull the mean down.\n- **Partial windows.** Early-day forecasts based on 1\u20136 days are noisy.\n- **Empty window after skipping missing values.** This would divide by zero. Step 5 handles it.\n- **Integer-only sales.** The result must still be a float.\n\n## Questions for the user\n1. Is `day` a 0-based index into `sales`?\n2. When fewer than `window` usable prior days exist, what should happen? This includes the case where none are usable because all were skipped as missing. Options are averaging what's available, returning `None`, or raising an error.\n3. How are missing or closed days represented, and should they be skipped or counted as 0?\n4. Should `day == len(sales)` be allowed, so you can forecast the next unseen day? Any `day` beyond that will be rejected."
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 18218,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2141,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1909,
+        "output_tokens_details": {
+          "thinking_tokens": 179
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2141,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1909,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2141,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2141
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.055316000000000004,
+      "error": null,
+      "reply": "```python\n\"\"\"Trailing-mean forecast for daily store sales.\n\nDecisions from your answers:\n  - `day` is a 0-based index (index 0 is the first day).\n  - Fewer than `window` prior days: average whatever history exists.\n  - No usable history: return None.\n\nAssumptions you didn't specify (easy to change):\n  - day == len(sales) is ALLOWED, so you can forecast the next unseen day.\n    Any day beyond that raises ValueError.\n  - Missing values (None or NaN) are SKIPPED, not counted as 0. If every\n    value in the window is missing, the result is None.\n  - Zeros are real data and are kept, so closed days recorded as 0 will\n    pull the mean down. Record closed days as None if you want them skipped.\n\"\"\"\n\nimport math\nimport unittest\n\n\ndef _is_int(x):\n    return isinstance(x, int) and not isinstance(x, bool)\n\n\ndef _is_missing(v):\n    return v is None or (isinstance(v, float) and math.isnan(v))\n\n\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Return the mean of sales[day-window:day] as the forecast for `day`.\n\n    sales[day] itself is never included, which keeps the forecast free of\n    the value it is trying to predict.\n\n    Returns a float, or None if no usable history exists.\n    Raises TypeError or ValueError for invalid inputs.\n    \"\"\"\n    if not _is_int(window):\n        raise TypeError(\"window must be an int\")\n    if window < 1:\n        raise ValueError(\"window must be >= 1\")\n    if not _is_int(day):\n        raise TypeError(\"day must be an int\")\n    if day < 0:\n        raise ValueError(\"day must be >= 0\")\n    if day > len(sales):\n        raise ValueError(\n            f\"day {day} is beyond the forecastable range (max {len(sales)})\"\n        )\n\n    # Clamp so a negative start can't wrap around to the end of the list.\n    start = max(0, day - window)\n    values = [v for v in sales[start:day] if not _is_missing(v)]\n\n    # Check the count after skipping missing values, so we never divide by zero.\n    if not values:\n        return None\n    return sum(values) / len(values)\n\n\nclass TestTrailingMean(unittest.TestCase):\n    def setUp(self):\n        self.sales = list(range(1, 16))  # 15 days: 1..15\n\n    def test_normal_case(self):\n        # day 10, window 7 -> indices 3..9 -> values 4..10\n        self.assertEqual(trailing_mean(self.sales, 10), sum(range(4, 11)) / 7)\n\n    def test_excludes_current_day(self):\n        sales = [1, 1, 1, 1000]\n        self.assertEqual(trailing_mean(sales, 3, window=3), 1.0)\n\n    def test_partial_window(self):\n        # day 3 < window 7 -> use indices 0..2 only, no wraparound\n        self.assertEqual(trailing_mean(self.sales, 3), 2.0)\n\n    def test_day_zero_returns_none(self):\n        self.assertIsNone(trailing_mean(self.sales, 0))\n\n    def test_empty_sales(self):\n        self.assertIsNone(trailing_mean([], 0))\n\n    def test_day_equals_len_forecasts_tomorrow(self):\n        self.assertEqual(trailing_mean(self.sales, 15), sum(range(9, 16)) / 7)\n\n    def test_day_beyond_len_rejected(self):\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, 16)\n\n    def test_missing_values_skipped(self):\n        sales = [2, None, 4, float(\"nan\"), 6]\n        self.assertEqual(trailing_mean(sales, 5, window=5), 4.0)\n\n    def test_all_missing_returns_none(self):\n        sales = [None, float(\"nan\"), None, 5]\n        self.assertIsNone(trailing_mean(sales, 3, window=3))\n\n    def test_zeros_are_kept(self):\n        self.assertEqual(trailing_mean([0, 0, 6], 3, window=3), 2.0)\n\n    def test_returns_float_for_int_sales(self):\n        result = trailing_mean([1, 2], 2, window=2)\n        self.assertIsInstance(result, float)\n        self.assertEqual(result, 1.5)\n\n    def test_does_not_mutate(self):\n        sales = [1, None, 3]\n        copy = list(sales)\n        trailing_mean(sales, 3)\n        self.assertEqual(sales, copy)\n\n    def test_invalid_inputs(self):\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, 5, window=0)\n        with self.assertRaises(ValueError):\n            trailing_mean(self.sales, -1)\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, 5, window=2.5)\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, 5.0)\n        with self.assertRaises(TypeError):\n            trailing_mean(self.sales, True)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}

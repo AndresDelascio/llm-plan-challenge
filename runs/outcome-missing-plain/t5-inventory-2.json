@@ -1,0 +1,102 @@
+{
+  "arm": "plain",
+  "task": "t5-inventory",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 12472,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 989,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1084,
+        "output_tokens_details": {
+          "thinking_tokens": 158
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 989,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1084,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 989,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 989
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.0296,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for a web shop.\n\nAssumptions (adjust if your shop works differently):\n  * `stock` is the physical count on the shelf. Paid orders stay in it until\n    they ship, so a paid reservation keeps holding its units and never expires.\n  * An unpaid reservation is a temporary hold (e.g. an item sitting in a\n    checkout). It expires `hold_ttl_s` seconds after `created_s`, and then its\n    units go back on sale. The default is 15 minutes.\n  * A reservation with a `created_s` later than `now_s` (clock skew) is treated\n    as active.\n  * The result never goes below 0, even if reservations exceed stock.\n\"\"\"\n\nfrom typing import Iterable, Mapping\n\nDEFAULT_HOLD_TTL_S = 15 * 60  # unpaid holds last 15 minutes\n\n\ndef _is_active(reservation: Mapping, now_s: float, hold_ttl_s: float) -> bool:\n    if reservation.get(\"paid\"):\n        return True\n    created_s = reservation[\"created_s\"]\n    return now_s - created_s < hold_ttl_s\n\n\ndef available(\n    stock: int,\n    reservations: Iterable[Mapping],\n    now_s: float,\n    hold_ttl_s: float = DEFAULT_HOLD_TTL_S,\n) -> int:\n    \"\"\"Return how many units can still be sold at time `now_s`.\n\n    Each reservation is a dict with:\n      qty        -- units held (a non-negative int)\n      created_s  -- creation time in seconds, on the same clock as `now_s`\n      paid       -- truthy if the reservation has been paid for\n    \"\"\"\n    if stock < 0:\n        raise ValueError(\"stock must be non-negative\")\n    if hold_ttl_s < 0:\n        raise ValueError(\"hold_ttl_s must be non-negative\")\n\n    held = 0\n    for r in reservations:\n        qty = r[\"qty\"]\n        if qty < 0:\n            raise ValueError(f\"reservation qty must be non-negative: {r!r}\")\n        if _is_active(r, now_s, hold_ttl_s):\n            held += qty\n\n    return max(0, stock - held)\n\n\nif __name__ == \"__main__\":\n    now = 10_000\n    res = [\n        {\"qty\": 2, \"created_s\": now - 60, \"paid\": False},     # active hold\n        {\"qty\": 3, \"created_s\": now - 3600, \"paid\": False},   # expired hold\n        {\"qty\": 1, \"created_s\": now - 86400, \"paid\": True},   # paid, still held\n    ]\n    assert available(10, res, now) == 7\n    assert available(2, res, now) == 0\n    assert available(5, [], now) == 5\n    assert available(10, res, now, hold_ttl_s=7200) == 4\n    print(\"ok\")\n```",
+      "symptom": "wrong count with one unpaid reservation made 301 seconds ago"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 13556,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1976,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1303,
+        "output_tokens_details": {
+          "thinking_tokens": 152
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1976,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1303,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1976,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1976
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.041876,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for a web shop.\n\nAssumptions (adjust if your shop works differently):\n  * `stock` is the physical count on the shelf. Paid orders stay in it until\n    they ship, so a paid reservation keeps holding its units and never expires.\n  * An unpaid reservation is a temporary hold (e.g. an item sitting in a\n    checkout). It expires `hold_ttl_s` seconds after `created_s`, and then its\n    units go back on sale. The default is 5 minutes (300 seconds). A hold is\n    active while now_s - created_s < hold_ttl_s, so it has expired at exactly\n    300 seconds and after.\n  * A reservation with a `created_s` later than `now_s` (clock skew) is treated\n    as active.\n  * The result never goes below 0, even if reservations exceed stock.\n\"\"\"\n\nfrom typing import Iterable, Mapping\n\nDEFAULT_HOLD_TTL_S = 5 * 60  # unpaid holds last 5 minutes\n\n\ndef _is_active(reservation: Mapping, now_s: float, hold_ttl_s: float) -> bool:\n    if reservation.get(\"paid\"):\n        return True\n    created_s = reservation[\"created_s\"]\n    return now_s - created_s < hold_ttl_s\n\n\ndef available(\n    stock: int,\n    reservations: Iterable[Mapping],\n    now_s: float,\n    hold_ttl_s: float = DEFAULT_HOLD_TTL_S,\n) -> int:\n    \"\"\"Return how many units can still be sold at time `now_s`.\n\n    Each reservation is a dict with:\n      qty        -- units held (a non-negative int)\n      created_s  -- creation time in seconds, on the same clock as `now_s`\n      paid       -- truthy if the reservation has been paid for\n    \"\"\"\n    if stock < 0:\n        raise ValueError(\"stock must be non-negative\")\n    if hold_ttl_s < 0:\n        raise ValueError(\"hold_ttl_s must be non-negative\")\n\n    held = 0\n    for r in reservations:\n        qty = r[\"qty\"]\n        if qty < 0:\n            raise ValueError(f\"reservation qty must be non-negative: {r!r}\")\n        if _is_active(r, now_s, hold_ttl_s):\n            held += qty\n\n    return max(0, stock - held)\n\n\nif __name__ == \"__main__\":\n    now = 10_000\n    res = [\n        {\"qty\": 2, \"created_s\": now - 60, \"paid\": False},     # active hold\n        {\"qty\": 3, \"created_s\": now - 3600, \"paid\": False},   # expired hold\n        {\"qty\": 1, \"created_s\": now - 86400, \"paid\": True},   # paid, still held\n    ]\n    assert available(10, res, now) == 7\n    assert available(2, res, now) == 0\n    assert available(5, [], now) == 5\n    assert available(10, res, now, hold_ttl_s=7200) == 4\n\n    # Boundary checks around the 5-minute hold.\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 299, \"paid\": False}], now) == 6\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 300, \"paid\": False}], now) == 10\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 301, \"paid\": False}], now) == 10\n    assert available(10, [{\"qty\": 4, \"created_s\": now - 301, \"paid\": True}], now) == 6\n    print(\"ok\")\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t4-recall",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 6787,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1023,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 480,
+        "output_tokens_details": {
+          "thinking_tokens": 232
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1023,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 480,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1023,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1023
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.017792000000000002,
+      "error": null,
+      "reply": "Before I write it, I need a few details:\n\n1. **Touching boundaries:** If a clip ends exactly when a highlight starts (e.g., clip `(10, 20)` and highlight `(20, 30)`), does that count as found? Or must they share more than a single instant?\n2. **Minimum overlap:** Does any overlap count, even 0.1 s? Or does a clip need to cover some minimum duration or fraction of the highlight?\n3. **Empty highlights list:** If `highlights` is empty, should the function return `1.0`, return `0.0`, or raise an error?\n4. **Malformed intervals:** Can a tuple have `start_s > end_s` or `start_s == end_s`? If so, should the function raise an error or handle it some other way?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 14776,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1348,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1310,
+        "output_tokens_details": {
+          "thinking_tokens": 535
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1348,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1310,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1348,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1348
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.036992000000000004,
+      "error": null,
+      "reply": "```python\nfrom collections import deque\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by the clips.\n\n    Both arguments are lists of (start_s, end_s) tuples.\n\n    Rules:\n      * A clip can find a highlight only if they overlap by more than zero\n        seconds. Clips that only touch a highlight's end do not count.\n      * Each clip can be credited to at most one highlight.\n      * Clips are assigned so that as many highlights as possible are found\n        (a maximum bipartite matching).\n\n    Intervals with start_s >= end_s have no positive length, so they never\n    overlap anything.\n    \"\"\"\n    if not highlights:\n        raise ValueError(\"highlights must contain at least one interval\")\n\n    n_h = len(highlights)\n\n    # For each highlight, list the clips that overlap it by a positive amount.\n    adj = []\n    for hs, he in highlights:\n        overlapping = []\n        for j, (cs, ce) in enumerate(clips):\n            if min(he, ce) - max(hs, cs) > 0:\n                overlapping.append(j)\n        adj.append(overlapping)\n\n    clip_owner = [None] * len(clips)  # clip index -> highlight index\n    highlight_clip = [None] * n_h     # highlight index -> clip index\n\n    # Find an augmenting path for each highlight with a breadth-first search.\n    for h in range(n_h):\n        if not adj[h]:\n            continue\n        prev_highlight = {}  # clip -> highlight that reached it in the search\n        queue = deque([h])\n        free_clip = None\n        while queue and free_clip is None:\n            u = queue.popleft()\n            for c in adj[u]:\n                if c in prev_highlight:\n                    continue\n                prev_highlight[c] = u\n                if clip_owner[c] is None:\n                    free_clip = c\n                    break\n                queue.append(clip_owner[c])\n\n        if free_clip is None:\n            continue\n\n        # Flip the matching along the augmenting path.\n        c = free_clip\n        while True:\n            u = prev_highlight[c]\n            next_c = highlight_clip[u]\n            clip_owner[c] = u\n            highlight_clip[u] = c\n            if u == h:\n                break\n            c = next_c\n\n    found = sum(1 for c in highlight_clip if c is not None)\n    return found / n_h\n```",
+      "symptom": null
+    }
+  ]
+}

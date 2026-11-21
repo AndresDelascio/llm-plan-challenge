@@ -1,0 +1,160 @@
+{
+  "arm": "challenge",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 9487,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1043,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 795,
+        "output_tokens_details": {
+          "thinking_tokens": 56
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1043,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 795,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1043,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1043
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.024252000000000003,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `to_tracker(x, y)`, which converts a pixel position in the original video frame to the tracker's coordinate space (a cropped region) and returns `(x, y)`.\n\n**Constraints:**\n- A pure, side-effect-free function with no I/O.\n- Use the same crop parameters the tracker actually uses: read them from the existing config, not duplicated constants.\n- Keep the same coordinate convention as the source: origin at top-left, y increasing downward.\n\n**Non-goals:** Inverse mapping (`to_original`), changes to the crop or tracker logic, and lens or perspective correction.\n\n## Plan\n1. Find where the crop is defined (offset, size, and any resize after cropping) and read those values from there.\n2. Translate: `x' = x - crop_x`, `y' = y - crop_y`.\n3. If the cropped frame is resized before tracking, scale: `x' *= tracker_w / crop_w`, `y' *= tracker_h / crop_h`.\n4. Handle points outside the crop according to the chosen policy (see Questions).\n5. Return values with the agreed type (float, or rounded int).\n6. Write tests for the crop corners, the center, a point outside the crop, and a non-1:1 scale. Also test a round-trip against a hand-computed example from a real frame.\n\n## Risks I already know about\n- If there is a resize step that I don't know about, every result will be silently wrong by a scale factor.\n- Rounding to int too early loses sub-pixel precision for fast shots.\n- Off-by-one errors are possible if the crop bounds are inclusive in one place and exclusive in another.\n- If the crop changes per clip or per frame, a static mapping will break.\n- Different aspect-ratio scaling on each axis could distort the mapping if the crop is letterboxed or padded rather than stretched.\n\n## Questions for the user\n1. What are the crop's origin and size, and are they fixed or different for each video?\n2. Is the cropped region resized or padded before the tracker sees it? If so, to what size?\n3. What should happen with points outside the crop: return `None`, clamp to the edge, raise an error, or return negative or overflow values as-is?\n4. Should the function return floats or integers?"
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 8701,
+      "usage": {
+        "input_tokens": 13574,
+        "cached_input_tokens": 12672,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 286,
+        "reasoning_output_tokens": 0
+      },
+      "error": null,
+      "reply": "VERDICT: PROCEED WITH CHANGES\n### 1. [major] Crop configuration has no defined path into the pure function\n- Failure: If the crop varies by clip or frame, a static mapping uses stale parameters. Reading them from disk inside `to_tracker` would violate the no-I/O constraint.\n- Fix: Bind `to_tracker(x, y)` to the tracker\u2019s already-loaded crop and resize parameters for the active clip or frame.\n\n### 2. [major] Resize mapping omits padding and pixel alignment\n- Failure: If the tracker input is letterboxed, scaling by the padded dimensions gives incorrect positions. If the resizer uses pixel-center alignment, multiplying by the scale alone can shift coordinates.\n- Fix: Match the tracker\u2019s resize convention using the resized content dimensions and any padding offsets.\n\n### 3. [major] Outside-crop behavior leaves the return contract unresolved\n- Failure: Returning `None` breaks the promised `(x, y)` result, and an unspecified boundary convention makes edge tests ambiguous.\n- Fix: Return unclamped float pairs for all inputs and use half-open crop bounds in tests.\n\n### 4. [minor] Round-trip test requires an inverse\n- Failure: A round-trip test needs a reverse mapping, which is outside the stated scope.\n- Fix: Compare the forward result directly with a hand-computed expected pair from a real frame."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 13822,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2213,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1579,
+        "output_tokens_details": {
+          "thinking_tokens": 385
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2213,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1579,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2213,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2213
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.049292,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `to_tracker(x, y)`, which converts a pixel position in the original video frame to the tracker's coordinate space (a cropped region) and returns `(x, y)`.\n\n**Constraints:**\n- A pure, side-effect-free function with no I/O.\n- Use the same crop parameters the tracker actually uses: read them from the existing config, not duplicated constants.\n- Keep the same coordinate convention as the source: origin at top-left, y increasing downward.\n\n**Non-goals:** Inverse mapping (`to_original`), changes to the crop or tracker logic, and lens or perspective correction.\n\n## Plan\n1. Find where the crop is defined (offset, size, and any resize or padding after cropping) and where the tracker loads those values. Bind `to_tracker(x, y)` to the parameters the tracker has already loaded for the active clip or frame, for example through a closure or partial built from the loaded config. The function itself must not read config from disk, so it stays free of I/O.\n2. Translate: `x' = x - crop_x`, `y' = y - crop_y`.\n3. If the cropped frame is resized before tracking, use the tracker's own resize convention:\n   - Scale by the resized content dimensions, not the padded output dimensions: `x' *= content_w / crop_w`, `y' *= content_h / crop_h`.\n   - Then add any padding or letterbox offsets: `x' += pad_x`, `y' += pad_y`.\n   - If the resizer uses pixel-center alignment, apply the matching half-pixel adjustment: `x' = (x + 0.5) * s - 0.5`.\n4. Handle points outside the crop according to the chosen policy (see Questions). The result is always an `(x, y)` pair. Use the crop-bounds convention the tracker uses, which is expected to be half-open `[crop_x, crop_x + crop_w)`, and confirm it in the code.\n5. Return values with the agreed type (float, or rounded int).\n6. Write tests for:\n   - the crop corners, including both edges of the half-open bounds;\n   - the center;\n   - a point outside the crop;\n   - a non-1:1 scale;\n   - a padded or letterboxed resize, if one applies.\n\n   Also compare the forward result directly with a hand-computed expected pair from a real frame.\n\n## Risks I already know about\n- If there is a resize step that I don't know about, every result will be silently wrong by a scale factor.\n- Rounding to int too early loses sub-pixel precision for fast shots.\n- Off-by-one errors are possible if the crop bounds are inclusive in one place and exclusive in another.\n- If the crop changes per clip or per frame, a static mapping will break. Step 1 mitigates this by binding to the tracker's active parameters.\n- Different aspect-ratio scaling on each axis could distort the mapping if the crop is letterboxed or padded rather than stretched. Step 3 mitigates this by using content dimensions and padding offsets.\n- A mismatch in pixel-center versus pixel-corner alignment with the resizer could shift coordinates by a fraction of a pixel.\n\n## Questions for the user\n1. What are the crop's origin and size, and are they fixed or different for each video?\n2. Is the cropped region resized or padded before the tracker sees it? If so, to what size, and with what padding and alignment convention?\n3. What should happen with points outside the crop: clamp to the edge, raise an error, or return negative or overflow values as-is? Returning `None` is excluded because the function must return `(x, y)`.\n4. Should the function return floats or integers?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 19327,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2269,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1847,
+        "output_tokens_details": {
+          "thinking_tokens": 387
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2269,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1847,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2269,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2269
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.0551,
+      "error": null,
+      "reply": "```python\n\"\"\"Map original-video pixel coordinates to shot-tracker coordinates.\n\nPipeline, as described by the user:\n  1920x1080 source -> centered 1440x1080 crop -> downscale by 2 -> 720x540 tracker frame.\n\nAssumptions to check against the real tracker code:\n  * The crop bounds are half-open: [crop_x, crop_x + crop_w).\n  * The resize is a plain uniform scale with no padding or letterboxing.\n  * The default is corner alignment: x' = (x - crop_x) * s.\n    If the resizer is center-aligned (as OpenCV's cv2.resize is), pass\n    align_centers=True. That uses x' = (x - crop_x + 0.5) * s - 0.5.\n  * If the tracker loads these numbers from a config, build the mapper with\n    make_to_tracker(...) and pass it the loaded values. Don't rely on the\n    defaults below.\n\"\"\"\n\nfrom typing import Callable, Optional, Tuple\n\nPoint = Tuple[float, float]\n\nSOURCE_W, SOURCE_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nDOWNSCALE = 2\n\n\ndef make_to_tracker(\n    source_w: int = SOURCE_W,\n    source_h: int = SOURCE_H,\n    crop_w: int = CROP_W,\n    crop_h: int = CROP_H,\n    downscale: float = DOWNSCALE,\n    align_centers: bool = False,\n) -> Callable[[float, float], Optional[Point]]:\n    \"\"\"Build a pure to_tracker(x, y) function bound to the given crop and scale.\"\"\"\n    if not (0 < crop_w <= source_w and 0 < crop_h <= source_h):\n        raise ValueError(\"crop must be non-empty and fit inside the source frame\")\n    if downscale <= 0:\n        raise ValueError(\"downscale must be positive\")\n\n    # Center crop. Integer division matches the usual array slicing.\n    crop_x = (source_w - crop_w) // 2\n    crop_y = (source_h - crop_h) // 2\n    scale = 1.0 / downscale\n    half = 0.5 if align_centers else 0.0\n\n    def to_tracker(x: float, y: float) -> Optional[Point]:\n        \"\"\"Convert an original-video pixel position to tracker coordinates.\n\n        The origin is at the top-left and y increases downward. Returns\n        (x, y) as floats, so sub-pixel precision is kept. Returns None if the\n        point is outside the crop.\n        \"\"\"\n        if not (crop_x <= x < crop_x + crop_w and crop_y <= y < crop_y + crop_h):\n            return None\n        tx = (x - crop_x + half) * scale - half\n        ty = (y - crop_y + half) * scale - half\n        return (float(tx), float(ty))\n\n    return to_tracker\n\n\n# Default mapper for the 1920x1080 -> 1440x1080 center crop -> /2 pipeline.\nto_tracker = make_to_tracker()\n\n\nif __name__ == \"__main__\":\n    # crop_x = 240, crop_y = 0, scale = 0.5\n    assert to_tracker(240, 0) == (0.0, 0.0)                # top-left corner\n    assert to_tracker(1679, 1079) == (719.5, 539.5)        # last pixel inside\n    assert to_tracker(1680, 500) is None                   # right edge is exclusive\n    assert to_tracker(239.999, 500) is None                # just left of the crop\n    assert to_tracker(500, 1080) is None                   # bottom edge is exclusive\n    assert to_tracker(-1, -1) is None\n    assert to_tracker(960, 540) == (360.0, 270.0)          # center maps to center\n    assert to_tracker(241.3, 10.7) == (0.65, 5.35) or (\n        abs(to_tracker(241.3, 10.7)[0] - 0.65) < 1e-9\n        and abs(to_tracker(241.3, 10.7)[1] - 5.35) < 1e-9\n    )                                                      # sub-pixel kept\n\n    centered = make_to_tracker(align_centers=True)\n    assert centered(240, 0) == (-0.25, -0.25)\n    assert centered(960, 540) == (359.75, 269.75)\n\n    print(\"all to_tracker checks passed\")\n```",
+      "symptom": null
+    }
+  ]
+}

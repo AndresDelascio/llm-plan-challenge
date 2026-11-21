@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 6001,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1004,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 395,
+        "output_tokens_details": {
+          "thinking_tokens": 63
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1004,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 395,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1004,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1004
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01594,
+      "error": null,
+      "reply": "Before I write `to_tracker(x, y)`, I need a few details about the crop:\n\n1. **Crop rectangle:** Where does the crop start in the original video (left x, top y), and how wide and tall is it? Is it fixed, or does it change per frame or per video? If it changes, how should the function get it (arguments, a config, a global)?\n2. **Scaling:** Is the cropped region resized before the tracker sees it (for example, a 1200\u00d7800 crop scaled to 640\u00d7480)? If so, to what size, and is the aspect ratio kept (with letterboxing or padding) or stretched?\n3. **Tracker coordinate system:** Does the tracker use pixel coordinates with the origin at the top-left of the crop, or normalized 0\u20131 values, or something else? Should the results be floats or rounded to integers?\n4. **Points outside the crop:** If (x, y) falls outside the cropped area, should the function return the out-of-range values as they are, clamp them to the edge, return `None`, or raise an error?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8708,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1412,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 544,
+        "output_tokens_details": {
+          "thinking_tokens": 120
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1412,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 544,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1412,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1412
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.022184000000000002,
+      "error": null,
+      "reply": "```python\nVIDEO_WIDTH = 1920\nVIDEO_HEIGHT = 1080\n\nCROP_WIDTH = 1440\nCROP_HEIGHT = 1080\nCROP_LEFT = (VIDEO_WIDTH - CROP_WIDTH) / 2   # 240.0\nCROP_TOP = (VIDEO_HEIGHT - CROP_HEIGHT) / 2  # 0.0\n\nDOWNSCALE = 2.0  # tracker frame is 720x540\n\n\ndef to_tracker(x, y):\n    \"\"\"Convert a pixel position in the original 1920x1080 video to tracker coordinates.\n\n    The tracker sees a centered 1440x1080 crop of the video, downscaled by 2\n    (a 720x540 frame with its origin at the crop's top-left corner).\n\n    Returns (x, y) as floats with sub-pixel precision, or None if the point\n    lies outside the cropped region.\n    \"\"\"\n    cx = x - CROP_LEFT\n    cy = y - CROP_TOP\n\n    if not (0 <= cx < CROP_WIDTH and 0 <= cy < CROP_HEIGHT):\n        return None\n\n    return (cx / DOWNSCALE, cy / DOWNSCALE)\n```",
+      "symptom": null
+    }
+  ]
+}

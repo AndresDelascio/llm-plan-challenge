@@ -1,0 +1,206 @@
+{
+  "arm": "challenge",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 10096,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1049,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 794,
+        "output_tokens_details": {
+          "thinking_tokens": 51
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1049,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 794,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1049,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1049
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.02428,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `to_tracker(x, y)`, which converts a pixel position in the original video frame into the tracker's coordinate space (the cropped region) and returns `(x, y)`.\n\n**Constraints:** The mapping must match exactly how the tracker crops, and possibly resizes, its input. It must be a pure function with no side effects. It should be consistent with any existing inverse, such as `from_tracker`, if one exists.\n\n**Non-goals:** Changing how the tracker crops, adding video I/O, and handling lens distortion or perspective.\n\n## Plan\n1. Find where the crop is defined: config, CLI args, or tracker setup. Record its origin (left, top) and size (width, height).\n2. Check whether the tracker resizes the crop before processing. If it does, record the target size.\n3. Implement the mapping: `tx = (x - left) * sx`, `ty = (y - top) * sy`. Here `sx` and `sy` are 1 if there is no resize, or `tracker_w / crop_w` and `tracker_h / crop_h` if there is.\n4. Apply the agreed policy for points outside the crop, the agreed output type, and the agreed rounding.\n5. If no inverse exists, add `from_tracker` and use it for round-trip checks.\n6. Write tests for:\n   - the crop corners mapping to (0, 0) and (w, h)\n   - the centre point\n   - points outside the crop\n   - non-uniform scaling\n\n## Risks I already know about\n- There may be a pixel-centre vs. pixel-edge convention mismatch (an off-by-0.5 error).\n- The crop may change per clip or over time, which would break a hardcoded offset.\n- Something may silently swap row/column order (y, x) between libraries such as OpenCV and NumPy.\n- Rounding to int could lose precision that the tracker relies on.\n\n## Questions for the user\n1. What is the crop's origin and size, and where is it defined? Is it fixed or set per video?\n2. Does the tracker resize the crop after cropping? If so, to what size?\n3. Points outside the crop: should the function return negative or overflow values, clamp them to the edge, return `None`, or raise an error?\n4. Should the output be floats or rounded ints?"
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 9581,
+      "usage": {
+        "input_tokens": 14781,
+        "cached_input_tokens": 10368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 299,
+        "reasoning_output_tokens": 0
+      },
+      "error": null,
+      "reply": "VERDICT: BLOCKED\n### 1. [blocker] Resize formula assumes a coordinate convention\n- Failure: Scaling the crop-relative coordinates directly yields shifted positions if the tracker\u2019s resize uses a different pixel-centre or pixel-edge convention.\n- Fix: Verify the tracker\u2019s coordinate convention and derive the offset and scale from it. Check a resized pixel position against an independent expected value.\n\n### 2. [blocker] No way to select the active crop\n- Failure: If the crop or resize varies by clip or frame, the same `(x, y)` can require different outputs. The plan leaves the geometry source unspecified.\n- Fix: Bind `to_tracker(x, y)` to immutable geometry for the relevant clip or frame.\n\n### 3. [major] Existing inverse compatibility goes unchecked\n- Failure: The plan tests round trips only when it adds an inverse, so disagreements with an existing `from_tracker` can go undetected.\n- Fix: Verify compatibility with `from_tracker` if it exists. Use direct expected-value tests otherwise.\n\n### 4. [major] Corner tests conflate pixels and boundaries\n- Failure: The expected `(w, h)` lies outside the valid pixel-index range when `w` and `h` are output dimensions. Resizing can also make those variables ambiguous.\n- Fix: Test the first and last in-crop pixel centres using explicit crop and output dimensions. Test crop boundaries separately against the outside-point policy."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 15734,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2244,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1777,
+        "output_tokens_details": {
+          "thinking_tokens": 350
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2244,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1777,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2244,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2244
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.053500000000000006,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `to_tracker(x, y)`, which converts a pixel position in the original video frame into the tracker's coordinate space (the cropped region) and returns `(x, y)`.\n\n**Constraints:** The mapping must match exactly how the tracker crops, and possibly resizes, its input. It must be a pure function with no side effects. It must be consistent with any existing inverse, such as `from_tracker`.\n\n**Non-goals:** Changing how the tracker crops, adding video I/O, and handling lens distortion or perspective.\n\n## Plan\n1. Find where the crop is defined: config, CLI args, or tracker setup. Record its origin (left, top) and size (crop_w, crop_h). Determine whether it is fixed, set per clip, or set per frame.\n2. Represent the crop and resize parameters as an immutable geometry value for the relevant clip or frame. Bind `to_tracker(x, y)` to that geometry, for example with a factory or closure that returns `to_tracker`. This keeps the `(x, y)` signature, keeps the function pure, and avoids a hardcoded offset.\n3. Check whether the tracker resizes the crop before processing. If it does, record the target size (tracker_w, tracker_h).\n4. Check the tracker's coordinate convention, including the resize implementation it uses. Find out whether pixel coordinates refer to pixel centres or pixel edges. For example, OpenCV `resize` maps centres as `(x + 0.5) * s - 0.5`. Also confirm the (x, y) versus (row, col) ordering at every library boundary.\n5. Implement the mapping from that convention:\n   - **Edge convention:** `tx = (x - left) * sx`, `ty = (y - top) * sy`.\n   - **Centre convention:** `tx = (x - left + 0.5) * sx - 0.5`, and the same form for `ty`.\n   - `sx` and `sy` are 1 if there is no resize. If there is a resize, they are `tracker_w / crop_w` and `tracker_h / crop_h`.\n6. Apply the agreed policy for points outside the crop, the agreed output type, and the agreed rounding.\n7. Handle the inverse:\n   - If `from_tracker` already exists, check it against the new function. Use round-trip tests and also compare the offset, scale and convention directly. Report any disagreement rather than silently changing either function.\n   - If no inverse exists, add `from_tracker` using the same geometry and convention, and use it for round-trip checks.\n8. Write tests using explicit crop dimensions (crop_w, crop_h) and output dimensions (tracker_w, tracker_h):\n   - The first in-crop pixel centre `(left, top)` and the last in-crop pixel centre `(left + crop_w - 1, top + crop_h - 1)`, compared against independently computed expected values.\n   - The centre point.\n   - Crop boundaries, tested separately against the outside-point policy.\n   - Points outside the crop.\n   - Non-uniform scaling.\n   - At least one resized pixel position whose expected value is derived independently. For example, compare against the tracker's actual resize output on a synthetic image with a marked pixel.\n   - Geometry selection: the same `(x, y)` mapped under two different clip or frame geometries gives the expected, different results.\n   - Round trips through `from_tracker`.\n\n## Risks I already know about\n- There may be a pixel-centre vs. pixel-edge convention mismatch (an off-by-0.5 error). Step 4 addresses this, and step 8 tests it.\n- The crop may change per clip or over time. Step 2 addresses this by binding to per-clip or per-frame geometry.\n- Something may silently swap row/column order (y, x) between libraries such as OpenCV and NumPy.\n- Rounding to int could lose precision that the tracker relies on.\n\n## Questions for the user\n1. What is the crop's origin and size, and where is it defined? Is it fixed, set per video, or set per frame?\n2. Does the tracker resize the crop after cropping? If so, to what size, and with which library or function?\n3. Points outside the crop: should the function return negative or overflow values, clamp them to the edge, return `None`, or raise an error?\n4. Should the output be floats or rounded ints?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 35892,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2500,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 4421,
+        "output_tokens_details": {
+          "thinking_tokens": 438
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2500,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 4421,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2500,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2500
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.108428,
+      "error": null,
+      "reply": "```python\n\"\"\"Map original-video pixel positions to shot-tracker coordinates.\n\nGeometry from the user's answers:\n  * Source video: 1920x1080.\n  * The tracker uses a centre crop of 1440x1080, so left=240 and top=0.\n  * The crop is then downscaled by 2, so the tracker space is 720x540.\n  * Points outside the crop map to None.\n  * Results are floats, so sub-pixel precision is kept.\n\nPixel convention: CENTRE by default. Integer coordinates are pixel centres,\nwhich matches OpenCV's cv2.resize (src = (dst + 0.5) / s - 0.5). If the\ntracker treats integers as pixel edges, pass convention=\"edge\" when you build\nthe geometry. That choice shifts results by 0.5 tracker pixels, so confirm it\nagainst the real resize call.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport unittest\nfrom dataclasses import dataclass\nfrom typing import Callable, Optional, Tuple\n\nPoint = Tuple[float, float]\n\nCENTRE = \"centre\"\nEDGE = \"edge\"\n\n\n@dataclass(frozen=True)\nclass TrackerGeometry:\n    left: float\n    top: float\n    crop_w: int\n    crop_h: int\n    tracker_w: int\n    tracker_h: int\n    convention: str = CENTRE\n\n    def __post_init__(self) -> None:\n        if self.convention not in (CENTRE, EDGE):\n            raise ValueError(f\"unknown convention: {self.convention!r}\")\n        if min(self.crop_w, self.crop_h, self.tracker_w, self.tracker_h) <= 0:\n            raise ValueError(\"sizes must be positive\")\n\n    @property\n    def sx(self) -> float:\n        return self.tracker_w / self.crop_w\n\n    @property\n    def sy(self) -> float:\n        return self.tracker_h / self.crop_h\n\n    @property\n    def _half(self) -> float:\n        return 0.5 if self.convention == CENTRE else 0.0\n\n    @classmethod\n    def centre_crop(\n        cls,\n        video_w: int,\n        video_h: int,\n        crop_w: int,\n        crop_h: int,\n        downscale: float = 1.0,\n        convention: str = CENTRE,\n    ) -> \"TrackerGeometry\":\n        if crop_w > video_w or crop_h > video_h:\n            raise ValueError(\"crop larger than video\")\n        tw, th = crop_w / downscale, crop_h / downscale\n        if tw != int(tw) or th != int(th):\n            raise ValueError(\"downscale must give integer tracker size\")\n        return cls(\n            left=(video_w - crop_w) / 2,\n            top=(video_h - crop_h) / 2,\n            crop_w=crop_w,\n            crop_h=crop_h,\n            tracker_w=int(tw),\n            tracker_h=int(th),\n            convention=convention,\n        )\n\n    def contains(self, x: float, y: float) -> bool:\n        \"\"\"True if (x, y) lies inside the crop's continuous extent.\n\n        Centre convention: pixel i covers [i - 0.5, i + 0.5).\n        Edge convention: pixel i covers [i, i + 1).\n        \"\"\"\n        h = self._half\n        return (\n            self.left - h <= x < self.left + self.crop_w - h\n            and self.top - h <= y < self.top + self.crop_h - h\n        )\n\n    def to_tracker(self, x: float, y: float) -> Optional[Point]:\n        if not self.contains(x, y):\n            return None\n        h = self._half\n        tx = (x - self.left + h) * self.sx - h\n        ty = (y - self.top + h) * self.sy - h\n        return (float(tx), float(ty))\n\n    def from_tracker(self, tx: float, ty: float) -> Point:\n        h = self._half\n        x = (tx + h) / self.sx - h + self.left\n        y = (ty + h) / self.sy - h + self.top\n        return (float(x), float(y))\n\n\ndef make_to_tracker(geom: TrackerGeometry) -> Callable[[float, float], Optional[Point]]:\n    \"\"\"Return a pure to_tracker(x, y) bound to the given geometry.\"\"\"\n    return geom.to_tracker\n\n\ndef make_from_tracker(geom: TrackerGeometry) -> Callable[[float, float], Point]:\n    return geom.from_tracker\n\n\n# The shot tracker's geometry: 1920x1080, centre crop 1440x1080, downscaled by 2.\nDEFAULT_GEOMETRY = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, downscale=2)\n\n\ndef to_tracker(x: float, y: float) -> Optional[Point]:\n    \"\"\"Original-video pixel (x, y) -> tracker (x, y), or None if outside the crop.\"\"\"\n    return DEFAULT_GEOMETRY.to_tracker(x, y)\n\n\ndef from_tracker(tx: float, ty: float) -> Point:\n    \"\"\"Tracker (x, y) -> original-video pixel (x, y).\"\"\"\n    return DEFAULT_GEOMETRY.from_tracker(tx, ty)\n\n\n# --------------------------------------------------------------------------- #\n# Tests\n# --------------------------------------------------------------------------- #\nclass TestToTracker(unittest.TestCase):\n    def assertPoint(self, got, expected, places=9):\n        self.assertIsNotNone(got)\n        self.assertAlmostEqual(got[0], expected[0], places=places)\n        self.assertAlmostEqual(got[1], expected[1], places=places)\n\n    def test_default_geometry(self):\n        g = DEFAULT_GEOMETRY\n        self.assertEqual((g.left, g.top), (240, 0))\n        self.assertEqual((g.tracker_w, g.tracker_h), (720, 540))\n\n    def test_first_and_last_pixel_centres(self):\n        # Centre convention, scale 0.5: t = (p + 0.5) * 0.5 - 0.5 = p/2 - 0.25\n        self.assertPoint(to_tracker(240, 0), (-0.25, -0.25))\n        self.assertPoint(to_tracker(1679, 1079), (719.25, 539.25))\n\n    def test_pixel_pair_maps_to_tracker_pixel_centre(self):\n        # Source pixels 240 and 241 average into tracker pixel 0, whose centre\n        # sits at source x = 240.5.\n        self.assertPoint(to_tracker(240.5, 0.5), (0.0, 0.0))\n        self.assertPoint(to_tracker(1678.5, 1078.5), (719.0, 539.0))\n\n    def test_centre_point(self):\n        # Continuous image centre (959.5, 539.5) maps to the tracker centre.\n        self.assertPoint(to_tracker(959.5, 539.5), (359.5, 269.5))\n\n    def test_boundaries(self):\n        self.assertIsNotNone(to_tracker(239.5, -0.5))\n        self.assertPoint(to_tracker(239.5, -0.5), (-0.5, -0.5))\n        self.assertIsNone(to_tracker(1679.5, 500))   # right edge is exclusive\n        self.assertIsNone(to_tracker(500, 1079.5))   # bottom edge is exclusive\n        self.assertIsNotNone(to_tracker(1679.4999, 1079.4999))\n\n    def test_outside(self):\n        for p in [(0, 0), (239, 500), (1680, 500), (1919, 1079), (960, -1), (960, 1080)]:\n            self.assertIsNone(to_tracker(*p), p)\n\n    def test_subpixel_precision(self):\n        a = to_tracker(1000.3, 500.7)\n        self.assertPoint(a, ((1000.3 - 240 + 0.5) * 0.5 - 0.5, (500.7 + 0.5) * 0.5 - 0.5))\n        self.assertIsInstance(a[0], float)\n\n    def test_edge_convention(self):\n        g = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2, convention=EDGE)\n        self.assertPoint(g.to_tracker(240, 0), (0.0, 0.0))\n        self.assertPoint(g.to_tracker(1000, 500), (380.0, 250.0))\n        self.assertIsNone(g.to_tracker(239.9, 0))\n        self.assertIsNone(g.to_tracker(1680, 0))\n\n    def test_non_uniform_scaling(self):\n        g = TrackerGeometry(left=10, top=20, crop_w=100, crop_h=50,\n                            tracker_w=50, tracker_h=100, convention=EDGE)\n        self.assertPoint(g.to_tracker(60, 45), (25.0, 50.0))\n        gc = TrackerGeometry(left=10, top=20, crop_w=100, crop_h=50,\n                             tracker_w=50, tracker_h=100)\n        self.assertPoint(gc.to_tracker(60, 45), ((50.5) * 0.5 - 0.5, (25.5) * 2 - 0.5))\n\n    def test_resize_against_synthetic_downscale(self):\n        # Independent check: 2x2 box-average a synthetic crop that contains one\n        # marked source pixel. Find the tracker pixel holding the mark and check\n        # that the mapped point falls inside that tracker pixel's extent.\n        g = DEFAULT_GEOMETRY\n        sx, sy = 1001, 437\n        cx, cy = sx - int(g.left), sy - int(g.top)\n        hits = [(tx, ty) for ty in range(g.tracker_h) for tx in range(g.tracker_w)\n                if 2 * tx <= cx < 2 * tx + 2 and 2 * ty <= cy < 2 * ty + 2]\n        self.assertEqual(len(hits), 1)\n        tx, ty = hits[0]\n        mx, my = to_tracker(sx, sy)\n        self.assertTrue(tx - 0.5 <= mx < tx + 0.5)\n        self.assertTrue(ty - 0.5 <= my < ty + 0.5)\n\n    def test_geometry_selection(self):\n        g1 = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2)\n        g2 = TrackerGeometry.centre_crop(1920, 1080, 1080, 1080, 1)\n        f1, f2 = make_to_tracker(g1), make_to_tracker(g2)\n        self.assertPoint(f1(960, 540), (359.75, 269.75))\n        self.assertPoint(f2(960, 540), (540.0, 540.0))\n\n    def test_round_trip(self):\n        for g in (DEFAULT_GEOMETRY,\n                  TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2, convention=EDGE),\n                  TrackerGeometry(5, 7, 300, 200, 120, 160)):\n            for p in [(g.left, g.top), (g.left + 123.456, g.top + 78.9),\n                      (g.left + g.crop_w - 1, g.top + g.crop_h - 1)]:\n                t = g.to_tracker(*p)\n                self.assertPoint(g.from_tracker(*t), p)\n            for t in [(0.0, 0.0), (10.25, 33.75)]:\n                self.assertPoint(g.to_tracker(*g.from_tracker(*t)), t)\n\n    def test_purity(self):\n        self.assertEqual(to_tracker(1000, 500), to_tracker(1000, 500))\n        self.assertEqual(DEFAULT_GEOMETRY.left, 240)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 37880,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 6539,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 5017,
+        "output_tokens_details": {
+          "thinking_tokens": 809
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 6539,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 5017,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 6539,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 6539
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.15266,
+      "error": null,
+      "reply": "```python\n\"\"\"Map original-video pixel positions to shot-tracker coordinates.\n\nGeometry from the user's answers:\n  * Source video: 1920x1080.\n  * The tracker uses a centre crop of 1440x1080, so left=240 and top=0.\n  * The crop is then downscaled by 2, so the tracker space is 720x540.\n  * Points outside the crop map to None.\n  * Results are floats, so sub-pixel precision is kept.\n\nPixel convention: EDGE by default. Coordinates are continuous positions\nmeasured from the top-left edge of the frame, so the mapping is a plain\noffset and scale:\n\n    tx = (x - left) * sx,   ty = (y - top) * sy\n\nWith this convention the frame centre (960, 540) maps to the tracker centre\n(360, 270).\n\nIf the tracker instead treats integer coordinates as pixel centres (OpenCV's\ncv2.resize style), pass convention=\"centre\" when you build the geometry. That\nshifts results by 0.25 tracker pixels at this scale, so confirm it against the\nreal resize call.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport unittest\nfrom dataclasses import dataclass\nfrom typing import Callable, Optional, Tuple\n\nPoint = Tuple[float, float]\n\nCENTRE = \"centre\"\nEDGE = \"edge\"\n\n\n@dataclass(frozen=True)\nclass TrackerGeometry:\n    left: float\n    top: float\n    crop_w: int\n    crop_h: int\n    tracker_w: int\n    tracker_h: int\n    convention: str = EDGE\n\n    def __post_init__(self) -> None:\n        if self.convention not in (CENTRE, EDGE):\n            raise ValueError(f\"unknown convention: {self.convention!r}\")\n        if min(self.crop_w, self.crop_h, self.tracker_w, self.tracker_h) <= 0:\n            raise ValueError(\"sizes must be positive\")\n\n    @property\n    def sx(self) -> float:\n        return self.tracker_w / self.crop_w\n\n    @property\n    def sy(self) -> float:\n        return self.tracker_h / self.crop_h\n\n    @property\n    def _half(self) -> float:\n        return 0.5 if self.convention == CENTRE else 0.0\n\n    @classmethod\n    def centre_crop(\n        cls,\n        video_w: int,\n        video_h: int,\n        crop_w: int,\n        crop_h: int,\n        downscale: float = 1.0,\n        convention: str = EDGE,\n    ) -> \"TrackerGeometry\":\n        if crop_w > video_w or crop_h > video_h:\n            raise ValueError(\"crop larger than video\")\n        if downscale <= 0:\n            raise ValueError(\"downscale must be positive\")\n        tw, th = crop_w / downscale, crop_h / downscale\n        if tw != int(tw) or th != int(th):\n            raise ValueError(\"downscale must give integer tracker size\")\n        return cls(\n            left=(video_w - crop_w) / 2,\n            top=(video_h - crop_h) / 2,\n            crop_w=crop_w,\n            crop_h=crop_h,\n            tracker_w=int(tw),\n            tracker_h=int(th),\n            convention=convention,\n        )\n\n    def contains(self, x: float, y: float) -> bool:\n        \"\"\"True if (x, y) lies inside the crop's continuous extent.\n\n        Edge convention: pixel i covers [i, i + 1).\n        Centre convention: pixel i covers [i - 0.5, i + 0.5).\n        \"\"\"\n        h = self._half\n        return (\n            self.left - h <= x < self.left + self.crop_w - h\n            and self.top - h <= y < self.top + self.crop_h - h\n        )\n\n    def to_tracker(self, x: float, y: float) -> Optional[Point]:\n        if not self.contains(x, y):\n            return None\n        h = self._half\n        tx = (x - self.left + h) * self.sx - h\n        ty = (y - self.top + h) * self.sy - h\n        return (float(tx), float(ty))\n\n    def from_tracker(self, tx: float, ty: float) -> Point:\n        h = self._half\n        x = (tx + h) / self.sx - h + self.left\n        y = (ty + h) / self.sy - h + self.top\n        return (float(x), float(y))\n\n\ndef make_to_tracker(geom: TrackerGeometry) -> Callable[[float, float], Optional[Point]]:\n    \"\"\"Return a pure to_tracker(x, y) bound to the given geometry.\"\"\"\n    return geom.to_tracker\n\n\ndef make_from_tracker(geom: TrackerGeometry) -> Callable[[float, float], Point]:\n    \"\"\"Return a pure from_tracker(tx, ty) bound to the given geometry.\"\"\"\n    return geom.from_tracker\n\n\n# The shot tracker's geometry: 1920x1080, centre crop 1440x1080, downscaled by 2.\nDEFAULT_GEOMETRY = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, downscale=2)\n\n\ndef to_tracker(x: float, y: float) -> Optional[Point]:\n    \"\"\"Original-video pixel (x, y) -> tracker (x, y), or None if outside the crop.\"\"\"\n    return DEFAULT_GEOMETRY.to_tracker(x, y)\n\n\ndef from_tracker(tx: float, ty: float) -> Point:\n    \"\"\"Tracker (x, y) -> original-video pixel (x, y).\"\"\"\n    return DEFAULT_GEOMETRY.from_tracker(tx, ty)\n\n\n# --------------------------------------------------------------------------- #\n# Tests\n# --------------------------------------------------------------------------- #\nclass TestToTracker(unittest.TestCase):\n    def assertPoint(self, got, expected, places=9):\n        self.assertIsNotNone(got)\n        self.assertAlmostEqual(got[0], expected[0], places=places)\n        self.assertAlmostEqual(got[1], expected[1], places=places)\n\n    def test_default_geometry(self):\n        g = DEFAULT_GEOMETRY\n        self.assertEqual((g.left, g.top), (240, 0))\n        self.assertEqual((g.crop_w, g.crop_h), (1440, 1080))\n        self.assertEqual((g.tracker_w, g.tracker_h), (720, 540))\n        self.assertEqual(g.convention, EDGE)\n\n    def test_frame_centre(self):\n        # Frame centre (960, 540) -> ((960 - 240) / 2, 540 / 2) = (360, 270).\n        self.assertPoint(to_tracker(960, 540), (360.0, 270.0))\n\n    def test_crop_corners(self):\n        self.assertPoint(to_tracker(240, 0), (0.0, 0.0))\n        self.assertPoint(to_tracker(1679, 1079), (719.5, 539.5))\n\n    def test_boundaries(self):\n        self.assertIsNotNone(to_tracker(240, 0))\n        self.assertIsNone(to_tracker(239.999, 0))      # left edge is inclusive\n        self.assertIsNone(to_tracker(500, -0.001))     # top edge is inclusive\n        self.assertIsNone(to_tracker(1680, 500))       # right edge is exclusive\n        self.assertIsNone(to_tracker(500, 1080))       # bottom edge is exclusive\n        self.assertPoint(to_tracker(1679.999, 1079.999), (719.9995, 539.9995))\n\n    def test_outside(self):\n        for p in [(0, 0), (239, 500), (1680, 500), (1919, 1079), (960, -1), (960, 1080)]:\n            self.assertIsNone(to_tracker(*p), p)\n\n    def test_subpixel_precision(self):\n        a = to_tracker(1000.3, 500.7)\n        self.assertPoint(a, ((1000.3 - 240) / 2, 500.7 / 2))\n        self.assertIsInstance(a[0], float)\n        self.assertIsInstance(a[1], float)\n\n    def test_centre_convention(self):\n        g = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2, convention=CENTRE)\n        # t = (p - left + 0.5) * 0.5 - 0.5\n        self.assertPoint(g.to_tracker(240, 0), (-0.25, -0.25))\n        self.assertPoint(g.to_tracker(240.5, 0.5), (0.0, 0.0))\n        self.assertPoint(g.to_tracker(959.5, 539.5), (359.5, 269.5))\n        self.assertPoint(g.to_tracker(239.5, -0.5), (-0.5, -0.5))\n        self.assertIsNone(g.to_tracker(1679.5, 500))\n        self.assertIsNone(g.to_tracker(500, 1079.5))\n\n    def test_non_uniform_scaling(self):\n        g = TrackerGeometry(left=10, top=20, crop_w=100, crop_h=50,\n                            tracker_w=50, tracker_h=100, convention=EDGE)\n        self.assertPoint(g.to_tracker(60, 45), (25.0, 50.0))\n        gc = TrackerGeometry(left=10, top=20, crop_w=100, crop_h=50,\n                             tracker_w=50, tracker_h=100, convention=CENTRE)\n        self.assertPoint(gc.to_tracker(60, 45), (50.5 * 0.5 - 0.5, 25.5 * 2 - 0.5))\n\n    def test_resize_against_synthetic_downscale(self):\n        # Independent check: 2x2 box-average a synthetic crop that contains one\n        # marked source pixel. Find the tracker pixel holding the mark and check\n        # that the mapped point falls inside that tracker pixel's extent.\n        g = DEFAULT_GEOMETRY\n        sx, sy = 1001, 437\n        cx, cy = sx - int(g.left), sy - int(g.top)\n        hits = [(tx, ty) for ty in range(g.tracker_h) for tx in range(g.tracker_w)\n                if 2 * tx <= cx < 2 * tx + 2 and 2 * ty <= cy < 2 * ty + 2]\n        self.assertEqual(len(hits), 1)\n        tx, ty = hits[0]\n        mx, my = to_tracker(sx, sy)\n        self.assertTrue(tx <= mx < tx + 1)\n        self.assertTrue(ty <= my < ty + 1)\n\n    def test_geometry_selection(self):\n        g1 = TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2)\n        g2 = TrackerGeometry.centre_crop(1920, 1080, 1080, 1080, 1)\n        f1, f2 = make_to_tracker(g1), make_to_tracker(g2)\n        self.assertPoint(f1(960, 540), (360.0, 270.0))\n        self.assertPoint(f2(960, 540), (540.0, 540.0))\n\n    def test_round_trip(self):\n        for g in (DEFAULT_GEOMETRY,\n                  TrackerGeometry.centre_crop(1920, 1080, 1440, 1080, 2, convention=CENTRE),\n                  TrackerGeometry(5, 7, 300, 200, 120, 160),\n                  TrackerGeometry(5, 7, 300, 200, 120, 160, convention=CENTRE)):\n            for p in [(g.left, g.top), (g.left + 123.456, g.top + 78.9),\n                      (g.left + g.crop_w - 1, g.top + g.crop_h - 1)]:\n                t = g.to_tracker(*p)\n                self.assertPoint(g.from_tracker(*t), p)\n            for t in [(0.0, 0.0), (10.25, 33.75)]:\n                self.assertPoint(g.to_tracker(*g.from_tracker(*t)), t)\n\n    def test_from_tracker_default(self):\n        self.assertPoint(from_tracker(360, 270), (960.0, 540.0))\n        self.assertPoint(from_tracker(0, 0), (240.0, 0.0))\n\n    def test_purity(self):\n        self.assertEqual(to_tracker(1000, 500), to_tracker(1000, 500))\n        self.assertEqual(DEFAULT_GEOMETRY.left, 240)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}

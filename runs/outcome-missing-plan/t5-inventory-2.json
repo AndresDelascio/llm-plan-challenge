@@ -1,0 +1,101 @@
+{
+  "arm": "plan",
+  "task": "t5-inventory",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 9986,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1062,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 846,
+        "output_tokens_details": {
+          "thinking_tokens": 86
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1062,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 846,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1062,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1062
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.025424,
+      "error": null,
+      "reply": "## Brief\n\n**Goal:** Write a Python function `available(stock, reservations, now_s)`. It returns how many units of a product can still be sold. That is the units on the shelf minus the units held by active reservations.\n\n**Constraints:**\n- Each reservation is a dict with `qty`, `created_s` and `paid`.\n- `now_s` is given in seconds, which suggests unpaid reservations expire after some hold window.\n- The function must be pure: no I/O, no clock reads, and it must not change its inputs.\n\n**Non-goals:**\n- Creating, persisting or cleaning up reservations.\n- Handling concurrency or locking.\n- Supporting more than one product.\n\n## Plan\n\n1. Make the hold window a named constant or an optional parameter, e.g. `hold_s`. Use the value the user confirms.\n2. Treat a reservation as active if it is paid, or if it is unpaid and `now_s - created_s < hold_s`.\n3. Add up `qty` over the active reservations.\n4. Return `max(0, stock - held)`, so the result is never negative even when the shop is oversold.\n5. Validate inputs. Reject negative `qty` or `stock`, and decide what to do with a `created_s` in the future (treat it as active).\n6. Write unit tests for:\n   - no reservations\n   - only paid reservations\n   - an unpaid reservation just before, exactly at, and just after expiry\n   - reservations that add up to more than stock\n   - zero stock\n\n## Risks I already know about\n\n- **Paid units may be counted twice.** If paid orders are already taken off `stock`, subtracting them again undercounts.\n- **The expiry boundary (`<` vs `<=`)** gives off-by-one-second answers if I pick the wrong one.\n- **Clock mismatch.** `created_s` and `now_s` must use the same epoch and units.\n- **Clamping to 0 hides oversell bugs.** The caller might want the negative number instead.\n\n## Questions for the user\n\n1. How long does an unpaid reservation hold its units, and does it expire exactly at that age or just after?\n2. When an order is paid, is it already taken off `stock`, or does the paid reservation still hold units until it ships?\n3. If reservations exceed stock, should the function return 0 or the negative number?\n4. Is this Python, and which version?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 16186,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1820,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1670,
+        "output_tokens_details": {
+          "thinking_tokens": 150
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1820,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1670,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1820,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1820
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.047968,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for a single product in the web shop.\"\"\"\n\nHOLD_S = 300  # Seconds an unpaid reservation holds its units.\n\n\ndef available(stock, reservations, now_s, hold_s=HOLD_S):\n    \"\"\"Return how many units can still be sold.\n\n    stock        -- units on the shelf (int >= 0)\n    reservations -- iterable of dicts with keys 'qty', 'created_s', 'paid'\n    now_s        -- current time in seconds, same epoch/units as created_s\n    hold_s       -- how long an unpaid reservation holds its units\n\n    A reservation holds its units if it is paid (paid ones never expire),\n    or if it is unpaid and younger than hold_s seconds. An unpaid\n    reservation stops holding at exactly hold_s seconds of age.\n    A reservation with created_s in the future counts as active.\n\n    Assumption: paid reservations are NOT already subtracted from `stock`.\n    If your checkout decrements stock on payment, pass only unpaid\n    reservations, or paid units will be counted twice.\n\n    The result is never below 0, even if reservations exceed stock.\n    The function is pure: it reads no clock and does not modify its inputs.\n    \"\"\"\n    if isinstance(stock, bool) or not isinstance(stock, int):\n        raise TypeError(\"stock must be an int\")\n    if stock < 0:\n        raise ValueError(\"stock must not be negative\")\n    if hold_s < 0:\n        raise ValueError(\"hold_s must not be negative\")\n\n    held = 0\n    for i, r in enumerate(reservations):\n        try:\n            qty = r[\"qty\"]\n            created_s = r[\"created_s\"]\n            paid = r[\"paid\"]\n        except (KeyError, TypeError):\n            raise ValueError(\n                f\"reservation {i} must be a dict with 'qty', 'created_s' and 'paid'\"\n            ) from None\n        if isinstance(qty, bool) or not isinstance(qty, int):\n            raise TypeError(f\"reservation {i}: qty must be an int\")\n        if qty < 0:\n            raise ValueError(f\"reservation {i}: qty must not be negative\")\n\n        if paid or now_s - created_s < hold_s:\n            held += qty\n\n    return max(0, stock - held)\n\n\nif __name__ == \"__main__\":\n    import unittest\n\n    def res(qty, created_s, paid=False):\n        return {\"qty\": qty, \"created_s\": created_s, \"paid\": paid}\n\n    class AvailableTests(unittest.TestCase):\n        def test_no_reservations(self):\n            self.assertEqual(available(10, [], 1000), 10)\n\n        def test_zero_stock(self):\n            self.assertEqual(available(0, [], 1000), 0)\n            self.assertEqual(available(0, [res(2, 1000)], 1000), 0)\n\n        def test_paid_never_expires(self):\n            self.assertEqual(available(10, [res(3, 0, paid=True)], 10**9), 7)\n\n        def test_unpaid_expiry_boundary(self):\n            r = [res(4, 1000)]\n            self.assertEqual(available(10, r, 1299), 6)   # just before\n            self.assertEqual(available(10, r, 1300), 10)  # exactly at 300 s\n            self.assertEqual(available(10, r, 1301), 10)  # just after\n\n        def test_future_created_is_active(self):\n            self.assertEqual(available(10, [res(2, 2000)], 1000), 8)\n\n        def test_mixed(self):\n            r = [res(1, 0, paid=True), res(2, 900), res(5, 100)]\n            self.assertEqual(available(10, r, 1000), 7)\n\n        def test_oversold_clamps_to_zero(self):\n            r = [res(6, 1000), res(6, 1000, paid=True)]\n            self.assertEqual(available(10, r, 1000), 0)\n\n        def test_inputs_not_modified(self):\n            r = [res(2, 1000)]\n            snapshot = [dict(x) for x in r]\n            available(10, r, 1000)\n            self.assertEqual(r, snapshot)\n\n        def test_invalid_inputs(self):\n            with self.assertRaises(ValueError):\n                available(-1, [], 0)\n            with self.assertRaises(ValueError):\n                available(10, [res(-1, 0)], 0)\n            with self.assertRaises(ValueError):\n                available(10, [{\"qty\": 1}], 0)\n            with self.assertRaises(TypeError):\n                available(10, [res(1.5, 0)], 0)\n\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "arm": "plain",
+  "task": "t4-recall",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 5991,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 990,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 341,
+        "output_tokens_details": {
+          "thinking_tokens": 66
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 990,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 341,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 990,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 990
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.014748,
+      "error": null,
+      "reply": "```python\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights overlapped by at least one clip.\n\n    Both arguments are lists of (start_s, end_s) tuples.\n    Intervals that only touch at an endpoint do not count as overlapping.\n    Returns 0.0 when there are no highlights.\n    \"\"\"\n    if not highlights:\n        return 0.0\n\n    def _norm(interval):\n        a, b = interval\n        return (a, b) if a <= b else (b, a)\n\n    norm_clips = [_norm(c) for c in clips]\n\n    found = 0\n    for h in highlights:\n        h_start, h_end = _norm(h)\n        for c_start, c_end in norm_clips:\n            if c_start < h_end and h_start < c_end:\n                found += 1\n                break\n\n    return found / len(highlights)\n```",
+      "symptom": "wrong recall for highlights [(0,10),(20,30)] and one clip (5,25)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 10788,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1332,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 861,
+        "output_tokens_details": {
+          "thinking_tokens": 188
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1332,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 861,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1332,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1332
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.027884,
+      "error": null,
+      "reply": "```python\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by the clips.\n\n    Both arguments are lists of (start_s, end_s) tuples.\n    A highlight is found when a clip overlaps it, and each clip can\n    find at most one highlight. A single clip spanning several\n    highlights therefore counts once. The function uses a maximum\n    one-to-one matching between highlights and the clips that\n    overlap them.\n\n    Intervals that only touch at an endpoint do not count as\n    overlapping. Returns 0.0 when there are no highlights.\n    \"\"\"\n    if not highlights:\n        return 0.0\n\n    def _norm(interval):\n        a, b = interval\n        return (a, b) if a <= b else (b, a)\n\n    norm_highlights = [_norm(h) for h in highlights]\n    norm_clips = [_norm(c) for c in clips]\n\n    # For each highlight, list the clips that overlap it.\n    adjacency = []\n    for h_start, h_end in norm_highlights:\n        overlapping = [\n            j\n            for j, (c_start, c_end) in enumerate(norm_clips)\n            if c_start < h_end and h_start < c_end\n        ]\n        adjacency.append(overlapping)\n\n    # Maximum bipartite matching using augmenting paths (Kuhn's algorithm).\n    clip_owner = [-1] * len(norm_clips)\n\n    def _try_assign(h_idx, visited):\n        for c_idx in adjacency[h_idx]:\n            if visited[c_idx]:\n                continue\n            visited[c_idx] = True\n            if clip_owner[c_idx] == -1 or _try_assign(clip_owner[c_idx], visited):\n                clip_owner[c_idx] = h_idx\n                return True\n        return False\n\n    found = 0\n    for h_idx in range(len(norm_highlights)):\n        if adjacency[h_idx] and _try_assign(h_idx, [False] * len(norm_clips)):\n            found += 1\n\n    return found / len(highlights)\n```",
+      "symptom": null
+    }
+  ]
+}

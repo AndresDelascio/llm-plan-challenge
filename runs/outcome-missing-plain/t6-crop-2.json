@@ -1,0 +1,194 @@
+{
+  "arm": "plain",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": null,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 13346,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 972,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1227,
+        "output_tokens_details": {
+          "thinking_tokens": 77
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 972,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1227,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 972,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 972
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.032324,
+      "error": null,
+      "reply": "```python\n\"\"\"Map pixel positions from the original video into shot-tracker coordinates.\n\nThe tracker sees a cropped region of the original frame, optionally resized.\nSet CROP_* to the region being cropped (in original-video pixels). If the\ntracker resizes that crop, set TRACKER_WIDTH/TRACKER_HEIGHT to its input size;\nleave them as None if the crop is passed through at native resolution.\n\"\"\"\n\n# --- Configure these to match your pipeline -------------------------------\nCROP_X = 0          # left edge of the crop in the original video (px)\nCROP_Y = 0          # top edge of the crop in the original video (px)\nCROP_WIDTH = 1920   # width of the crop region (px)\nCROP_HEIGHT = 1080  # height of the crop region (px)\n\nTRACKER_WIDTH = None   # e.g. 640 if the crop is resized before tracking\nTRACKER_HEIGHT = None  # e.g. 360\n# --------------------------------------------------------------------------\n\n\ndef to_tracker(x, y,\n               crop_x=None, crop_y=None,\n               crop_width=None, crop_height=None,\n               tracker_width=None, tracker_height=None):\n    \"\"\"Convert an (x, y) pixel position in the original video to tracker coordinates.\n\n    Any argument left as None falls back to the module-level configuration.\n    Returns a tuple (x, y) of floats. Points outside the crop are still mapped\n    (they will fall outside [0, width) / [0, height) in tracker space); use\n    is_in_crop() if you need to filter them.\n    \"\"\"\n    cx = CROP_X if crop_x is None else crop_x\n    cy = CROP_Y if crop_y is None else crop_y\n    cw = CROP_WIDTH if crop_width is None else crop_width\n    ch = CROP_HEIGHT if crop_height is None else crop_height\n    tw = TRACKER_WIDTH if tracker_width is None else tracker_width\n    th = TRACKER_HEIGHT if tracker_height is None else tracker_height\n\n    if cw <= 0 or ch <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n\n    # Shift into the crop's coordinate frame.\n    tx = float(x) - cx\n    ty = float(y) - cy\n\n    # Scale if the tracker resizes the crop.\n    if tw is not None:\n        tx *= tw / cw\n    if th is not None:\n        ty *= th / ch\n\n    return (tx, ty)\n\n\ndef is_in_crop(x, y, crop_x=None, crop_y=None, crop_width=None, crop_height=None):\n    \"\"\"Return True if the original-video point (x, y) lies inside the crop.\"\"\"\n    cx = CROP_X if crop_x is None else crop_x\n    cy = CROP_Y if crop_y is None else crop_y\n    cw = CROP_WIDTH if crop_width is None else crop_width\n    ch = CROP_HEIGHT if crop_height is None else crop_height\n    return cx <= x < cx + cw and cy <= y < cy + ch\n\n\nif __name__ == \"__main__\":\n    # Example: crop starts at (320, 180), is 1280x720, tracker input is 640x360.\n    print(to_tracker(960, 540, crop_x=320, crop_y=180,\n                     crop_width=1280, crop_height=720,\n                     tracker_width=640, tracker_height=360))  # (320.0, 180.0)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 25591,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2167,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2659,
+        "output_tokens_details": {
+          "thinking_tokens": 523
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2167,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2659,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2167,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2167
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.070524,
+      "error": null,
+      "reply": "```python\n\"\"\"Map pixel positions from the original video into shot-tracker coordinates.\n\nNOTE ON THE FAILED CHECK\n------------------------\nThe previous version used placeholder defaults: a full 1920x1080 \"crop\" at\n(0, 0) with no resize. That maps (960, 540) to itself. The check rejected\nthat, so the tracker's real crop is not the full frame. The plan does not\ngive the crop rectangle or the tracker's input size, and I can't infer them\nfrom a single failed check. Guessing new numbers would only produce a\ndifferent wrong answer.\n\nThis version does not use made-up defaults. Supply the real values in one\nof these ways, in priority order:\n  1. Keyword arguments to to_tracker().\n  2. A tracker_config.json file next to this script, for example:\n       {\"crop_x\": 320, \"crop_y\": 180, \"crop_width\": 1280, \"crop_height\": 720,\n        \"tracker_width\": 640, \"tracker_height\": 360}\n  3. Environment variables TRACKER_CROP_X, TRACKER_CROP_Y,\n     TRACKER_CROP_WIDTH, TRACKER_CROP_HEIGHT, and optionally\n     TRACKER_WIDTH, TRACKER_HEIGHT.\nIf the crop is still unknown after these, to_tracker() raises an error that\nsays which value is missing.\n\nThe mapping is\n    tracker = (original - crop_origin) * (tracker_size / crop_size)\nIf your tracker uses a different convention, such as normalized 0..1\ncoordinates or a centered origin, set OUTPUT_MODE below.\n\"\"\"\n\nimport json\nimport os\n\n_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                            \"tracker_config.json\")\n\n# \"pixels\"     -> pixel coordinates in the tracker's input image (default)\n# \"normalized\" -> 0..1 relative to the tracker image\n# \"centered\"   -> pixels relative to the tracker image center\nOUTPUT_MODE = os.environ.get(\"TRACKER_OUTPUT_MODE\", \"pixels\")\n\n_KEYS = (\"crop_x\", \"crop_y\", \"crop_width\", \"crop_height\",\n         \"tracker_width\", \"tracker_height\")\n_ENV = {\n    \"crop_x\": \"TRACKER_CROP_X\",\n    \"crop_y\": \"TRACKER_CROP_Y\",\n    \"crop_width\": \"TRACKER_CROP_WIDTH\",\n    \"crop_height\": \"TRACKER_CROP_HEIGHT\",\n    \"tracker_width\": \"TRACKER_WIDTH\",\n    \"tracker_height\": \"TRACKER_HEIGHT\",\n}\n\n\ndef _load_config():\n    cfg = {k: None for k in _KEYS}\n    for k, env in _ENV.items():\n        v = os.environ.get(env)\n        if v not in (None, \"\"):\n            cfg[k] = float(v)\n    if os.path.isfile(_CONFIG_FILE):\n        with open(_CONFIG_FILE, \"r\", encoding=\"utf-8\") as f:\n            data = json.load(f)\n        for k in _KEYS:\n            if data.get(k) is not None:\n                cfg[k] = float(data[k])\n    return cfg\n\n\ndef _resolve(**overrides):\n    cfg = _load_config()\n    for k, v in overrides.items():\n        if v is not None:\n            cfg[k] = float(v)\n    missing = [k for k in (\"crop_x\", \"crop_y\", \"crop_width\", \"crop_height\")\n               if cfg[k] is None]\n    if missing:\n        raise ValueError(\n            \"Tracker crop is not configured (missing: %s). Pass these as \"\n            \"arguments, add them to %s, or set the TRACKER_* environment \"\n            \"variables.\" % (\", \".join(missing), _CONFIG_FILE))\n    if cfg[\"crop_width\"] <= 0 or cfg[\"crop_height\"] <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    # No resize means the tracker image is the crop at native size.\n    if cfg[\"tracker_width\"] is None:\n        cfg[\"tracker_width\"] = cfg[\"crop_width\"]\n    if cfg[\"tracker_height\"] is None:\n        cfg[\"tracker_height\"] = cfg[\"crop_height\"]\n    return cfg\n\n\ndef to_tracker(x, y,\n               crop_x=None, crop_y=None,\n               crop_width=None, crop_height=None,\n               tracker_width=None, tracker_height=None):\n    \"\"\"Convert an (x, y) pixel in the original video to tracker coordinates.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height,\n                 tracker_width=tracker_width, tracker_height=tracker_height)\n\n    sx = c[\"tracker_width\"] / c[\"crop_width\"]\n    sy = c[\"tracker_height\"] / c[\"crop_height\"]\n    tx = (float(x) - c[\"crop_x\"]) * sx\n    ty = (float(y) - c[\"crop_y\"]) * sy\n\n    if OUTPUT_MODE == \"normalized\":\n        return (tx / c[\"tracker_width\"], ty / c[\"tracker_height\"])\n    if OUTPUT_MODE == \"centered\":\n        return (tx - c[\"tracker_width\"] / 2.0, ty - c[\"tracker_height\"] / 2.0)\n    return (tx, ty)\n\n\ndef is_in_crop(x, y, crop_x=None, crop_y=None, crop_width=None, crop_height=None):\n    \"\"\"Return True if the original-video point (x, y) lies inside the crop.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height)\n    return (c[\"crop_x\"] <= x < c[\"crop_x\"] + c[\"crop_width\"] and\n            c[\"crop_y\"] <= y < c[\"crop_y\"] + c[\"crop_height\"])\n\n\nif __name__ == \"__main__\":\n    # Example with explicit values: crop at (320, 180), 1280x720, resized to 640x360.\n    print(to_tracker(960, 540, crop_x=320, crop_y=180,\n                     crop_width=1280, crop_height=720,\n                     tracker_width=640, tracker_height=360))  # (320.0, 180.0)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 25174,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 3158,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2595,
+        "output_tokens_details": {
+          "thinking_tokens": 467
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 3158,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2595,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 3158,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 3158
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.077172,
+      "error": null,
+      "reply": "```python\n\"\"\"Map pixel positions from the original video into shot-tracker coordinates.\n\nWHY THE CHECK STILL FAILS\n-------------------------\nI can't produce the expected result for (960, 540) because I don't know the\ntracker's crop rectangle. The plan only says \"the tracker runs on a crop of\nthe video\". The first version assumed the full 1920x1080 frame, which mapped\n(960, 540) to itself, and the check rejected that. Any other built-in numbers\nwould be a guess, so this module doesn't ship any.\n\nTo fix it, fill in CROP below with the values your tracker actually uses\n(look for something like `frame[y0:y1, x0:x1]` followed by an optional\n`cv2.resize`). You can also pass them as arguments, put them in\ntracker_config.json next to this file, or set TRACKER_* environment variables.\nIf you send me the crop numbers or the tracker's crop/resize code, I can\nconfirm what the expected output for (960, 540) should be.\n\nMapping:\n    tracker = (original - crop_origin) * (tracker_size / crop_size)\n\"\"\"\n\nimport json\nimport os\n\n# ---------------------------------------------------------------------------\n# FILL THESE IN with your tracker's real values.\n# Example: CROP = {\"crop_x\": 320, \"crop_y\": 180, \"crop_width\": 1280,\n#                  \"crop_height\": 720, \"tracker_width\": 640,\n#                  \"tracker_height\": 360}\n# tracker_width/height can be left out if the crop isn't resized.\n# ---------------------------------------------------------------------------\nCROP = None\n\n# \"pixels\"     -> pixel coordinates in the tracker's input image (default)\n# \"normalized\" -> 0..1 relative to the tracker image\n# \"centered\"   -> pixels relative to the tracker image center\nOUTPUT_MODE = os.environ.get(\"TRACKER_OUTPUT_MODE\", \"pixels\")\n\n_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                            \"tracker_config.json\")\n_KEYS = (\"crop_x\", \"crop_y\", \"crop_width\", \"crop_height\",\n         \"tracker_width\", \"tracker_height\")\n_ENV = {\n    \"crop_x\": \"TRACKER_CROP_X\",\n    \"crop_y\": \"TRACKER_CROP_Y\",\n    \"crop_width\": \"TRACKER_CROP_WIDTH\",\n    \"crop_height\": \"TRACKER_CROP_HEIGHT\",\n    \"tracker_width\": \"TRACKER_WIDTH\",\n    \"tracker_height\": \"TRACKER_HEIGHT\",\n}\n\n\ndef _load_config():\n    \"\"\"Priority (lowest to highest): env vars, config file, CROP constant.\"\"\"\n    cfg = {k: None for k in _KEYS}\n    for k, env in _ENV.items():\n        v = os.environ.get(env)\n        if v not in (None, \"\"):\n            cfg[k] = float(v)\n    if os.path.isfile(_CONFIG_FILE):\n        with open(_CONFIG_FILE, \"r\", encoding=\"utf-8\") as f:\n            data = json.load(f)\n        for k in _KEYS:\n            if data.get(k) is not None:\n                cfg[k] = float(data[k])\n    if CROP:\n        for k in _KEYS:\n            if CROP.get(k) is not None:\n                cfg[k] = float(CROP[k])\n    return cfg\n\n\ndef _resolve(**overrides):\n    cfg = _load_config()\n    for k, v in overrides.items():\n        if v is not None:\n            cfg[k] = float(v)\n    missing = [k for k in (\"crop_x\", \"crop_y\", \"crop_width\", \"crop_height\")\n               if cfg[k] is None]\n    if missing:\n        raise ValueError(\n            \"Tracker crop is not configured (missing: %s). Set CROP at the \"\n            \"top of this file, pass the values as arguments, add them to %s, \"\n            \"or set the TRACKER_* environment variables.\"\n            % (\", \".join(missing), _CONFIG_FILE))\n    if cfg[\"crop_width\"] <= 0 or cfg[\"crop_height\"] <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    if cfg[\"tracker_width\"] is None:\n        cfg[\"tracker_width\"] = cfg[\"crop_width\"]\n    if cfg[\"tracker_height\"] is None:\n        cfg[\"tracker_height\"] = cfg[\"crop_height\"]\n    return cfg\n\n\ndef to_tracker(x, y,\n               crop_x=None, crop_y=None,\n               crop_width=None, crop_height=None,\n               tracker_width=None, tracker_height=None):\n    \"\"\"Convert an (x, y) pixel in the original video to tracker coordinates.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height,\n                 tracker_width=tracker_width, tracker_height=tracker_height)\n\n    sx = c[\"tracker_width\"] / c[\"crop_width\"]\n    sy = c[\"tracker_height\"] / c[\"crop_height\"]\n    tx = (float(x) - c[\"crop_x\"]) * sx\n    ty = (float(y) - c[\"crop_y\"]) * sy\n\n    if OUTPUT_MODE == \"normalized\":\n        return (tx / c[\"tracker_width\"], ty / c[\"tracker_height\"])\n    if OUTPUT_MODE == \"centered\":\n        return (tx - c[\"tracker_width\"] / 2.0, ty - c[\"tracker_height\"] / 2.0)\n    return (tx, ty)\n\n\ndef is_in_crop(x, y, crop_x=None, crop_y=None, crop_width=None,\n               crop_height=None):\n    \"\"\"Return True if the original-video point (x, y) lies inside the crop.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height)\n    return (c[\"crop_x\"] <= x < c[\"crop_x\"] + c[\"crop_width\"] and\n            c[\"crop_y\"] <= y < c[\"crop_y\"] + c[\"crop_height\"])\n\n\nif __name__ == \"__main__\":\n    try:\n        print(\"frame center ->\", to_tracker(960, 540))\n    except ValueError as e:\n        print(\"Not configured yet:\", e)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 39897,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 3147,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 4873,
+        "output_tokens_details": {
+          "thinking_tokens": 774
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 3147,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 4873,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 3147,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 3147
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.12264399999999999,
+      "error": null,
+      "reply": "```python\n\"\"\"Map pixel positions from the original video into shot-tracker coordinates.\n\nWHY THE CHECK STILL FAILS\n-------------------------\nThe expected output for the frame center (960, 540) depends on the tracker's\ncrop rectangle, and that rectangle isn't in the plan or in anything I've been\nshown. I won't hard-code made-up crop numbers, because a guess that happens to\npass a check would still give wrong positions on real footage.\n\nThis version tries to find the real crop on its own. It looks next to this\nfile and in the current directory for:\n  * a JSON config with crop keys (crop_x/crop_y/crop_width/crop_height,\n    \"crop\": [x, y, w, h], or \"crop\": {\"x\", \"y\", \"width\", \"height\"}), or\n  * the tracker's Python source with a literal crop such as\n    `frame[180:900, 320:1600]`, plus an optional `cv2.resize(..., (w, h))`.\nIf it finds exactly one candidate, it uses it. If it finds none or several,\nit raises an error that lists what it found.\n\nIf auto-discovery doesn't work for your setup, fill in CROP below. You can\nalso pass the values as arguments, put them in tracker_config.json, or set the\nTRACKER_* environment variables. If you send me the tracker's crop/resize\ncode, I'll confirm the correct value for (960, 540).\n\nMapping:\n    tracker = (original - crop_origin) * (tracker_size / crop_size)\n\"\"\"\n\nimport json\nimport os\nimport re\n\n# ---------------------------------------------------------------------------\n# FILL THESE IN with your tracker's real values (they take top priority).\n# Example: CROP = {\"crop_x\": 320, \"crop_y\": 180, \"crop_width\": 1280,\n#                  \"crop_height\": 720, \"tracker_width\": 640,\n#                  \"tracker_height\": 360}\n# tracker_width/height can be left out if the crop isn't resized.\n# ---------------------------------------------------------------------------\nCROP = None\n\n# \"pixels\"     -> pixel coordinates in the tracker's input image (default)\n# \"normalized\" -> 0..1 relative to the tracker image\n# \"centered\"   -> pixels relative to the tracker image center\nOUTPUT_MODE = os.environ.get(\"TRACKER_OUTPUT_MODE\", \"pixels\")\n\n_HERE = os.path.dirname(os.path.abspath(__file__))\n_CONFIG_FILE = os.path.join(_HERE, \"tracker_config.json\")\n_KEYS = (\"crop_x\", \"crop_y\", \"crop_width\", \"crop_height\",\n         \"tracker_width\", \"tracker_height\")\n_ENV = {\n    \"crop_x\": \"TRACKER_CROP_X\",\n    \"crop_y\": \"TRACKER_CROP_Y\",\n    \"crop_width\": \"TRACKER_CROP_WIDTH\",\n    \"crop_height\": \"TRACKER_CROP_HEIGHT\",\n    \"tracker_width\": \"TRACKER_WIDTH\",\n    \"tracker_height\": \"TRACKER_HEIGHT\",\n}\n_MAX_SCAN_BYTES = 2 * 1024 * 1024\n\n_SLICE_RE = re.compile(\n    r\"\\[\\s*(\\d+)\\s*:\\s*(\\d+)\\s*,\\s*(\\d+)\\s*:\\s*(\\d+)\\s*(?:,\\s*:?\\s*)?\\]\")\n_RESIZE_RE = re.compile(\n    r\"resize\\s*\\([^,()]+,\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\")\n\n\n# ---------------------------------------------------------------------------\n# Auto-discovery of the real crop (no invented defaults)\n# ---------------------------------------------------------------------------\ndef _search_dirs():\n    dirs = []\n    for d in (_HERE, os.getcwd()):\n        d = os.path.abspath(d)\n        if d not in dirs and os.path.isdir(d):\n            dirs.append(d)\n    return dirs\n\n\ndef _candidate_files(exts):\n    seen = set()\n    for d in _search_dirs():\n        try:\n            names = sorted(os.listdir(d))\n        except OSError:\n            continue\n        for name in names:\n            path = os.path.join(d, name)\n            if path in seen or not os.path.isfile(path):\n                continue\n            if os.path.splitext(name)[1].lower() not in exts:\n                continue\n            if os.path.abspath(path) == os.path.abspath(__file__):\n                continue\n            try:\n                if os.path.getsize(path) > _MAX_SCAN_BYTES:\n                    continue\n            except OSError:\n                continue\n            seen.add(path)\n            yield path\n\n\ndef _crop_from_obj(obj):\n    \"\"\"Find a crop description anywhere inside a parsed JSON object.\"\"\"\n    if isinstance(obj, dict):\n        if all(obj.get(k) is not None for k in _KEYS[:4]):\n            return {k: float(obj[k]) for k in _KEYS if obj.get(k) is not None}\n        crop = obj.get(\"crop\")\n        if isinstance(crop, (list, tuple)) and len(crop) == 4:\n            out = dict(zip(_KEYS[:4], (float(v) for v in crop)))\n        elif isinstance(crop, dict) and all(\n                k in crop for k in (\"x\", \"y\", \"width\", \"height\")):\n            out = {\"crop_x\": float(crop[\"x\"]), \"crop_y\": float(crop[\"y\"]),\n                   \"crop_width\": float(crop[\"width\"]),\n                   \"crop_height\": float(crop[\"height\"])}\n        else:\n            out = None\n        if out is not None:\n            for k in (\"tracker_width\", \"tracker_height\"):\n                if obj.get(k) is not None:\n                    out[k] = float(obj[k])\n            return out\n        for v in obj.values():\n            found = _crop_from_obj(v)\n            if found:\n                return found\n    elif isinstance(obj, list):\n        for v in obj:\n            found = _crop_from_obj(v)\n            if found:\n                return found\n    return None\n\n\ndef _discover():\n    \"\"\"Return (config_or_None, list_of_candidate_descriptions).\"\"\"\n    candidates = []\n\n    for path in _candidate_files({\".json\"}):\n        try:\n            with open(path, \"r\", encoding=\"utf-8\") as f:\n                data = json.load(f)\n        except (OSError, ValueError):\n            continue\n        found = _crop_from_obj(data)\n        if found:\n            candidates.append((found, path))\n\n    for path in _candidate_files({\".py\"}):\n        try:\n            with open(path, \"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                text = f.read()\n        except OSError:\n            continue\n        slices = {tuple(int(g) for g in m.groups())\n                  for m in _SLICE_RE.finditer(text)}\n        resizes = {tuple(int(g) for g in m.groups())\n                   for m in _RESIZE_RE.finditer(text)}\n        for y0, y1, x0, x1 in slices:\n            if y1 <= y0 or x1 <= x0:\n                continue\n            cfg = {\"crop_x\": float(x0), \"crop_y\": float(y0),\n                   \"crop_width\": float(x1 - x0),\n                   \"crop_height\": float(y1 - y0)}\n            if len(resizes) == 1:\n                w, h = next(iter(resizes))\n                cfg[\"tracker_width\"] = float(w)\n                cfg[\"tracker_height\"] = float(h)\n            candidates.append((cfg, path))\n\n    unique = {}\n    for cfg, path in candidates:\n        key = tuple(sorted(cfg.items()))\n        unique.setdefault(key, (cfg, path))\n    found = list(unique.values())\n    if len(found) == 1:\n        return found[0][0], found\n    return None, found\n\n\n# ---------------------------------------------------------------------------\n# Configuration resolution\n# ---------------------------------------------------------------------------\ndef _load_config():\n    \"\"\"Priority (lowest to highest): discovery, env vars, config file, CROP.\"\"\"\n    cfg = {k: None for k in _KEYS}\n    discovered, candidates = _discover()\n    if discovered:\n        cfg.update(discovered)\n    for k, env in _ENV.items():\n        v = os.environ.get(env)\n        if v not in (None, \"\"):\n            cfg[k] = float(v)\n    if os.path.isfile(_CONFIG_FILE):\n        with open(_CONFIG_FILE, \"r\", encoding=\"utf-8\") as f:\n            data = json.load(f)\n        found = _crop_from_obj(data) or {}\n        for k in _KEYS:\n            if found.get(k) is not None:\n                cfg[k] = float(found[k])\n    if CROP:\n        for k in _KEYS:\n            if CROP.get(k) is not None:\n                cfg[k] = float(CROP[k])\n    return cfg, candidates\n\n\ndef _resolve(**overrides):\n    cfg, candidates = _load_config()\n    for k, v in overrides.items():\n        if v is not None:\n            cfg[k] = float(v)\n    missing = [k for k in _KEYS[:4] if cfg[k] is None]\n    if missing:\n        if len(candidates) > 1:\n            listing = \"; \".join(\"%s from %s\" % (c, p) for c, p in candidates)\n            hint = \" Several possible crops were found: %s.\" % listing\n        else:\n            hint = \" No crop was found in %s.\" % \", \".join(_search_dirs())\n        raise ValueError(\n            \"Tracker crop is not configured (missing: %s).%s Set CROP at the \"\n            \"top of this file, pass the values as arguments, add them to %s, \"\n            \"or set the TRACKER_* environment variables.\"\n            % (\", \".join(missing), hint, _CONFIG_FILE))\n    if cfg[\"crop_width\"] <= 0 or cfg[\"crop_height\"] <= 0:\n        raise ValueError(\"Crop width and height must be positive.\")\n    if cfg[\"tracker_width\"] is None:\n        cfg[\"tracker_width\"] = cfg[\"crop_width\"]\n    if cfg[\"tracker_height\"] is None:\n        cfg[\"tracker_height\"] = cfg[\"crop_height\"]\n    return cfg\n\n\n# ---------------------------------------------------------------------------\n# Public API\n# ---------------------------------------------------------------------------\ndef to_tracker(x, y,\n               crop_x=None, crop_y=None,\n               crop_width=None, crop_height=None,\n               tracker_width=None, tracker_height=None):\n    \"\"\"Convert an (x, y) pixel in the original video to tracker coordinates.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height,\n                 tracker_width=tracker_width, tracker_height=tracker_height)\n\n    sx = c[\"tracker_width\"] / c[\"crop_width\"]\n    sy = c[\"tracker_height\"] / c[\"crop_height\"]\n    tx = (float(x) - c[\"crop_x\"]) * sx\n    ty = (float(y) - c[\"crop_y\"]) * sy\n\n    if OUTPUT_MODE == \"normalized\":\n        return (tx / c[\"tracker_width\"], ty / c[\"tracker_height\"])\n    if OUTPUT_MODE == \"centered\":\n        return (tx - c[\"tracker_width\"] / 2.0, ty - c[\"tracker_height\"] / 2.0)\n    return (tx, ty)\n\n\ndef is_in_crop(x, y, crop_x=None, crop_y=None, crop_width=None,\n               crop_height=None):\n    \"\"\"Return True if the original-video point (x, y) lies inside the crop.\"\"\"\n    c = _resolve(crop_x=crop_x, crop_y=crop_y,\n                 crop_width=crop_width, crop_height=crop_height)\n    return (c[\"crop_x\"] <= x < c[\"crop_x\"] + c[\"crop_width\"] and\n            c[\"crop_y\"] <= y < c[\"crop_y\"] + c[\"crop_height\"])\n\n\nif __name__ == \"__main__\":\n    try:\n        cfg = _resolve()\n        print(\"using crop:\", cfg)\n        print(\"frame center ->\", to_tracker(960, 540))\n    except ValueError as e:\n        print(\"Not configured yet:\", e)\n```",
+      "symptom": "wrong result for the frame center (960, 540)"
+    }
+  ]
+}

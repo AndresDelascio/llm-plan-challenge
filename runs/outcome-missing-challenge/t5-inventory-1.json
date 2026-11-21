@@ -1,0 +1,160 @@
+{
+  "arm": "challenge",
+  "task": "t5-inventory",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 9277,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1062,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 825,
+        "output_tokens_details": {
+          "thinking_tokens": 96
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1062,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 825,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1062,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1062
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.025004000000000002,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `available(stock, reservations, now_s)` in Python. It returns how many units can still be sold: shelf stock minus the units held by active reservations.\n\n**Constraints:**\n- Each reservation is a dict with `qty`, `created_s` and `paid`.\n- The function is pure: no I/O and no mutation of its inputs.\n- `now_s` and `created_s` are both in seconds on the same clock.\n\n**Non-goals:**\n- Persisting or creating reservations.\n- Concurrency or locking.\n- Removing expired reservations from storage.\n\n## Plan\n1. Decide which reservations are active.\n   - Unpaid reservations hold units until `now_s - created_s >= TTL`, then they expire.\n   - Paid reservations are handled according to the answer to Question 2.\n2. Sum `qty` over the active reservations.\n3. Return `max(0, stock - held)`, or raise if the answer to Question 3 says to.\n4. Validate inputs. Reject negative `stock` or `qty`, and handle a missing `paid` key.\n5. Write unit tests for:\n   - no reservations\n   - an unpaid reservation inside and outside the TTL, plus the exact boundary\n   - paid reservations\n   - overbooking (held > stock)\n   - a `created_s` in the future\n\n## Risks I already know about\n- If I guess the TTL wrong, the shop either oversells or blocks sales. This is why it should be a parameter, not hard-coded.\n- If paid units are already subtracted from `stock`, counting them again undercounts what can be sold.\n- Clock skew can make `created_s > now_s`. I would treat those reservations as active.\n- Clamping to 0 hides an oversold state that someone may need to see.\n\n## Questions for the user\n1. How long does an unpaid reservation hold units? Should the TTL be a parameter with a default?\n2. Do paid reservations still hold units, or is `stock` already reduced when an order is paid? Do paid reservations ever expire?\n3. If held units exceed stock, should the function return 0, return a negative number, or raise an error?\n4. Should the expiry boundary be inclusive (`>=`) or exclusive (`>`)?"
+    },
+    {
+      "phase": "review",
+      "provider": "codex",
+      "wall_ms": 13892,
+      "usage": {
+        "input_tokens": 14745,
+        "cached_input_tokens": 13184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 317,
+        "reasoning_output_tokens": 0
+      },
+      "error": null,
+      "reply": "VERDICT: BLOCKED\n\n### 1. [blocker] TTL has no source\n- Failure: The expiry check requires `TTL`, but the specified function takes only `stock`, `reservations`, and `now_s`.\n- Fix: Specify the TTL in seconds and its source while preserving the signature, or explicitly approve a TTL argument.\n\n### 2. [blocker] Paid reservation rules are undefined\n- Failure: When a paid reservation exists, the function cannot determine whether its quantity still holds shelf stock or whether the hold expires.\n- Fix: Specify when payment reduces shelf stock and whether any remaining paid hold expires.\n\n### 3. [blocker] Overbooking has no defined result\n- Failure: When active holds exceed stock, the plan leaves callers with three incompatible outcomes.\n- Fix: Return `stock - held` as stated in the goal, or explicitly revise the contract to clamp or raise.\n\n### 4. [major] Exact TTL boundary is contradictory\n- Failure: At age `TTL`, step 1 expires the reservation, but Question 4 leaves open whether it remains active.\n- Fix: Keep `>=` and assert that the reservation is expired at the exact boundary, or update both the predicate and test if `>` is chosen.\n\n### 5. [minor] Validation follows use\n- Failure: Summation and subtraction use inputs before validation, so invalid values can affect the result or trigger an incidental error before the intended check.\n- Fix: Validate `stock` before calculation and each reservation before using its fields."
+    },
+    {
+      "phase": "revise",
+      "provider": "claude",
+      "wall_ms": 16133,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 2234,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1628,
+        "output_tokens_details": {
+          "thinking_tokens": 721
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2234,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1628,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 2234,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 2234
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.050440000000000006,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `available(stock, reservations, now_s)` in Python. It returns how many units can still be sold: shelf stock minus the units held by active reservations.\n\n**Constraints:**\n- Each reservation is a dict with `qty`, `created_s` and `paid`.\n- The function is pure: no I/O and no mutation of its inputs.\n- `now_s` and `created_s` are both in seconds on the same clock.\n\n**Non-goals:**\n- Persisting or creating reservations.\n- Concurrency or locking.\n- Removing expired reservations from storage.\n\n## Plan\n1. Validate inputs before any calculation.\n   - Reject a negative `stock` before using it.\n   - Check each reservation before using its fields: reject a negative `qty`, and handle a missing `paid` key.\n2. Decide which reservations are active.\n   - Unpaid reservations hold units until `now_s - created_s >= TTL`, then they expire. The boundary is inclusive, so a reservation is expired at exactly age `TTL`.\n   - The TTL value and its source depend on the answer to Question 1. The specified signature is `available(stock, reservations, now_s)` and has no TTL argument. I will keep that signature unless you approve adding a TTL argument.\n   - Paid reservations are handled according to the answer to Question 2.\n3. Sum `qty` over the active reservations to get `held`.\n4. Return `stock - held`, as the goal states. Do not clamp the result. A negative result means the stock is oversold.\n5. Write unit tests for:\n   - no reservations\n   - an unpaid reservation inside and outside the TTL\n   - the exact boundary, where age equals `TTL` and the reservation is expired\n   - paid reservations\n   - overbooking (held > stock), which returns a negative number\n   - a `created_s` in the future\n   - invalid inputs, which are rejected before any calculation\n\n## Risks I already know about\n- If I guess the TTL wrong, the shop either oversells or blocks sales. The value must come from you. It must not be hard-coded on a guess.\n- If paid units are already subtracted from `stock`, counting them again undercounts what can be sold.\n- Clock skew can make `created_s > now_s`. I would treat those reservations as active.\n- Callers may expect a result of 0 or more. A negative result tells them the stock is oversold, but they need to handle it.\n\n## Questions for the user\n1. How long does an unpaid reservation hold units, in seconds? Where should the TTL come from if the three-argument signature stays the same? Or do you approve adding a TTL argument, with or without a default?\n2. Do paid reservations still hold units, or is `stock` already reduced when an order is paid? Do paid reservations ever expire?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 20609,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1969,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2335,
+        "output_tokens_details": {
+          "thinking_tokens": 209
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1969,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 2335,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1969,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1969
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.06246,
+      "error": null,
+      "reply": "```python\n\"\"\"Stock availability for the web shop.\"\"\"\n\nimport unittest\n\n# An unpaid reservation stops holding units once it is this old, in seconds.\nUNPAID_TTL_S = 300\n\n\ndef _is_int(value):\n    return isinstance(value, int) and not isinstance(value, bool)\n\n\ndef _is_number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return how many units can still be sold.\n\n    stock        -- units on the shelf (int, >= 0)\n    reservations -- iterable of dicts with keys 'qty', 'created_s' and 'paid'\n    now_s        -- current time in seconds, on the same clock as 'created_s'\n\n    Paid reservations hold their units and never expire. Unpaid reservations\n    hold their units until they are UNPAID_TTL_S seconds old. At exactly that\n    age they are expired. A missing 'paid' key counts as unpaid. A reservation\n    with 'created_s' in the future (clock skew) is active. The result is never\n    less than 0.\n\n    All inputs are checked before any calculation. Invalid input raises\n    TypeError or ValueError. The inputs are not modified.\n    \"\"\"\n    if not _is_int(stock):\n        raise TypeError(\"stock must be an int\")\n    if stock < 0:\n        raise ValueError(\"stock must not be negative\")\n    if not _is_number(now_s):\n        raise TypeError(\"now_s must be a number\")\n    if reservations is None:\n        raise TypeError(\"reservations must be an iterable of dicts\")\n\n    checked = []\n    for index, reservation in enumerate(reservations):\n        if not isinstance(reservation, dict):\n            raise TypeError(f\"reservation {index} must be a dict\")\n        if \"qty\" not in reservation:\n            raise ValueError(f\"reservation {index} is missing 'qty'\")\n        if \"created_s\" not in reservation:\n            raise ValueError(f\"reservation {index} is missing 'created_s'\")\n\n        qty = reservation[\"qty\"]\n        created_s = reservation[\"created_s\"]\n        paid = reservation.get(\"paid\", False)\n\n        if not _is_int(qty):\n            raise TypeError(f\"reservation {index}: 'qty' must be an int\")\n        if qty < 0:\n            raise ValueError(f\"reservation {index}: 'qty' must not be negative\")\n        if not _is_number(created_s):\n            raise TypeError(f\"reservation {index}: 'created_s' must be a number\")\n        if not isinstance(paid, bool):\n            raise TypeError(f\"reservation {index}: 'paid' must be a bool\")\n\n        checked.append((qty, created_s, paid))\n\n    held = 0\n    for qty, created_s, paid in checked:\n        if paid or now_s - created_s < UNPAID_TTL_S:\n            held += qty\n\n    return max(0, stock - held)\n\n\nclass AvailableTests(unittest.TestCase):\n    NOW = 10_000\n\n    def res(self, qty, age, paid=False):\n        return {\"qty\": qty, \"created_s\": self.NOW - age, \"paid\": paid}\n\n    def test_no_reservations(self):\n        self.assertEqual(available(10, [], self.NOW), 10)\n\n    def test_unpaid_inside_ttl_holds(self):\n        self.assertEqual(available(10, [self.res(3, 299)], self.NOW), 7)\n\n    def test_unpaid_outside_ttl_released(self):\n        self.assertEqual(available(10, [self.res(3, 301)], self.NOW), 10)\n\n    def test_unpaid_exact_boundary_is_expired(self):\n        self.assertEqual(available(10, [self.res(3, UNPAID_TTL_S)], self.NOW), 10)\n\n    def test_paid_never_expires(self):\n        self.assertEqual(available(10, [self.res(4, 1_000_000, paid=True)], self.NOW), 6)\n\n    def test_missing_paid_counts_as_unpaid(self):\n        fresh = {\"qty\": 2, \"created_s\": self.NOW - 10}\n        old = {\"qty\": 5, \"created_s\": self.NOW - 400}\n        self.assertEqual(available(10, [fresh, old], self.NOW), 8)\n\n    def test_mixed(self):\n        reservations = [\n            self.res(2, 10),\n            self.res(3, 500),\n            self.res(1, 500, paid=True),\n        ]\n        self.assertEqual(available(10, reservations, self.NOW), 7)\n\n    def test_overbooking_clamps_to_zero(self):\n        reservations = [self.res(8, 10), self.res(5, 0, paid=True)]\n        self.assertEqual(available(10, reservations, self.NOW), 0)\n\n    def test_future_created_s_is_active(self):\n        self.assertEqual(available(10, [self.res(3, -60)], self.NOW), 7)\n\n    def test_inputs_not_mutated(self):\n        reservations = [self.res(2, 10), {\"qty\": 1, \"created_s\": self.NOW}]\n        snapshot = [dict(r) for r in reservations]\n        available(10, reservations, self.NOW)\n        self.assertEqual(reservations, snapshot)\n\n    def test_negative_stock_rejected(self):\n        with self.assertRaises(ValueError):\n            available(-1, [], self.NOW)\n\n    def test_negative_qty_rejected(self):\n        with self.assertRaises(ValueError):\n            available(10, [self.res(-1, 10)], self.NOW)\n\n    def test_invalid_reservation_rejected_before_calculation(self):\n        reservations = [self.res(2, 10), {\"qty\": 1}]\n        with self.assertRaises(ValueError):\n            available(10, reservations, self.NOW)\n\n    def test_bad_types_rejected(self):\n        with self.assertRaises(TypeError):\n            available(\"10\", [], self.NOW)\n        with self.assertRaises(TypeError):\n            available(10, [{\"qty\": \"1\", \"created_s\": 0}], self.NOW)\n        with self.assertRaises(TypeError):\n            available(10, [{\"qty\": 1, \"created_s\": 0, \"paid\": \"yes\"}], self.NOW)\n        with self.assertRaises(TypeError):\n            available(10, None, self.NOW)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}

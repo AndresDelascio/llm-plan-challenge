@@ -1,0 +1,102 @@
+{
+  "arm": "plain",
+  "task": "t3-forecast",
+  "suite": "missing",
+  "asked_and_answered": false,
+  "solved_at": 1,
+  "note": null,
+  "steps": [
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 6906,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 972,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 390,
+        "output_tokens_details": {
+          "thinking_tokens": 73
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 972,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 390,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 972,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 972
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.015584,
+      "error": null,
+      "reply": "```python\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Forecast for `day` as the mean of the `window` days strictly before it.\n\n    Uses sales[day - window : day], so the target day's own sales are never\n    included. Near the start of the series, where fewer than `window` prior\n    days exist, it averages whatever prior days are available.\n\n    Raises ValueError if there are no prior days or the arguments are invalid.\n    \"\"\"\n    if not isinstance(window, int) or window < 1:\n        raise ValueError(\"window must be a positive integer\")\n    if not isinstance(day, int) or day < 0:\n        raise ValueError(\"day must be a non-negative integer index\")\n    if day > len(sales):\n        raise ValueError(\"day is beyond the end of the sales history\")\n\n    start = max(0, day - window)\n    history = sales[start:day]\n    if not history:\n        raise ValueError(\"no sales history before this day to forecast from\")\n    return sum(history) / len(history)\n```",
+      "symptom": "day=0 should return None"
+    },
+    {
+      "phase": "reprompt",
+      "provider": "claude",
+      "wall_ms": 6157,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1329,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 349,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1329,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 349,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1329,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1329
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01762,
+      "error": null,
+      "reply": "```python\ndef trailing_mean(sales, day, window=7):\n    \"\"\"Forecast for `day` as the mean of the `window` days strictly before it.\n\n    Uses sales[day - window : day], so the target day's own sales are never\n    included (no lookahead leakage). Near the start of the series, where fewer\n    than `window` prior days exist, it averages whatever prior days are\n    available.\n\n    Returns None when there is no prior history to forecast from (day == 0).\n\n    Raises ValueError if the arguments are invalid.\n    \"\"\"\n    if isinstance(window, bool) or not isinstance(window, int) or window < 1:\n        raise ValueError(\"window must be a positive integer\")\n    if isinstance(day, bool) or not isinstance(day, int) or day < 0:\n        raise ValueError(\"day must be a non-negative integer index\")\n    if day > len(sales):\n        raise ValueError(\"day is beyond the end of the sales history\")\n\n    start = max(0, day - window)\n    history = sales[start:day]\n    if not history:\n        return None\n    return sum(history) / len(history)\n```",
+      "symptom": null
+    }
+  ]
+}

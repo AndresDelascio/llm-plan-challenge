@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t4-recall",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 5551,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1024,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 356,
+        "output_tokens_details": {
+          "thinking_tokens": 164
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1024,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 356,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1024,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1024
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01532,
+      "error": null,
+      "reply": "1. **Touching endpoints:** If a clip ends exactly when a highlight starts, for example clip (10, 20) and highlight (20, 30), does that count as an overlap? Or must the two share a positive amount of time?\n2. **Minimum overlap:** Is any overlap at all enough to count a highlight as found? Or should there be a minimum, such as a number of seconds or a fraction of the highlight's length?\n3. **Empty highlights list:** What should `clip_recall` return when `highlights` is empty: 0.0, 1.0, `None`, or should it raise an error?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 22039,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1289,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1823,
+        "output_tokens_details": {
+          "thinking_tokens": 875
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1289,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1823,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1289,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1289
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.04678,
+      "error": null,
+      "reply": "```python\nfrom collections import deque\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"\n    Return the fraction of highlights found by the clips.\n\n    A clip can find a highlight only if they share more than zero seconds.\n    Touching endpoints do not count. Each clip can be credited to at most one\n    highlight, and the score credits as many highlights as possible\n    (a maximum bipartite matching found with Hopcroft-Karp).\n\n    highlights, clips: lists of (start_s, end_s) tuples.\n    \"\"\"\n    n_h = len(highlights)\n    if n_h == 0:\n        raise ValueError(\"highlights must contain at least one interval\")\n\n    # Build edges: highlight i -> clip j when they overlap by a positive amount.\n    adj = []\n    for h_start, h_end in highlights:\n        neighbors = [\n            j for j, (c_start, c_end) in enumerate(clips)\n            if max(h_start, c_start) < min(h_end, c_end)\n        ]\n        adj.append(neighbors)\n\n    INF = float(\"inf\")\n    match_h = [-1] * n_h          # highlight -> clip\n    match_c = [-1] * len(clips)   # clip -> highlight\n    dist = [INF] * n_h\n\n    def bfs():\n        queue = deque()\n        for h in range(n_h):\n            if match_h[h] == -1:\n                dist[h] = 0\n                queue.append(h)\n            else:\n                dist[h] = INF\n        found_free = False\n        while queue:\n            h = queue.popleft()\n            for c in adj[h]:\n                w = match_c[c]\n                if w == -1:\n                    found_free = True\n                elif dist[w] == INF:\n                    dist[w] = dist[h] + 1\n                    queue.append(w)\n        return found_free\n\n    def dfs(root, it):\n        # Iterative DFS for an augmenting path starting at a free highlight.\n        stack = [root]\n        chosen = []  # chosen[i] is the clip used to step from stack[i] onward\n        while stack:\n            v = stack[-1]\n            if it[v] < len(adj[v]):\n                c = adj[v][it[v]]\n                it[v] += 1\n                w = match_c[c]\n                if w == -1:\n                    chosen.append(c)\n                    for h, clip in zip(stack, chosen):\n                        match_h[h] = clip\n                        match_c[clip] = h\n                    return True\n                if dist[w] == dist[v] + 1:\n                    stack.append(w)\n                    chosen.append(c)\n            else:\n                dist[v] = INF\n                stack.pop()\n                if chosen:\n                    chosen.pop()\n        return False\n\n    matched = 0\n    while bfs():\n        it = [0] * n_h\n        for h in range(n_h):\n            if match_h[h] == -1 and dfs(h, it):\n                matched += 1\n\n    return matched / n_h\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "arm": "plan",
+  "task": "t4-recall",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 9992,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1060,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 957,
+        "output_tokens_details": {
+          "thinking_tokens": 62
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1060,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 957,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1060,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1060
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.027628,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `clip_recall(highlights, clips)`, which returns the fraction of highlight intervals that at least one clip overlaps.\n\n**Constraints:**\n- Inputs are lists of `(start_s, end_s)` tuples in seconds.\n- Use pure Python with no dependencies.\n- The result is a float in [0, 1].\n\n**Non-goals:**\n- Precision or F1.\n- Partial-credit scoring by overlap length.\n- Merging or deduplicating clips.\n- Loading files or video.\n\n## Plan\n1. Define the overlap test as `clip.start < hl.end and hl.start < clip.end`. This is strict, so intervals that only touch do not count. This default may change depending on the answer to Q1.\n2. Handle edge cases:\n   - Empty `highlights` returns the value chosen in Q2.\n   - Empty `clips` returns 0.0.\n3. Validate inputs. Any tuple where `start > end` raises `ValueError`.\n4. Count found highlights:\n   - Simple version: for each highlight, use `any()` over the clips. This is O(H\u00b7C) and fine for match-sized lists.\n   - Optional faster version: sort clips by start and use a sweep or bisect, giving O((H+C) log C).\n5. Return `found / len(highlights)`.\n6. Write pytest cases for:\n   - no overlap\n   - full containment\n   - partial overlap at each edge\n   - touching boundaries\n   - one clip covering several highlights\n   - duplicate highlights\n   - empty lists\n   - an invalid tuple\n   - zero-length intervals\n\n## Risks I already know about\n- **Touching boundaries:** whether `end == start` counts as overlap changes the score. Clip timestamps are often rounded, so this matters.\n- **Tiny overlaps:** a 0.1 s overlap counts the same as full coverage, which may inflate recall. A minimum-overlap threshold may be wanted.\n- **Duplicates:** duplicate or overlapping highlights each count separately, which could skew the score.\n- **Zero-length intervals:** point events (start == end) never overlap under the strict rule.\n- **Float precision:** float timestamps may cause off-by-epsilon misses at boundaries.\n\n## Questions for the user\n1. Should touching intervals count as found (e.g. clip ends at 30.0 and highlight starts at 30.0)?\n2. What should be returned when `highlights` is empty: 0.0, 1.0, NaN, or raise an error?\n3. Do you want a minimum overlap, in seconds or as a fraction of the highlight, before a highlight counts as found?\n4. Is Python correct, and where should the file and tests go?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 18327,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1987,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1822,
+        "output_tokens_details": {
+          "thinking_tokens": 656
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1987,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1822,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1987,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1987
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.052344,
+      "error": null,
+      "reply": "```python\n\"\"\"Recall scoring for a soccer highlight finder.\"\"\"\n\nfrom collections import deque\nimport math\n\n\ndef _validate(intervals, name):\n    \"\"\"Check that each item is a (start_s, end_s) pair with start <= end.\"\"\"\n    checked = []\n    for i, interval in enumerate(intervals):\n        try:\n            start, end = interval\n        except (TypeError, ValueError):\n            raise ValueError(\n                f\"{name}[{i}] must be a (start_s, end_s) pair, got {interval!r}\"\n            ) from None\n        if any(isinstance(v, float) and math.isnan(v) for v in (start, end)):\n            raise ValueError(f\"{name}[{i}] contains NaN: {interval!r}\")\n        if start > end:\n            raise ValueError(\n                f\"{name}[{i}] has start > end: {interval!r}\"\n            )\n        checked.append((start, end))\n    return checked\n\n\ndef _overlaps(a, b):\n    \"\"\"True if the intervals share more than zero seconds.\n\n    Touching ends do not count, and a zero-length interval never overlaps.\n    \"\"\"\n    return max(a[0], b[0]) < min(a[1], b[1])\n\n\ndef clip_recall(highlights, clips):\n    \"\"\"Return the fraction of highlights found by the clips.\n\n    A highlight is found when a clip overlaps it by more than zero seconds.\n    Each clip can be credited to at most one highlight. Clips are assigned\n    so that as many highlights as possible are credited, using a maximum\n    bipartite matching.\n\n    Args:\n        highlights: list of (start_s, end_s) tuples. Must not be empty.\n        clips: list of (start_s, end_s) tuples.\n\n    Returns:\n        A float in [0, 1].\n\n    Raises:\n        ValueError: if highlights is empty, or if any interval is malformed\n            or has start > end.\n    \"\"\"\n    highlights = _validate(highlights, \"highlights\")\n    clips = _validate(clips, \"clips\")\n\n    if not highlights:\n        raise ValueError(\"highlights must contain at least one interval\")\n    if not clips:\n        return 0.0\n\n    # For each highlight, list the clips that overlap it.\n    adjacency = [\n        [c for c, clip in enumerate(clips) if _overlaps(hl, clip)]\n        for hl in highlights\n    ]\n\n    match_of_highlight = [None] * len(highlights)  # highlight -> clip\n    match_of_clip = [None] * len(clips)            # clip -> highlight\n\n    for h in range(len(highlights)):\n        if not adjacency[h]:\n            continue\n\n        # BFS for an augmenting path from highlight h to a free clip.\n        prev_highlight = {}  # clip -> highlight that reached it\n        queue = deque([h])\n        free_clip = None\n\n        while queue and free_clip is None:\n            u = queue.popleft()\n            for c in adjacency[u]:\n                if c in prev_highlight:\n                    continue\n                prev_highlight[c] = u\n                if match_of_clip[c] is None:\n                    free_clip = c\n                    break\n                queue.append(match_of_clip[c])\n\n        if free_clip is None:\n            continue\n\n        # Flip the matches along the path back to h.\n        c = free_clip\n        while c is not None:\n            u = prev_highlight[c]\n            next_c = match_of_highlight[u]\n            match_of_highlight[u] = c\n            match_of_clip[c] = u\n            c = next_c\n\n    found = sum(1 for m in match_of_highlight if m is not None)\n    return found / len(highlights)\n```",
+      "symptom": null
+    }
+  ]
+}

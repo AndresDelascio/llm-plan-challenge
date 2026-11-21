@@ -9,6 +9,7 @@ Dates are when the work was committed. Each benchmark froze its rules in a commi
 - **Results:** exact 95% intervals for every pass count ([evals/intervals.py](evals/intervals.py)). 12 of 12 means at least 73.5%, not 100%.
 - **Verified:** with the skill's flags, Codex's read-only sandbox refused a write on native Windows, both with shell on and with shell off ([runs/sandbox-check-windows](runs/sandbox-check-windows/)).
 - **Stakes rule reworded** to catch indirect money risk (prices, stock, orders or pay set from the output). 16 of 16 with both models, including four held-out plans; rules frozen before the run.
+- **Missing-fact outcome test:** the prompts leave out key facts. Plain chat that cannot ask passed 2 of 12 first builds; told it may ask, 12 of 12; a plan with a questions step 11; a reviewed plan 10. Per the frozen rule, the skill gets no questions step.
 - **Second grader:** Codex regraded 30 extra findings blind and agreed with the Claude grader on 16. Each favoured its own family's findings, so the claim that Claude writes more valid extra findings is now marked as grader-dependent. A blind sheet for a person is in [runs/regrade](runs/regrade/).
 - **Plugin:** the repository is now also a Claude Code plugin and marketplace (`.claude-plugin/`), checked with `claude plugin validate`.
 - **CI:** tests run on Linux, Windows and macOS with Python 3.9 and 3.13, plus both dry runs.

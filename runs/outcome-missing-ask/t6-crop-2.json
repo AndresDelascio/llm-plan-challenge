@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 5104,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1004,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 321,
+        "output_tokens_details": {
+          "thinking_tokens": 35
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1004,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 321,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1004,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1004
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01446,
+      "error": null,
+      "reply": "Before I write this, I need a few details about the crop:\n\n1. **Crop offset:** Where does the crop start in the original video? I need the left (x) and top (y) pixel offsets of the crop's top-left corner.\n2. **Scaling:** Does the tracker use the cropped region at its native resolution, or is the crop resized first? If it's resized, what are the crop's size in the original video (width \u00d7 height) and the tracker's input size (width \u00d7 height)?\n3. **Fixed or variable crop:** Is the crop the same for every frame, or does it change? If it changes, should `to_tracker` take the crop parameters as arguments?\n4. **Out-of-bounds points:** If a point lies outside the crop, should the function raise an error, return `None`, or return the out-of-range coordinates anyway?\n5. **Rounding:** Should the returned coordinates be floats or rounded to integers?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 12217,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1368,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 983,
+        "output_tokens_details": {
+          "thinking_tokens": 198
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1368,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 983,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1368,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1368
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.030612,
+      "error": null,
+      "reply": "```python\n\"\"\"Convert pixel positions in the original video to shot-tracker coordinates.\n\nThe source video is 1920x1080. The tracker uses a center crop of 1440x1080,\nwhich is then downscaled by a factor of 2 (giving 720x540 tracker input).\n\"\"\"\n\nfrom typing import Optional, Tuple\n\n# Original video dimensions.\nVIDEO_W = 1920\nVIDEO_H = 1080\n\n# Center crop dimensions in original-video pixels.\nCROP_W = 1440\nCROP_H = 1080\n\n# Top-left corner of the center crop in the original video.\nCROP_X0 = (VIDEO_W - CROP_W) / 2  # 240.0\nCROP_Y0 = (VIDEO_H - CROP_H) / 2  # 0.0\n\n# The crop is downscaled by 2 before reaching the tracker.\nDOWNSCALE = 2.0\n\n\ndef to_tracker(x: float, y: float) -> Optional[Tuple[float, float]]:\n    \"\"\"Map an original-video pixel position to tracker coordinates.\n\n    Args:\n        x: Horizontal position in the original 1920x1080 video.\n        y: Vertical position in the original 1920x1080 video.\n\n    Returns:\n        (x, y) in tracker coordinates as floats (sub-pixel precision kept),\n        or None if the point lies outside the center crop.\n    \"\"\"\n    cx = x - CROP_X0\n    cy = y - CROP_Y0\n\n    # The crop covers [0, CROP_W) x [0, CROP_H) in crop-local coordinates.\n    if not (0.0 <= cx < CROP_W and 0.0 <= cy < CROP_H):\n        return None\n\n    return (cx / DOWNSCALE, cy / DOWNSCALE)\n\n\nif __name__ == \"__main__\":\n    # Quick sanity checks.\n    assert to_tracker(240, 0) == (0.0, 0.0)\n    assert to_tracker(960, 540) == (360.0, 270.0)\n    assert to_tracker(1679.5, 1079.5) == (719.75, 539.75)\n    assert to_tracker(239.9, 500) is None\n    assert to_tracker(1680, 500) is None\n    assert to_tracker(500, 1080) is None\n    assert to_tracker(500, -0.1) is None\n    print(\"All checks passed.\")\n```",
+      "symptom": null
+    }
+  ]
+}

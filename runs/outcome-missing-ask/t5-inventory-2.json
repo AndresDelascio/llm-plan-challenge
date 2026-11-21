@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t5-inventory",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 4511,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1019,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 276,
+        "output_tokens_details": {
+          "thinking_tokens": 66
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1019,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 276,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1019,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1019
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01368,
+      "error": null,
+      "reply": "Before I write this, I need a few details:\n\n1. **Expiry:** How long does an unpaid reservation hold its units? After how many seconds past `created_s` does it stop counting?\n2. **Paid reservations:** Do paid reservations hold their units forever, or do they expire too? And is `stock` still counting paid units (they're held until shipped), or have paid units already been subtracted from `stock`?\n3. **Boundary:** At exactly `created_s + timeout`, is the reservation still active or already expired?\n4. **Oversold case:** If reservations add up to more than `stock`, should the function return 0, return a negative number, or raise an error?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 8882,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1278,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 563,
+        "output_tokens_details": {
+          "thinking_tokens": 98
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1278,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 563,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1278,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1278
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.021492,
+      "error": null,
+      "reply": "```python\nUNPAID_HOLD_SECONDS = 300\n\n\ndef available(stock, reservations, now_s):\n    \"\"\"Return how many units can still be sold.\n\n    stock        -- units physically on the shelf, including units held by\n                    paid reservations that have not shipped yet.\n    reservations -- iterable of dicts with keys 'qty', 'created_s', 'paid'.\n    now_s        -- current time in seconds, same clock as 'created_s'.\n\n    Rules:\n      * A paid reservation never expires and always holds its units.\n      * An unpaid reservation holds its units for 300 seconds after\n        'created_s'.\n      * The result is never less than 0.\n\n    Assumptions (the plan did not settle these, so change them here if needed):\n      * Boundary: an unpaid reservation is active while\n        now_s < created_s + 300 and has expired at exactly created_s + 300.\n      * 'stock' still counts paid units until they ship. If paid units are\n        already removed from 'stock', skip paid reservations in the loop\n        below; otherwise they are subtracted twice.\n    \"\"\"\n    held = 0\n    for r in reservations:\n        qty = r[\"qty\"]\n        if qty <= 0:\n            continue\n        if r[\"paid\"]:\n            held += qty\n        elif now_s < r[\"created_s\"] + UNPAID_HOLD_SECONDS:\n            held += qty\n    return max(0, stock - held)\n```",
+      "symptom": null
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t1-gate",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 3266,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1004,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 111,
+        "output_tokens_details": {
+          "thinking_tokens": 34
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1004,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 111,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1004,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1004
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.01026,
+      "error": null,
+      "reply": "1. What is the timer's tick rate, in ticks per second (Hz) or seconds per tick?\n2. Does the counter wrap around? If so, how many bits wide is it, so I can handle a stop count that is lower than the start count?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 12012,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1137,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 879,
+        "output_tokens_details": {
+          "thinking_tokens": 79
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1137,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 879,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1137,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1137
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.026684,
+      "error": null,
+      "reply": "```python\nTICKS_PER_SECOND = 10_000           # timer rate: 10 kHz\nCOUNTER_BITS = 16                   # 16-bit counter\nCOUNTER_MODULUS = 1 << COUNTER_BITS # 65536 counts before wrap (6.5536 s)\n\n\ndef gate_time_s(start_tick: int, stop_tick: int) -> float:\n    \"\"\"\n    Return the sprint time in seconds from latched photogate counts.\n\n    The timer is a 16-bit counter running at 10,000 ticks per second, so it\n    wraps every 65536 ticks (6.5536 s). Because sprints are under 6 seconds,\n    at most one wrap can occur between the start and stop latches. Modular\n    subtraction therefore gives the correct elapsed tick count even when\n    stop_tick is numerically lower than start_tick.\n\n    Args:\n        start_tick: Counter value latched at the start gate (0..65535).\n        stop_tick:  Counter value latched at the stop gate (0..65535).\n\n    Returns:\n        Elapsed sprint time in seconds.\n\n    Raises:\n        TypeError:  If either tick is not an integer.\n        ValueError: If either tick is outside the 16-bit range.\n    \"\"\"\n    for name, value in ((\"start_tick\", start_tick), (\"stop_tick\", stop_tick)):\n        if isinstance(value, bool) or not isinstance(value, int):\n            raise TypeError(f\"{name} must be an int, got {type(value).__name__}\")\n        if not 0 <= value < COUNTER_MODULUS:\n            raise ValueError(\n                f\"{name} must be in 0..{COUNTER_MODULUS - 1}, got {value}\"\n            )\n\n    elapsed_ticks = (stop_tick - start_tick) % COUNTER_MODULUS\n    return elapsed_ticks / TICKS_PER_SECOND\n\n\nif __name__ == \"__main__\":\n    # No wrap: 4.5 s\n    assert gate_time_s(1_000, 46_000) == 4.5\n    # Wrap: start near top of range, stop after rollover -> 5.0 s\n    assert gate_time_s(60_000, (60_000 + 50_000) % COUNTER_MODULUS) == 5.0\n    # Zero elapsed\n    assert gate_time_s(12_345, 12_345) == 0.0\n    print(\"All checks passed.\")\n```",
+      "symptom": null
+    }
+  ]
+}

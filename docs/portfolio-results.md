@@ -187,13 +187,41 @@ Strongest case against this result: the test hit its ceiling. Six functions with
 
 Reprint the numbers with `python evals/outcome/outcome.py report`.
 
+### Second outcome test: the prompt leaves out a fact
+
+The first test's strongest objection was that every fact was in the prompt. This one removes them: the same six functions and hidden tests, but the prompts leave out the tick rate, the time-zone rule, the expiry time, the crop geometry and the rest. A simulated user hands over the full facts sheet whenever an arm asks a question. `ask` is plain chat told that it may ask. Rules frozen before the first call ([missing.md](../evals/outcome/missing.md), commit `a412ae4`). 48 runs, no failed calls ([runs/outcome-missing-*](../runs/)).
+
+| Measured, 12 runs per arm | Plain chat (cannot ask) | Plain chat, may ask | Plan with a questions step | Plan + `/challenge` |
+| --- | ---: | ---: | ---: | ---: |
+| First builds that pass the hidden tests | 2 / 12 | 12 / 12 | 11 / 12 | 10 / 12 |
+| Runs that asked and got the facts | 0 / 12 | 12 / 12 | 12 / 12 | 12 / 12 |
+| Solved within 3 reprompts | 8 / 12 | 12 / 12 | 12 / 12 | 12 / 12 |
+| Reported tokens, all 12 runs | 99,093 | 42,328 | 74,323 | 337,609 |
+| Median time per run | 27.1 s | 15.2 s | 29.2 s | 59.0 s |
+| Claude cost reported, all 12 runs (Codex reports none) | $1.35 | $0.51 | $1.02 | $2.20 |
+
+**The decision rule, applied as written.**
+
+1. Floor check: plain chat passed 2 of 12, so the facts could not be guessed and the test can say something about asking.
+2. Neither plan arm beat `ask` by 2 or more (11 and 10 against 12), so the skill does **not** get a questions step.
+3. `ask` was within 1 of the better plan arm: **letting plain chat ask did as well as planning**, at 0.57 times the plan arm's tokens and 0.13 times the review arm's (computed from the totals).
+4. `/challenge` did not beat the plan by 2 or more (10 against 11): the review added nothing measurable beyond writing the plan.
+
+**What happened to the missed builds (my reading of 3 runs, not a measure).** All three plan-arm misses had the facts. They failed because the plan or the review added a convention nobody asked for: a "sprints take under 6 s" limit that rejected a valid case, and a pixel-centre shift of half a pixel. This matches the first test: preparation tends to add requirements, and an added requirement can break a correct answer.
+
+**Without asking, reprompts did not recover what cannot be guessed.** Plain chat solved the four tasks whose facts are guessable from a failing case within 3 reprompts, and never solved the timer (tick rate and width) or the crop (geometry). It spent more tokens than `ask` doing so.
+
+Strongest case against this result: the simulated user is generous (any question unlocks every fact) and the tasks are small enough that one question covers them. A real user answers only what was asked, and a large task has facts that only show up halfway through, which is where a written plan might help. Confidence that "tell chat it may ask" is enough for small tasks with missing facts: about 80 percent. For large tasks: not tested.
+
+Reprint with `python evals/outcome/outcome.py report --suite missing`.
+
 ### When to use which (my rule after all the tests)
 
 | Use plain chat when | Use `/challenge` when |
 | --- | --- |
 | You can check the result in under a minute (run it, look at it) | A wrong plan is only discovered after hours of work or after money is spent |
 | It is easy to undo | It is hard to undo (a purchase, a data migration, a public release) |
-| The task is small and every needed fact is in your message | The plan rests on assumptions that running the code will not reveal |
+| The task is small. If a fact may be missing, say "ask me if anything is unclear" | The plan rests on assumptions that running the code will not reveal |
 | | You want a short plan with a written reason for each change |
 
 The first column is measured here. The second is supported only by the pilot on three real plans (20 issues, all accepted) and is otherwise my reasoning.
@@ -237,6 +265,9 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 | Stakes rule correct (each model) | 10 / 12 | 51.6% to 97.9% |
 | Reworded stakes rule correct (each model) | 16 / 16 | 79.4% to 100% |
 | Two blind graders agreed on a Codex finding | 47 / 55 | 73.3% to 93.5% |
+| Missing-fact test, first builds: plain chat that cannot ask | 2 / 12 | 2.1% to 48.4% |
+| Missing-fact test, first builds: plan with a questions step | 11 / 12 | 61.5% to 99.8% |
+| Missing-fact test, first builds: plan + `/challenge` | 10 / 12 | 51.6% to 97.9% |
 | Codex grader agreed with the Claude grader (both families) | 16 / 30 | 34.3% to 71.7% |
 | Same, findings Codex wrote | 11 / 15 | 44.9% to 92.2% |
 | Same, findings Claude wrote | 5 / 15 | 11.8% to 61.6% |
@@ -258,7 +289,7 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 - Have a person grade the 30 findings on [runs/regrade/sheet.md](../runs/regrade/sheet.md), to settle which AI grader to trust.
 - Test the reworded stakes rule on plans someone else writes and labels.
 - Repeat the "make it better" comparison on real plans, where the writer's chat holds context the plan text does not.
-- Rerun the outcome test on tasks where the prompt leaves out a needed fact, so plain chat no longer passes everything on the first build.
+- Rerun the missing-fact test with a user who answers only what was asked, and on a task large enough that facts surface halfway through.
 
 ## Reproduce
 

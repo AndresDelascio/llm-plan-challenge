@@ -1,0 +1,101 @@
+{
+  "arm": "ask",
+  "task": "t1-gate",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "ask",
+      "provider": "claude",
+      "wall_ms": 3611,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1004,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 123,
+        "output_tokens_details": {
+          "thinking_tokens": 35
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1004,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 123,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1004,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1004
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.010499999999999999,
+      "error": null,
+      "reply": "1. What is the timer's tick rate, in ticks per second (for example 1 MHz or 32.768 kHz)?\n2. Can the counter wrap around between the start and stop gates? If it can, what is its bit width (for example 16-bit or 32-bit)?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 11413,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1144,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 752,
+        "output_tokens_details": {
+          "thinking_tokens": 65
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1144,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 752,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1144,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1144
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.0242,
+      "error": null,
+      "reply": "```python\nTICK_RATE_HZ = 10_000          # timer counts 10,000 ticks per second\nCOUNTER_BITS = 16              # 16-bit free-running counter\nCOUNTER_MODULUS = 1 << COUNTER_BITS   # 65,536 ticks -> wraps every 6.5536 s\n\n\ndef gate_time_s(start_tick: int, stop_tick: int) -> float:\n    \"\"\"Return the sprint time in seconds between the start and stop gates.\n\n    The 16-bit counter wraps every 6.5536 s. Sprints are under 6 s, so the\n    counter wraps at most once between the gates. Modular subtraction\n    therefore gives the correct elapsed tick count even when stop_tick is\n    numerically smaller than start_tick.\n    \"\"\"\n    for name, tick in ((\"start_tick\", start_tick), (\"stop_tick\", stop_tick)):\n        if not isinstance(tick, int) or isinstance(tick, bool):\n            raise TypeError(f\"{name} must be an int, got {type(tick).__name__}\")\n        if not 0 <= tick < COUNTER_MODULUS:\n            raise ValueError(\n                f\"{name} must be in 0..{COUNTER_MODULUS - 1} for a \"\n                f\"{COUNTER_BITS}-bit counter, got {tick}\"\n            )\n\n    elapsed_ticks = (stop_tick - start_tick) % COUNTER_MODULUS\n    return elapsed_ticks / TICK_RATE_HZ\n\n\nif __name__ == \"__main__\":\n    # No wrap: 4.2 s sprint\n    assert abs(gate_time_s(1_000, 43_000) - 4.2) < 1e-9\n    # Wrap: start near the top, stop after rollover (5.5 s sprint)\n    assert abs(gate_time_s(60_000, (60_000 + 55_000) % 65_536) - 5.5) < 1e-9\n    # Zero-length\n    assert gate_time_s(123, 123) == 0.0\n    print(\"all checks passed\")\n```",
+      "symptom": null
+    }
+  ]
+}

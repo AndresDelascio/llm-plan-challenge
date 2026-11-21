@@ -1,0 +1,101 @@
+{
+  "arm": "plan",
+  "task": "t6-crop",
+  "suite": "missing",
+  "asked_and_answered": true,
+  "solved_at": 0,
+  "note": null,
+  "steps": [
+    {
+      "phase": "prepare",
+      "provider": "claude",
+      "wall_ms": 9768,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1045,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 819,
+        "output_tokens_details": {
+          "thinking_tokens": 60
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1045,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 819,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1045,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1045
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.024748,
+      "error": null,
+      "reply": "## Brief\n**Goal:** Implement `to_tracker(x, y)` to map a pixel position in the original video frame to the matching position in the tracker's cropped frame, returning `(x, y)`.\n\n**Constraints:**\n- Use the crop parameters the tracker actually uses, rather than hard-coded guesses.\n- Keep it a small, pure function that is easy to test.\n- Match the existing coordinate convention: origin at the top-left, with y pointing down.\n\n**Non-goals:**\n- An inverse function (`from_tracker`), unless you ask for one.\n- Changing how the crop is computed.\n- Lens or perspective correction.\n\n## Plan\n1. Find where the crop is defined, such as config, CLI arguments or an ffmpeg filter. Record the offset `(crop_x, crop_y)`, the crop size, and whether the crop is resized before tracking.\n2. Implement the translation: `tx = x - crop_x`, `ty = y - crop_y`.\n3. If the crop is resized, scale the result: `tx *= out_w / crop_w`, `ty *= out_h / crop_h`.\n4. Handle points that fall outside the crop using the agreed policy (see Questions).\n5. Return a type that matches what the tracker consumes, either float or rounded int.\n6. Add unit tests for these cases:\n   - The crop corners map to (0, 0) and (w, h).\n   - The crop center maps to the tracker's center.\n   - An out-of-bounds point behaves as agreed.\n   - A scaled case, if scaling is used.\n\n## Risks I already know about\n- The crop may change per clip or per frame, so a static offset would be wrong.\n- The tracker may also resize or letterbox the image, which hides an extra scale or padding step.\n- Rounding twice or in the wrong order can introduce off-by-one or half-pixel errors.\n- Original coordinates may come from a display-scaled preview rather than the native resolution.\n\n## Questions for the user\n1. Where are the crop parameters defined, and are they fixed or set per video?\n2. Is the cropped region resized or padded before the tracker sees it? If so, to what size?\n3. For points outside the crop, should the function clamp them, return `None`, raise an error, or return negative or overflow values?\n4. Should the output be floats or integers?"
+    },
+    {
+      "phase": "build",
+      "provider": "claude",
+      "wall_ms": 11079,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 1829,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 1002,
+        "output_tokens_details": {
+          "thinking_tokens": 100
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1829,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 1002,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 1829,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1829
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "resolved_models": [
+        "claude-opus-5-5"
+      ],
+      "reported_cost_usd": 0.03468,
+      "error": null,
+      "reply": "```python\n\"\"\"Map pixel coordinates from the original video to tracker coordinates.\n\nPipeline: 1920x1080 source -> center crop 1440x1080 -> downscale by 2 -> 720x540.\nOrigin is top-left with y pointing down. Sub-pixel precision is preserved.\n\"\"\"\n\nfrom typing import Optional, Tuple\n\nSRC_W, SRC_H = 1920, 1080\nCROP_W, CROP_H = 1440, 1080\nCROP_X = (SRC_W - CROP_W) / 2  # 240.0\nCROP_Y = (SRC_H - CROP_H) / 2  # 0.0\nSCALE = 0.5  # downscale by 2\nOUT_W, OUT_H = CROP_W * SCALE, CROP_H * SCALE  # 720.0 x 540.0\n\n\ndef to_tracker(x: float, y: float) -> Optional[Tuple[float, float]]:\n    \"\"\"Convert an original-video pixel position to tracker coordinates.\n\n    Returns (tx, ty) as floats, or None if the point lies outside the crop.\n    The crop edges are inclusive, so (240, 0) -> (0, 0) and\n    (1680, 1080) -> (720, 540).\n    \"\"\"\n    cx = x - CROP_X\n    cy = y - CROP_Y\n    if not (0.0 <= cx <= CROP_W and 0.0 <= cy <= CROP_H):\n        return None\n    return (cx * SCALE, cy * SCALE)\n\n\nif __name__ == \"__main__\":\n    import unittest\n\n    class ToTrackerTests(unittest.TestCase):\n        def test_top_left_corner(self):\n            self.assertEqual(to_tracker(240, 0), (0.0, 0.0))\n\n        def test_bottom_right_corner(self):\n            self.assertEqual(to_tracker(1680, 1080), (OUT_W, OUT_H))\n\n        def test_center(self):\n            self.assertEqual(to_tracker(960, 540), (360.0, 270.0))\n\n        def test_subpixel(self):\n            self.assertEqual(to_tracker(241, 1), (0.5, 0.5))\n            self.assertEqual(to_tracker(240.5, 0.25), (0.25, 0.125))\n\n        def test_outside_left(self):\n            self.assertIsNone(to_tracker(239.9, 500))\n\n        def test_outside_right(self):\n            self.assertIsNone(to_tracker(1680.1, 500))\n\n        def test_outside_vertical(self):\n            self.assertIsNone(to_tracker(960, -0.1))\n            self.assertIsNone(to_tracker(960, 1080.1))\n\n    unittest.main()\n```",
+      "symptom": null
+    }
+  ]
+}
