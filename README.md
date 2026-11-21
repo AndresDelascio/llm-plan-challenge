@@ -79,7 +79,7 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 - **Effort settings differ** (Codex low, Claude medium), as the skill ships them. I reran Codex at medium to check: it took twice as long (13.9 s), found the same 18 of 18 blockers, and did not add valid findings (12 against 17 at low, within grading noise). Claude's lead in extra findings is not explained by the effort setting. ([follow-up](docs/portfolio-results.md#follow-up-codex-at-medium-effort)) The Codex CLI did not report which model it used.
 - **It does not show that the review beats a simple rewrite.** On the planted flaws both fixed everything, so that test hit its ceiling. Real plans with context outside the plan text are not tested.
 - **The outcome test hit its ceiling.** Plain chat passed everything, so the test shows that planning costs more on small tasks. It cannot show whether planning helps on large or hard-to-check work, which is where I use the tool. My first grader also miscounted 19 correct builds as failures; it was fixed and the saved replies regraded, with the details in the results page.
-- **The stakes rule missed one of two consequential pairs.** Both models called the store forecast plan routine. They flagged no routine plan by mistake.
+- **The stakes rule was fixed after seeing its miss.** The first wording called the store forecast plan routine with both models. A reworded rule scored 16 of 16 with both, including four new held-out plans, but I wrote those plans and their labels. ([details](docs/portfolio-results.md#5-a-reworded-stakes-rule-16-of-16-for-both-models))
 - **In the pilot I accepted every issue**, so it shows which reviewer raised more, not which was more often right.
 
 ## Try it

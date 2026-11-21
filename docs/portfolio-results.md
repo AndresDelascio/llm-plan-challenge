@@ -139,6 +139,19 @@ Each model classified each of the 12 plans once, using the wording of the skill.
 - **No false alarms, and both models missed the same pair.** The forecast plan says the service "will be deployed to stores", and neither model read that as material money.
 - **Strongest case against the label:** a reasonable person could also call the forecast plan routine, so this may be a labelling disagreement, not a model error. Either way the rule as worded does not catch "an error here costs money later". Confidence that the rule misses indirect money risk: 65%.
 
+### 5. A reworded stakes rule: 16 of 16 for both models
+
+The new wording names indirect money risk: "a mistake in the plan or in what it produces could cost material money, now or later (for example, when people set prices, stock, orders or pay from its output)". Each model classified the 12 plans and four new held-out plans once (32 calls, [runs/followup-stakes2](../runs/followup-stakes2/)). Rules and labels were committed before the first call ([Test 5](../evals/plan-review/followup.md)).
+
+| Measured | Codex | Claude |
+| --- | ---: | ---: |
+| Main plans correct | 12 / 12 | 12 / 12 |
+| Held-out plans correct (2 consequential, 2 routine) | 4 / 4 | 4 / 4 |
+| Routine plans called consequential | 0 / 10 | 0 / 10 |
+
+- **Both models passed the frozen bar, so the skill now uses this wording.**
+- **Why it is weaker evidence than it looks:** I wrote the new wording after seeing which plans were missed, and I wrote the held-out plans and their labels. The held-out plans were never shown to a model before this run, but four plans is a smoke check. Confidence that the new wording catches indirect money risk on plans I have not seen: 70%.
+
 ### What this changes
 
 - **The claim "a second model catches what the first misses" is not supported here.** The supported claim is narrower: a fresh read with no chat history finds real issues, and a second fresh read finds more.
@@ -205,6 +218,7 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 | Format check passed, Claude, current validator | 24 / 24 | 85.8% to 100% |
 | Planted flaws fixed by "make it better" (each arm) | 24 / 24 | 85.8% to 100% |
 | Stakes rule correct (each model) | 10 / 12 | 51.6% to 97.9% |
+| Reworded stakes rule correct (each model) | 16 / 16 | 79.4% to 100% |
 | Two blind graders agreed on a Codex finding | 47 / 55 | 73.3% to 93.5% |
 
 "All passed" here means the true rate is probably above three quarters, not that it is 100%. A tie such as 12/12 against 12/12 cannot separate two methods whose real pass rates are 80% and 100%.
@@ -222,7 +236,7 @@ Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals
 
 - Write harder plans, where a flaw only shows when two steps are read together, so the blocker test stops hitting its ceiling.
 - Have a person grade a sample of the findings and compare with the AI grader.
-- Reword the stakes rule so it catches plans where an error costs money later, and test it again.
+- Test the reworded stakes rule on plans someone else writes and labels.
 - Repeat the "make it better" comparison on real plans, where the writer's chat holds context the plan text does not.
 - Rerun the outcome test on tasks where the prompt leaves out a needed fact, so plain chat no longer passes everything on the first build.
 

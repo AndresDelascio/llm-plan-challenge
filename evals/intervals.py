@@ -15,6 +15,7 @@ COUNTS = [
     ("Format check passed, Claude, rerun with current validator", 24, 24),
     ("Planted flaws fixed by \"make it better\" (each arm)", 24, 24),
     ("Stakes rule correct (each model)", 10, 12),
+    ("Reworded stakes rule correct (each model)", 16, 16),
     ("Two blind graders agreed on a Codex finding", 47, 55),
 ]
 

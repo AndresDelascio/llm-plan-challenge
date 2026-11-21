@@ -8,6 +8,7 @@ Dates are when the work was committed. Each benchmark froze its rules in a commi
 - **Outcome grader:** the model's code now runs with no environment variables, so it cannot read API keys.
 - **Results:** exact 95% intervals for every pass count ([evals/intervals.py](evals/intervals.py)). 12 of 12 means at least 73.5%, not 100%.
 - **Verified:** with the skill's flags, Codex's read-only sandbox refused a write on native Windows, both with shell on and with shell off ([runs/sandbox-check-windows](runs/sandbox-check-windows/)).
+- **Stakes rule reworded** to catch indirect money risk (prices, stock, orders or pay set from the output). 16 of 16 with both models, including four held-out plans; rules frozen before the run.
 - **CI:** tests run on Linux, Windows and macOS with Python 3.9 and 3.13, plus both dry runs.
 
 ## 2026-11-20
