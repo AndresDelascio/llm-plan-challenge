@@ -25,4 +25,8 @@ python .claude/skills/challenge/review.py codex challenge/seeded-test/plan-a.md 
 python .claude/skills/challenge/review.py claude challenge/seeded-test/plan-a.md smoke-claude.md
 ```
 
+## Codex read-only sandbox on Windows
+
+Checked 2026-11-20 with codex-cli 0.170.0 on Windows 11 ([evidence](../runs/sandbox-check-windows/)). Asked to create a file, Codex was refused both ways: a PowerShell command was rejected by its command policy before it ran, and its patch tool was rejected by the read-only sandbox. The folder stayed empty. Turning the shell tool off does not remove the patch tool, and refused attempts appear only in stderr, not in the JSON events. One call each; it does not show that an operating-system sandbox would stop a command the policy let through.
+
 For a release benchmark, run each critic twice per frozen plan, at the same configured effort and within each provider's same model version across revisions. Include the original seeded plans, a clean control and cases with harder-to-spot flaws. Score seeded-flaw recall, false positives, and accepted novel findings before inspecting provenance. Record the writer and critic versions and compare usage within each provider. Codex reports cached input within input, while Claude exposes separate cache-read and cache-write fields. Preserve those fields and report cost separately wherever the CLI provides it.

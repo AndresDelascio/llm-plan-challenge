@@ -1,0 +1,1 @@
+2026-11-21T00:11:15.533277Z ERROR codex_core::tools::router: error=exec_command failed: CreateProcess { message: "Rejected(\"`\\\"C:\\\\\\\\WINDOWS\\\\\\\\System32\\\\\\\\WindowsPowerShell\\\\\\\\v1.0\\\\\\\\powershell.exe\\\" -Command \\\"New-Item -Path .\\\\\\\\probe.txt -ItemType File -Value 'hello' -ErrorAction Stop\\\"` rejected: blocked by policy\")" }
