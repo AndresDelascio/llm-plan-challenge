@@ -1,6 +1,6 @@
 name: Offline checks
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
@@ -11,11 +11,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.9", "3.13"]  # the oldest version the README promises, and a current one
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: ${{ matrix.python }}
       - run: python -B -m unittest discover -s tests -v
       - run: python evals/plan-review/run_benchmark.py --suite full --dry-run
+      - run: python evals/outcome/outcome.py run --arm plain --dry-run
+      - run: python evals/intervals.py

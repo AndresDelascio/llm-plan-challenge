@@ -71,6 +71,7 @@ Example of the first kind: "Write `gate_time_s(start_tick, stop_tick)` for a 16-
 
 ## What this does not show
 
+- **"All passed" is not 100%.** 12 of 12 is consistent with a true pass rate as low as 73.5% (exact 95% interval, [all intervals](docs/portfolio-results.md#how-sure-are-the-counts)). Ties at the ceiling cannot rank two methods.
 - **It is not independent validation.** The plans are synthetic and were written with AI help. Twelve plans is a small set, and two reads of the same plan are related.
 - **No person checked the grading.** The grader is Claude, which is also one of the two reviewers. Two blind grading passes over the Codex findings agreed on 47 of 55.
 - **It does not say which reviewer catches more blockers.** Both hit the ceiling. The case for Claude on important plans rests on the extra findings, not on recall.
@@ -118,12 +119,15 @@ For a real example, read the [camera-swap decision log](challenge/shot-tracker-n
 
 ## Reproduce
 
-31 offline tests cover both CLI adapters with no model calls. The dry run prints the benchmark plan without calling a reviewer.
+36 offline tests cover both CLI adapters, the outcome grader and the intervals, with no model calls. The dry run prints the benchmark plan without calling a reviewer. CI runs these on Linux, Windows and macOS with Python 3.9 and 3.13.
 
 ```sh
 python -B -m unittest discover -s tests -v
 python evals/plan-review/run_benchmark.py --suite full --dry-run
+python evals/intervals.py
 ```
+
+What changed and when is in [CHANGELOG.md](CHANGELOG.md). What each run folder holds is in [runs/README.md](runs/README.md).
 
 The live commands and the scoring steps are in the [benchmark folder](evals/plan-review/) and the [client verification guide](docs/verification.md). Each run keeps plan and rubric hashes, CLI versions, usage and failures.
 

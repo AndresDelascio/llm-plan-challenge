@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import signal
 import subprocess
 import tempfile
 from time import monotonic
@@ -26,6 +27,26 @@ VERDICTS = {
 
 class ReviewError(Exception):
     pass
+
+
+def run_limited(command, *, input, cwd, env, timeout):
+    """subprocess.run with a timeout that also stops grandchildren. On Windows the CLIs are .cmd
+    shims: subprocess.run kills only the shim, and then waits for Node, which still holds the
+    output pipe (measured: a 2 s timeout returned after 20 s)."""
+    process = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        encoding="utf-8", errors="replace", cwd=cwd, env=env, start_new_session=os.name != "nt",
+    )
+    try:
+        stdout, stderr = process.communicate(input, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(process.pid)], capture_output=True)
+        else:
+            os.killpg(process.pid, signal.SIGKILL)
+        process.communicate()
+        raise
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
 
 
 def validate(text):
@@ -127,10 +148,7 @@ def review(provider, plan, rubric, model=None, effort=None):
     if provider == "claude":
         env.pop("CLAUDECODE", None)  # Start a fresh process even when the writer is Claude.
     with tempfile.TemporaryDirectory(prefix="plan-challenge-") as cwd:
-        result = subprocess.run(
-            [executable, *flags], input=stdin, capture_output=True, encoding="utf-8",
-            errors="replace", cwd=cwd, env=env, timeout=TIMEOUT,
-        )
+        result = run_limited([executable, *flags], input=stdin, cwd=cwd, env=env, timeout=TIMEOUT)
     if result.returncode:
         details = (result.stdout + result.stderr).lower()
         if any(hint in details for hint in ("not logged in", "please run /login", "unauthorized", "401 unauthorized")):

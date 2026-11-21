@@ -3,6 +3,7 @@
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evals/outcome"))
@@ -104,6 +105,11 @@ class HiddenTests(unittest.TestCase):
         self.assertIsNotNone(outcome.grade("t1-gate", fake))
         peek = "import glob\nassert not any('def test_' in open(p).read() for p in glob.glob('*') if p != 'solution.py')\n"
         self.assertIsNone(outcome.grade("t1-gate", peek + CORRECT["t1-gate"]))
+
+    def test_the_answer_cannot_read_the_users_environment(self):
+        with patch.dict(outcome.os.environ, {"ANTHROPIC_API_KEY": "secret"}):
+            leak = "import os\nassert 'ANTHROPIC_API_KEY' not in os.environ\n"
+            self.assertIsNone(outcome.grade("t1-gate", leak + CORRECT["t1-gate"]))
 
     def test_a_hang_or_a_crash_counts_as_a_failure(self):
         self.assertEqual(outcome.grade("t1-gate", "import nothing_like_this"), "the code crashed when it was loaded")

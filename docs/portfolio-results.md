@@ -192,6 +192,23 @@ The first column is measured here. The second is supported only by the pilot on 
 - **Claude smoke, 4 of 6 rejected.** The validator had a hard 250-word limit and Claude wrote slightly more (270 words on the one reply inspected). The limit in the validator was raised to 400 words before the full run. The rubric text the reviewers see was not changed, so the Codex runs stay comparable. The 4096-byte cap still applies.
 - **Claude full, 3 of 24 rejected.** All three added a sentence of plain text after the required format: two "NO BLOCKING ISSUES" replies with an explanation, one review with a closing remark. All three were on control plans, which is why the recall numbers do not change when failed runs count as zero. The raw replies are saved next to the runs as `.rejected.txt`. After the benchmark the validator was changed to drop such a closing remark and keep the review. Replayed offline, it accepts all three saved replies. The benchmark numbers above are not recomputed: these three stay counted as failed and were not graded.
 
+## How sure are the counts?
+
+Exact 95% intervals (Clopper-Pearson), computed by [evals/intervals.py](../evals/intervals.py). They assume independent trials. The two repeats of each plan or task are related, so the real uncertainty is wider.
+
+| Count | Measured | 95% interval for the true rate |
+| --- | ---: | --- |
+| First builds that passed, outcome test (each arm) | 12 / 12 | 73.5% to 100% |
+| Planted blockers found (each reviewer) | 18 / 18 | 81.5% to 100% |
+| Format check passed, Codex | 24 / 24 | 85.8% to 100% |
+| Format check passed, Claude, main run | 21 / 24 | 67.6% to 97.3% |
+| Format check passed, Claude, current validator | 24 / 24 | 85.8% to 100% |
+| Planted flaws fixed by "make it better" (each arm) | 24 / 24 | 85.8% to 100% |
+| Stakes rule correct (each model) | 10 / 12 | 51.6% to 97.9% |
+| Two blind graders agreed on a Codex finding | 47 / 55 | 73.3% to 93.5% |
+
+"All passed" here means the true rate is probably above three quarters, not that it is 100%. A tie such as 12/12 against 12/12 cannot separate two methods whose real pass rates are 80% and 100%.
+
 ## Limits
 
 - The plans are synthetic and were written with AI help. Both splits are development data. This is not independent validation.

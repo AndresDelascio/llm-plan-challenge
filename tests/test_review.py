@@ -61,7 +61,7 @@ class ReviewTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, returncode, stdout, stderr)
 
         with patch.object(runner.shutil, "which", return_value=f"/test/{provider}"), patch.object(
-            runner.subprocess, "run", side_effect=invoke
+            runner, "run_limited", side_effect=invoke
         ):
             runner.save_review(provider, self.plan, self.report)
         return observed
@@ -158,7 +158,7 @@ class ReviewTests(unittest.TestCase):
         args = ["review.py", "codex", str(self.plan), str(self.report)]
         stderr = io.StringIO()
         with patch("sys.argv", args), patch("sys.stderr", stderr), patch.object(
-            runner.subprocess, "run", side_effect=error
+            runner, "run_limited", side_effect=error
         ), patch.object(runner.shutil, "which", return_value="codex"):
             with self.assertRaises(SystemExit) as exit_info:
                 runner.main()
@@ -166,6 +166,17 @@ class ReviewTests(unittest.TestCase):
         self.assertIn("NOT CHALLENGED: codex timed out", stderr.getvalue())
         self.assertFalse(self.report.exists())
         self.assertFalse(self.metrics.exists())
+
+    def test_timeout_also_stops_a_grandchild_that_holds_the_pipe(self):
+        # The Windows .cmd shim case on any OS: the child exits only when killed, and its own
+        # child keeps the output pipe open. Plain subprocess.run waited the full 30 s here.
+        import sys
+        from time import monotonic
+        grandchild = "import subprocess, sys, time; subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); time.sleep(30)"
+        started = monotonic()
+        with self.assertRaises(subprocess.TimeoutExpired):
+            runner.run_limited([sys.executable, "-c", grandchild], input="", cwd=None, env=None, timeout=2)
+        self.assertLess(monotonic() - started, 15)
 
     def test_input_limits_and_collision_stop_before_cli_call(self):
         for text in ("", "word " * 501, "é" * 2049):

@@ -4,6 +4,7 @@ in an empty temporary folder with tools off. Hidden tests decide pass or fail; n
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import secrets
@@ -80,9 +81,11 @@ def grade(task, code):
         (Path(cwd) / "solution.py").write_text(code, encoding="utf-8")
         token = secrets.token_hex(8)
         script = HEADER.format(function=function) + tests + FOOTER.replace("TOKEN", token)
+        # The model's code gets no environment variables (no API keys); Windows needs SYSTEMROOT.
+        env = {k: os.environ[k] for k in ("SYSTEMROOT",) if k in os.environ}
         try:  # -I: isolated mode, the model's code cannot pick up modules from the user's folders
-            done = subprocess.run([sys.executable, "-I", "-B", "-"], input=script, capture_output=True,
-                                  encoding="utf-8", errors="replace", cwd=cwd, timeout=TEST_TIMEOUT_S)
+            done = review.run_limited([sys.executable, "-I", "-B", "-"], input=script, cwd=cwd, env=env,
+                                      timeout=TEST_TIMEOUT_S)
         except subprocess.TimeoutExpired:
             return f"the code did not finish in {TEST_TIMEOUT_S} seconds"
     last = (done.stdout.strip().splitlines() or [""])[-1]
