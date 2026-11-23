@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 604" width="880" height="604" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">Ten questions and what the tests answered</title>
+  <desc id="d">1. Does a fresh review find real problems? Yes: on three real plans 20 issues were raised and all 20 accepted; Claude raised 18, Codex 6, both 4. 2. Which reviewer finds more of the flaws I planted? Tie: both found 18 of 18. 3. Which is faster and more reliable? Codex: 7.1 seconds and 24 of 24 usable replies, Claude 17.9 seconds and 21 of 24. 4. Which writes more extra valid issues? Depends on the grader: the Claude grader counted Claude 37 and Codex 17, and a Codex grader agreed on only 16 of 30. 5. Does a review beat a plain make it better? Tie: both fixed 24 of 24 planted flaws, and the rewrite made plans 3 to 4 times longer. 6. Second model or second read? A second read: two Claude reads found 19 valid issues, Codex plus Claude 17, two Codex reads 6, by the Claude grader. 7. Does planning give better code on small tasks? No: all 48 first builds passed and plan plus review used 15 times the tokens. 8. With facts left out, does planning help? Asking won: plain chat that cannot ask 2 of 12, chat that may ask 12 of 12, plan 11 of 12, reviewed plan 10 of 12. 9. Does the skill spot a high-stakes plan? Yes after a fix: the first rule scored 10 of 12, the reworded rule 16 of 16 with both models. 10. Did a person check the grading? Not yet: a blind sheet is ready.</desc>
+  <rect x="0.5" y="0.5" width="879" height="603" rx="8" fill="#fcfcfb" stroke="#e3e2de"/>
+
+  <text x="20" y="32" font-size="16" font-weight="600" fill="#0b0b0b">Ten questions, ten measured answers</text>
+  <text x="20" y="52" font-size="12" fill="#52514e">Tests run 2026-11-19 and 2026-11-20. Review findings were graded by AI; the coding tests were judged by hidden tests.</text>
+
+  <g font-size="12" fill="#52514e">
+    <!-- row 0 -->
+    <rect x="20" y="70" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="34" y="84" width="46" height="20" rx="10" fill="#1baf7a"/>
+    <text x="57" y="98" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">YES</text>
+    <text x="34" y="124" font-size="13" font-weight="600" fill="#0b0b0b">Does a fresh review find real problems?</text>
+    <text x="34" y="142">3 of my real plans: 20 issues raised, all 20 accepted.</text>
+    <text x="34" y="158">Claude raised 18, Codex 6, both 4.</text>
+
+    <rect x="452" y="70" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="466" y="84" width="44" height="20" rx="10" fill="#b7791f"/>
+    <text x="488" y="98" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE</text>
+    <text x="466" y="124" font-size="13" font-weight="600" fill="#0b0b0b">Which reviewer finds more of the flaws I planted?</text>
+    <text x="466" y="142">Both found all 18 planted blockers.</text>
+    <text x="466" y="158">The test was too easy to separate them.</text>
+
+    <!-- row 1 -->
+    <rect x="20" y="176" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="34" y="190" width="62" height="20" rx="10" fill="#2a78d6"/>
+    <text x="65" y="204" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">CODEX</text>
+    <text x="34" y="230" font-size="13" font-weight="600" fill="#0b0b0b">Which reviewer is faster and more reliable?</text>
+    <text x="34" y="248">Codex: 7.1 s median, 24 of 24 usable replies.</text>
+    <text x="34" y="264">Claude: 17.9 s median, 21 of 24.</text>
+
+    <rect x="452" y="176" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="466" y="190" width="172" height="20" rx="10" fill="#8a5cd6"/>
+    <text x="552" y="204" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">DEPENDS ON THE GRADER</text>
+    <text x="466" y="230" font-size="13" font-weight="600" fill="#0b0b0b">Which reviewer writes more extra valid issues?</text>
+    <text x="466" y="248">Claude grader: Claude 37, Codex 17.</text>
+    <text x="466" y="264">A Codex grader agreed on only 16 of 30 findings.</text>
+
+    <!-- row 2 -->
+    <rect x="20" y="282" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="34" y="296" width="44" height="20" rx="10" fill="#b7791f"/>
+    <text x="56" y="310" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">TIE</text>
+    <text x="34" y="336" font-size="13" font-weight="600" fill="#0b0b0b">Does a review beat a plain “make it better”?</text>
+    <text x="34" y="354">Both fixed all 24 flaws I planted.</text>
+    <text x="34" y="370">The rewrite made plans 3 to 4 times longer.</text>
+
+    <rect x="452" y="282" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="466" y="296" width="114" height="20" rx="10" fill="#0f8a8a"/>
+    <text x="523" y="310" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">A SECOND READ</text>
+    <text x="466" y="336" font-size="13" font-weight="600" fill="#0b0b0b">What helps more: a second model or a second read?</text>
+    <text x="466" y="354">Valid issues on 9 plans: two Claude reads 19,</text>
+    <text x="466" y="370">Codex + Claude 17, two Codex reads 6 (Claude grader).</text>
+
+    <!-- row 3 -->
+    <rect x="20" y="388" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="34" y="402" width="40" height="20" rx="10" fill="#c9473d"/>
+    <text x="54" y="416" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">NO</text>
+    <text x="34" y="442" font-size="13" font-weight="600" fill="#0b0b0b">Does planning give better code on small tasks?</text>
+    <text x="34" y="460">All 48 first builds passed, plan or no plan.</text>
+    <text x="34" y="476">Plan + review used 15 times the tokens of plain chat.</text>
+
+    <rect x="452" y="388" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="466" y="402" width="92" height="20" rx="10" fill="#1baf7a"/>
+    <text x="512" y="416" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">ASKING WON</text>
+    <text x="466" y="442" font-size="13" font-weight="600" fill="#0b0b0b">With a fact left out, does planning help?</text>
+    <text x="466" y="460">First builds passed: can’t ask 2/12, may ask 12/12,</text>
+    <text x="466" y="476">plan 11/12, reviewed plan 10/12.</text>
+
+    <!-- row 4 -->
+    <rect x="20" y="494" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="34" y="508" width="134" height="20" rx="10" fill="#1baf7a"/>
+    <text x="101" y="522" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">YES, AFTER A FIX</text>
+    <text x="34" y="548" font-size="13" font-weight="600" fill="#0b0b0b">Does the skill spot a high-stakes plan?</text>
+    <text x="34" y="566">First rule: 10 of 12, missed a forecast plan.</text>
+    <text x="34" y="582">Reworded: 16 of 16 with both models (plans I labelled).</text>
+
+    <rect x="452" y="494" width="408" height="96" rx="8" fill="#ffffff" stroke="#e3e2de"/>
+    <rect x="466" y="508" width="72" height="20" rx="10" fill="#6b6a66"/>
+    <text x="502" y="522" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">NOT YET</text>
+    <text x="466" y="548" font-size="13" font-weight="600" fill="#0b0b0b">Did a person check the AI grading?</text>
+    <text x="466" y="566">No. The two AI graders split on 14 of 30 findings.</text>
+    <text x="466" y="582">A blind sheet for a person is ready in runs/regrade/.</text>
+  </g>
+</svg>

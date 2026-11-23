@@ -45,7 +45,7 @@
   <!-- panel 3: extra valid findings per completed review (scale 0-1.76 = 100 px) -->
   <g transform="translate(448,0)">
     <text y="100" font-size="13" font-weight="600" fill="#0b0b0b">Extra valid findings per review</text>
-    <text y="117" font-size="11" fill="#52514e">higher is better</text>
+    <text y="117" font-size="11" fill="#52514e">Claude grader (Codex disagreed)</text>
     <text y="151" font-size="12" fill="#52514e">Codex</text>
     <path d="M50,139 h36.200 a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h-36.200 z" fill="#2a78d6"/>
     <text x="96.200" y="151" font-size="12" font-weight="600" fill="#0b0b0b">0.7</text>

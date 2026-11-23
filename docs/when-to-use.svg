@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 264" width="880" height="264" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">When to plan and challenge, and when to just chat</title>
+  <desc id="d">Start with a task for an AI assistant. Ask: can you check the result in a minute and undo it easily? If yes, use plain chat with no plan and add "ask me if a fact is missing". If no, plan it and run /challenge: a routine plan goes to Codex in about 7 seconds, and a high-stakes plan makes it ask before using Claude. The yes branch is measured on small Python tasks; the no branch rests on three real plans and judgment.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#52514e"/>
+    </marker>
+  </defs>
+  <rect x="0.5" y="0.5" width="879" height="263" rx="8" fill="#fcfcfb" stroke="#e3e2de"/>
+
+  <text x="20" y="32" font-size="16" font-weight="600" fill="#0b0b0b">When to use it</text>
+  <text x="20" y="52" font-size="12" fill="#52514e">One question decides it: how much does a wrong first try cost you?</text>
+
+  <g font-size="12" fill="#52514e">
+    <rect x="20" y="98" width="180" height="56" rx="10" fill="#ffffff" stroke="#e3e2de"/>
+    <text x="110" y="122" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">You have a task</text>
+    <text x="110" y="140" text-anchor="middle">for an AI assistant</text>
+
+    <rect x="248" y="88" width="252" height="76" rx="10" fill="#fff8e6" stroke="#b7791f" stroke-width="1.5"/>
+    <text x="374" y="116" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Can you check the result in a</text>
+    <text x="374" y="134" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">minute and undo it easily?</text>
+    <text x="374" y="152" text-anchor="middle">(small script, quick edit, throwaway)</text>
+
+    <rect x="560" y="66" width="300" height="60" rx="10" fill="#eaf7f1" stroke="#1baf7a" stroke-width="1.5"/>
+    <text x="576" y="90" font-size="13" font-weight="600" fill="#0b0b0b">Plain chat. No plan.</text>
+    <text x="576" y="110">Add: “Ask me if a fact is missing.”</text>
+
+    <rect x="560" y="140" width="300" height="80" rx="10" fill="#eef4fc" stroke="#2a78d6" stroke-width="1.5"/>
+    <text x="576" y="164" font-size="13" font-weight="600" fill="#0b0b0b">Plan it, then run /challenge.</text>
+    <text x="576" y="184">Routine plan: Codex reviews it in about 7 s.</text>
+    <text x="576" y="202">High stakes: it asks before using Claude.</text>
+
+    <text x="512" y="90" font-size="12" font-weight="700" fill="#1baf7a">Yes</text>
+    <text x="514" y="172" font-size="12" font-weight="700" fill="#2a78d6">No</text>
+  </g>
+  <g stroke="#52514e" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <line x1="202" y1="126" x2="245" y2="126"/>
+    <polyline points="500,114 540,114 540,96 557,96"/>
+    <polyline points="500,140 540,140 540,180 557,180"/>
+  </g>
+
+  <text x="20" y="248" font-size="11" fill="#6b6a66">The “yes” branch is measured on small Python tasks. The “no” branch rests on 3 of my real plans and my judgment.</text>
+</svg>
